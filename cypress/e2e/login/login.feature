@@ -7,21 +7,22 @@ Feature: Login Functionality for flow dashboard
     Given I navigate to the login page
     
     @regression @fullSuite @smoke @login
-  Scenario: Login with valid credentials
-    When I enter my email "test@example.com"
-    And I enter my password "Password123"
+  Scenario: Login validation with different credential combinations
+    When I enter my email "<email>"
+    And I enter my password "<password>"
     And I click the Sign In button
-    Then I should be redirected to the dashboard
+    Then the system should display "<result>"
+
+    Examples:
+  | email                           | password           | result                      | tag       |
+  | test@seerbit.com               | Test@124            | JABARI INC.                | positive Primary Pocket |
+  | ayomide.afolabi@seerbit.com    | Password@@1           | JABARI INC.                | positive Sub Pocket |
+  | invalid@example.com             | ValidPassword123   | Invalid Login Credentials     | negative  |
+  | test@seerbit.com                | WrongPassword      | Invalid Login Credentials     | negative  |
+
 
     @regression @fullSuite @smoke @login
-  Scenario: Login with invalid credentials
-    When I enter my email "wrong@example.com"
-    And I enter my password "wrongpassword"
-    And I click the Sign In button
-    Then I should see a login error message
-
-    @regression @fullSuite @smoke @login
-  Scenario: Forgot Password link
+  Scenario: Forgot Password button and page load validation
     When I click the Forgot Password link
     Then I should be redirected to the Forgot Password page
 

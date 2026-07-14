@@ -14,17 +14,13 @@ class LoginPage {
 
         forgotPasswordLink: () => cy.contains('Forgot Password?'),
 
-        passwordToggle: () =>
-            cy.get('input[name="password"]')
-                .siblings('button'),
+        // passwordToggle: () =>
+        //     cy.get('button[type="button"]'),
 
         loginHeading: () => cy.contains('Sign to your account'),
 
         welcomeText: () =>
             cy.contains('Welcome back, please enter your details'),
-
-        errorMessage: () =>
-            cy.get('[role="alert"], .error, .text-red-500'),
 
     }
 
@@ -40,13 +36,13 @@ class LoginPage {
     enterEmail(email) {
         this.elements.emailInput()
             .clear()
-            .type('test@seerbit.com')
+            .type(email)
     }
 
     enterPassword(password) {
         this.elements.passwordInput()
             .clear()
-            .type('Test@124')
+            .type(password)
     }
 
     clickSignIn() {
@@ -74,27 +70,20 @@ class LoginPage {
         this.elements.signInButton().should('be.visible')
     }
 
-    verifyDashboard() {
-        cy.url().should('include', '/dashboard')
-    }
-
     verifyForgotPasswordPage() {
         cy.url().should('include', 'forgot-password')
+        this.elements.forgotPasswordLink().should('be.visible')
     }
 
-    verifyLoginError() {
-        this.elements.errorMessage().should('be.visible')
-    }
+    // verifyPasswordVisible() {
+    //     this.elements.passwordInput()
+    //         .should('have.attr', 'type', 'text')
+    // }
 
-    verifyPasswordVisible() {
-        this.elements.passwordInput()
-            .should('have.attr', 'type', 'text')
-    }
-
-    verifyPasswordHidden() {
-        this.elements.passwordInput()
-            .should('have.attr', 'type', 'password')
-    }
+    // verifyPasswordHidden() {
+    //     this.elements.passwordInput()
+    //         .should('have.attr', 'type', 'password')
+    // }
 
 }
 
