@@ -6,41 +6,73 @@ class PrimaryPocketDashboardPage {
 
     elements = {
 
+        //Blanace card
         dashboardTitle: () => cy.contains("Dashboard"),
 
         yourBalances: () => cy.contains("Your Balances"),
 
-        balanceCards: () =>
-            cy.get(".overflow-x-auto > .flex.gap-3 > div"),
+        balanceCards: () => cy.get(".overflow-x-auto > .flex.gap-3 > div"),
 
-        quickActions: () => cy.contains("Quick Actions"),
+        //Quick Actions
+
+        quickActionsTitle: () =>
+            cy.contains("h2", "Quick Actions"),
+
+        sendMoneyButton: () =>
+            cy.contains("h2", "Quick Actions")
+                .closest(".bg-white")
+                .contains("span", "Send Money"),
+
+        convertFundsButton: () =>
+            cy.contains("h2", "Quick Actions")
+                .closest(".bg-white").contains("span", "Convert Funds"),
+
+        createSubPocketButton: () =>
+            cy.contains("h2", "Quick Actions")
+                .closest(".bg-white").contains("span", "Create a Sub-pocket"),
+
+        sendMoneyPageTitle: () =>
+            cy.contains("h2", "Send money from"),
+
+        createSubPocketPageTitle: () => cy.contains("h1", "Create pocket account"),
+
+        convertFundsPageTitle: () => cy.contains('', ''),
+
+
+
+        // EXCHANGE RATES
 
         exchangeRates: () => cy.contains("Exchange Rates"),
 
+        exchangeRateButton: () => cy.contains("See all our rates"),
+
+
+
+        // RECENT TRANSACTIONS
         recentTransactions: () => cy.contains("Recent Transactions"),
-
-        homeMenu: () => cy.contains("Home"),
-
-        transactionsMenu: () => cy.contains("Transactions"),
-
-        accountsMenu: () => cy.contains("Accounts"),
-
-        auditLogMenu: () => cy.contains("Audit Log"),
-
-        sendMoneyMenu: () => cy.contains("Send Money"),
-
-        settingsMenu: () => cy.contains("Settings"),
-
-        logoutButton: () => cy.contains("Log out"),
-
-        sendMoneyQuickAction: () => cy.contains("span", "Send Money"),
 
         moreInformationButton: () => cy.contains("More information"),
 
-        exchangeRateButton: () => cy.contains("See all our rates"),
+        seeAllTransactions: () => cy.contains("See all transactions"),
 
-        seeAllTransactions: () => cy.contains("See all transactions")
+
+        // SIDE PANEL OR NAV BAR
+        homeMenu: () => cy.contains("nav a", "Home"),
+
+        transactionsMenu: () => cy.contains("nav a", "Transactions"),
+
+        accountsMenu: () => cy.contains("nav a", "Accounts"),
+
+        auditLogMenu: () => cy.contains("nav a", "Audit Log"),
+
+        sendMoneyMenu: () => cy.contains("nav a", "Send Money"),
+
+        settingsMenu: () => cy.contains("nav a", "Settings"),
+
+        logoutButton: () => cy.contains("button", "Log out"),
     }
+
+
 
 
     // ============================
@@ -51,29 +83,42 @@ class PrimaryPocketDashboardPage {
         cy.visit("/dashboard");
     }
 
-    clickTransactions() {
-        this.elements.transactionsMenu().click();
+
+    //Quick Actions
+    clickSendMoney() {
+        this.elements.sendMoneyButton()
+            .should("be.visible")
+            .click();
     }
 
-    clickAccounts() {
-        this.elements.accountsMenu().click();
+    clickConvertFunds() {
+        this.elements.convertFundsButton()
+            .should("be.visible")
+            .click();
     }
 
-    clickAuditLog() {
-        this.elements.auditLogMenu().click();
+    clickCreateSubPocket() {
+        this.elements.createSubPocketButton()
+            .should("be.visible")
+            .click();
     }
 
-    clickSettings() {
-        this.elements.settingsMenu().click();
+    verifySendMoneyPage() {
+        this.elements.sendMoneyPageTitle()
+            .should("be.visible");
     }
 
-    clickSendMoneyQuickAction() {
-        this.elements.sendMoneyQuickAction().click();
+    verifyConvertFundsPage() {
+        this.elements.convertFundsPageTitle()
+            .should("be.visible");
     }
 
-    clickLogout() {
-        this.elements.logoutButton().click();
+    verifyCreateSubPocketPage() {
+        this.elements.createSubPocketPageTitle()
+            .should("be.visible");
     }
+
+
 
 
     // ============================
@@ -241,6 +286,22 @@ class PrimaryPocketDashboardPage {
                 });
 
             });
+
+    }
+
+    validateQuickActionsSection() {
+
+        this.elements.quickActionsTitle()
+            .should("be.visible");
+
+        this.elements.sendMoneyButton()
+            .should("be.visible");
+
+        this.elements.convertFundsButton()
+            .should("be.visible");
+
+        this.elements.createSubPocketButton()
+            .should("be.visible");
 
     }
 

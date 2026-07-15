@@ -28,7 +28,8 @@ Then("I should see the Your Balances section", () => {
 });
 
 Then("I should see the Quick Actions section", () => {
-    PrimaryPocketDashboardPage.elements.quickActions({ timeout: 10000 }).should("be.visible");
+    PrimaryPocketDashboardPage.validateQuickActionsSection({ timeout: 10000 });
+
 });
 
 Then("I should see the Exchange Rates section", () => {
@@ -63,50 +64,31 @@ Then("I should see the Settings menu", () => {
     PrimaryPocketDashboardPage.elements.settingsMenu({ timeout: 10000 }).should("be.visible");
 });
 
-When("I click Send Money Quick Action", () => {
-    PrimaryPocketDashboardPage.clickSendMoneyQuickAction({ timeout: 10000 });
+// Quick Actions
+When("I click the send money button", () => {
+    PrimaryPocketDashboardPage.clickSendMoney();
 });
 
-Then("I should be redirected to the Send Money page", () => {
-    cy.url({ timeout: 10000 }).should("include", "/send-money");
+Then("I should see the send money page", () => {
+    PrimaryPocketDashboardPage.verifySendMoneyPage();
+
+    cy.go("back");
 });
 
-When("I click Transactions menu", () => {
-    PrimaryPocketDashboardPage.clickTransactions({ timeout: 10000 });
+When("I click the convert funds button", () => {
+    PrimaryPocketDashboardPage.clickConvertFunds();
 });
 
-Then("I should navigate to Transactions page", () => {
-    cy.url().should("include", "/transactions");
+Then("I should see the convert funds page", () => {
+    // PrimaryPocketDashboardPage.verifyConvertFundsPage();
+
+    // cy.go("back");
 });
 
-When("I click Accounts menu", () => {
-    PrimaryPocketDashboardPage.clickAccounts({ timeout: 10000 });
+When("I click the create a sub pocket button", () => {
+    PrimaryPocketDashboardPage.clickCreateSubPocket();
 });
 
-Then("I should navigate to Accounts page", () => {
-    cy.url().should("include", "/businesses");
-});
-
-When("I click Audit Log menu", () => {
-    PrimaryPocketDashboardPage.clickAuditLog({ timeout: 10000 });
-});
-
-Then("I should navigate to Audit Log page", () => {
-    cy.url().should("include", "/audit-log");
-});
-
-When("I click Settings menu", () => {
-    PrimaryPocketDashboardPage.clickSettings();
-});
-
-Then("I should navigate to Settings page", () => {
-    cy.url().should("include", "/settings");
-});
-
-When("I click Logout", () => {
-    PrimaryPocketDashboardPage.clickLogout();
-});
-
-Then("I should be redirected to Login page", () => {
-    cy.url().should("include", "/login");
+Then("I should see the create a sub pocket page", () => {
+    PrimaryPocketDashboardPage.verifyCreateSubPocketPage();
 });

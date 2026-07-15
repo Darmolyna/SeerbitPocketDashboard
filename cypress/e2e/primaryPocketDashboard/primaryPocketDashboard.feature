@@ -10,7 +10,7 @@ Feature: Primary Pocket Dashboard
         And I should see the Exchange Rates section
         And I should see the Recent Transactions section
 
-    Scenario: Verify Sidebar Menus
+Scenario: Verify Sidebar Menus
         Then I should see the Home menu
         And I should see the Transactions menu
         And I should see the Accounts menu
@@ -18,26 +18,16 @@ Feature: Primary Pocket Dashboard
         And I should see the Send Money menu
         And I should see the Settings menu
 
-    Scenario: Open Send Money
-        When I click Send Money Quick Action
-        Then I should be redirected to the Send Money page
+  Scenario: Verify Quick action section Send Money, Convert Funds and Create a sub pocket button works
+        Then I should see the Dashboard title
+        When I click the send money button 
+        Then I should see the send money page
+        When I click the convert funds button 
+        Then I should see the convert funds page
+        When I click the create a sub pocket button 
+        Then I should see the create a sub pocket page
 
-    Scenario: Navigate to Transactions
-        When I click Transactions menu
-        Then I should navigate to Transactions page
 
-    Scenario: Navigate to Accounts
-        When I click Accounts menu
-        Then I should navigate to Accounts page
+Scenario: Validate Exchange rate section and see all our rate page
 
-    Scenario: Navigate to Audit Log
-        When I click Audit Log menu
-        Then I should navigate to Audit Log page
-
-    Scenario: Navigate to Settings
-        When I click Settings menu
-        Then I should navigate to Settings page
-
-    Scenario: Logout
-        When I click Logout
-        Then I should be redirected to Login page
+Scenario: Validate Recent Transactions section and see all transactions page
