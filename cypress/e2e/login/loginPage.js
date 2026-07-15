@@ -45,6 +45,30 @@ class LoginPage {
             .type(password)
     }
 
+    enterPrimaryPocketEmail() {
+        this.elements.emailInput()
+            .clear()
+            .type('test@seerbit.com')
+    }
+
+    enterPrimaryPocketPassword() {
+        this.elements.passwordInput()
+            .clear()
+            .type('Test@124')
+    }
+
+    enterSubPocketEmail() {
+        this.elements.emailInput()
+            .clear()
+            .type('ayomide.afolabi@seerbit.com')
+    }
+
+    enterSubPocketPassword() {
+        this.elements.passwordInput()
+            .clear()
+            .type('Password@@1')
+    }
+
     clickSignIn() {
         this.elements.signInButton().click()
     }
