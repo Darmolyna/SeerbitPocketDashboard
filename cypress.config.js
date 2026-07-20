@@ -26,6 +26,18 @@ module.exports = defineConfig({
   expose: {
     baseUrl: "https://develop.d1vg8wvg97d1gx.amplifyapp.com/"
   },
+
+  retries: {
+    runMode: 2,   // Retry failed tests twice in `cypress run`
+    openMode: 2
+  },
+
+  defaultCommandTimeout: 10000,      // Default: 4000ms
+  pageLoadTimeout: 120000,           // Default: 60000ms
+  requestTimeout: 30000,             // Default: 5000ms
+  responseTimeout: 30000,            // Default: 10000ms
+  execTimeout: 10000,               // cy.exec()
+  taskTimeout: 10000,               // cy.task()
   e2e: {
     specPattern: "**/*.feature",
     setupNodeEvents,

@@ -42,10 +42,37 @@ class PrimaryPocketDashboardPage {
 
         // EXCHANGE RATES
 
-        exchangeRates: () => cy.contains("Exchange Rates"),
-
         exchangeRateButton: () => cy.contains("See all our rates"),
 
+        exchangeRateCard: () =>
+            cy.contains("h2", "Exchange Rates")
+                .parents(".bg-white"),
+
+        exchangeRateTitle: () =>
+            cy.contains("h2", "Exchange Rates"),
+
+        currencyHeader: () =>
+            cy.contains("div", "CURRENCY"),
+
+        rateHeader: () =>
+            cy.contains("div", "RATE"),
+
+        seeAllRatesButton: () =>
+            cy.contains("button", "See all our rates"),
+
+        currencyConversionTable: () =>
+            cy.contains("div", "CURRENCY")
+                .closest(".grid.grid-cols-4")
+                .parent(),
+
+        currencyConversionRows: () =>
+            cy.contains("div", "CURRENCY")
+                .closest(".grid.grid-cols-4")
+                .next()
+                .children(".grid.grid-cols-4"),
+
+        exchangeRatePageHeader: () =>
+            cy.contains('span', 'Exchange Rate'),
 
 
         // RECENT TRANSACTIONS
@@ -118,8 +145,10 @@ class PrimaryPocketDashboardPage {
             .should("be.visible");
     }
 
-
-
+    // Exchange Rates
+    clickSeeAllRates() {
+        this.elements.seeAllRatesButton().click();
+    }
 
     // ============================
     // Validations
@@ -302,6 +331,89 @@ class PrimaryPocketDashboardPage {
 
         this.elements.createSubPocketButton()
             .should("be.visible");
+
+    }
+
+    // Exchange rates
+    validateExchangeRates() {
+
+        this.elements.exchangeRateRows()
+            .should("have.length.greaterThan", 0)
+            .each(($row) => {
+
+                cy.wrap($row).within(() => {
+
+                    // Validate currency codes exist
+                    cy.get("span")
+                        .eq(0)
+                        .should("be.visible")
+                        .invoke("text")
+                        .should("match", /[a-zA-Z]/);
+
+                    cy.get("span")
+                        .eq(1)
+                        .should("be.visible")
+                        .invoke("text")
+                        .should("not.be.empty");
+
+                    cy.get("span")
+                        .eq(2)
+                        .should("be.visible")
+                        .invoke("text")
+                        .should("match", /[a-zA-Z]/);
+
+                    // Validate exchange rate
+                    cy.get("div")
+                        .last()
+                        .invoke("text")
+                        .should("not.be.empty")
+                        .and("match", /\d/);
+                });
+
+            });
+
+    }
+
+    //Validate currency conversion table
+    validateCurrencyConversionTable() {
+
+        this.elements.currencyConversionRows()
+            .should("have.length.greaterThan", 0)
+            .each(($row, index) => {
+
+                cy.log(`Validating Currency Conversion Row ${index + 1}`);
+
+                cy.wrap($row)
+                    .children("div")
+                    .should("have.length", 4)
+                    .then(($columns) => {
+
+                        // Source Currency
+                        cy.wrap($columns[0]).find("img, div").should("exist");
+                        cy.wrap($columns[0]).find("span")
+                            .invoke("text")
+                            .then(text => {
+                                expect(text.trim()).to.match(/^[A-Z]{3}$|^[A-Za-z]{2,5}$/);
+                            });
+
+                        // Destination Currency
+                        cy.wrap($columns[2]).find("img, div").should("exist");
+                        cy.wrap($columns[2]).find("span")
+                            .invoke("text")
+                            .then(text => {
+                                expect(text.trim()).to.match(/^[A-Z]{3}$|^[A-Za-z]{2,5}$/);
+                            });
+
+                        // Exchange Rate
+                        cy.wrap($columns[3])
+                            .invoke("text")
+                            .then(text => {
+                                expect(text.trim()).to.match(/^\d+(\.\d+)?$/);
+                            });
+
+                    });
+
+            });
 
     }
 
