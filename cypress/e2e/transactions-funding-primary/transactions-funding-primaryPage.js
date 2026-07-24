@@ -477,50 +477,107 @@ class PrimaryPocketFundingPage {
                 }
 
 
-                cy.get("nav")
-                    .find("button")
-                    .then(($buttons) => {
+                const paginationButtons = $body.find("nav button");
 
 
-                        const currentPage = $buttons
-                            .filter(".text-red-500")
-                            .text()
-                            .trim();
+                // Pagination arrow is not displayed when there is only one page
+                if (paginationButtons.length === 0) {
+
+                    cy.log("Pagination not displayed. Only one page available.");
+                    return;
+
+                }
 
 
-                        const nextPage = String(Number(currentPage) + 1);
+                const currentPage = [...paginationButtons]
+                    .find(button =>
+                        Cypress.$(button)
+                            .hasClass("text-red-500")
+                    );
 
 
-                        const hasNextPage = [...$buttons]
-                            .some(button => button.innerText.trim() === nextPage);
+                if (!currentPage) {
+
+                    cy.log("Current page not found. Stopping pagination.");
+                    return;
+
+                }
 
 
-                        if (hasNextPage) {
+                const currentPageNumber =
+                    Number(currentPage.innerText.trim());
 
 
-                            cy.log(`Navigating to page ${nextPage}`);
+                const nextPageNumber =
+                    String(currentPageNumber + 1);
 
 
-                            this.elements.nextPageButton()
-                                .click();
+                const hasNextPage =
+                    [...paginationButtons]
+                        .some(button =>
+                            button.innerText.trim() === nextPageNumber
+                        );
 
 
-                            this.elements.transactionRows()
-                                .should("exist");
+                if (hasNextPage) {
 
 
-                            validateCurrentPage();
+                    cy.log(`Navigating to page ${nextPageNumber}`);
 
 
-                            navigateNextPage();
+                    const firstRowBeforeClick = this.elements.transactionRows()
+                        .first()
+                        .invoke("text");
 
-                        }
 
-                    });
+                    cy.wrap(paginationButtons[paginationButtons.length - 1])
+                        .click();
+
+
+                    cy.wait(3000);
+
+
+                    this.elements.transactionRows()
+                        .should("have.length.greaterThan", 0)
+                        .each(($row) => {
+
+                            cy.wrap($row)
+                                .find("td")
+                                .should("have.length", 6);
+
+                        });
+
+
+                    this.elements.transactionRows()
+                        .first()
+                        .invoke("text")
+                        .should((newRowText) => {
+
+                            expect(newRowText.trim())
+                                .not.to.equal("");
+
+                            expect(newRowText)
+                                .not.to.equal(firstRowBeforeClick);
+
+                        });
+
+
+                    validateCurrentPage();
+
+
+                    navigateNextPage();
+
+
+                } else {
+
+                    cy.log("No next page available. Pagination completed.");
+
+                }
+
 
             });
 
-        }
+        };
 
 
         validateCurrentPage();
