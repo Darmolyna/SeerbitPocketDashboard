@@ -18,7 +18,7 @@ Given("I am logged into the Primary Pocket Dashboard", () => {
 );
 
 Then("I should see the Dashboard title", () => {
-    PrimaryPocketDashboardPage.elements.dashboardTitle().should("be.visible");
+    PrimaryPocketDashboardPage.elements.primaryPocketTag().should("be.visible");
 });
 
 Then("I should see the Your Balances section", () => {
@@ -37,7 +37,7 @@ Then("I should see the Exchange Rates section", () => {
 });
 
 Then("I should see the Recent Transactions section", () => {
-    PrimaryPocketDashboardPage.elements.recentTransactions().should("be.visible");
+    PrimaryPocketDashboardPage.elements.recentTransactionsSection().should("be.visible");
 });
 
 Then("I should see the Home menu", () => {
@@ -94,6 +94,10 @@ Then("I should see the create a sub pocket page", () => {
 });
 
 // Exchange Rates
+
+
+
+
 // Then("I should see the Exchange Rates section", () => {
 
 //     ExchangeRatesPage.elements.exchangeRateTitle()
@@ -133,5 +137,34 @@ Then("I validate that every currency conversion row should contain valid data in
     cy.wait(5000)
 
     PrimaryPocketDashboardPage.validateCurrencyConversionTable();
+
+});
+
+
+// RECENT TRANSACTIONS
+Then("I should see a list of recent transactions", () => {
+
+    PrimaryPocketDashboardPage.validateTransactionRows();
+
+});
+
+
+Then("each transaction should display valid information", () => {
+
+    PrimaryPocketDashboardPage.validateTransactionRows();
+
+});
+
+
+When("I click the See all transactions button", () => {
+
+    PrimaryPocketDashboardPage.clickSeeAllTransactions();
+
+});
+
+
+Then("I should be redirected to the Transactions page", () => {
+
+    PrimaryPocketDashboardPage.validateNavigationToTransactions()
 
 });

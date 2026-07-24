@@ -3,7 +3,7 @@ Feature: Primary Pocket Dashboard
   Background:
     Given I am logged into the Primary Pocket Dashboard
 
-  Scenario: Verify Dashboard Page
+  Scenario: Verify Pocket card section of the dashboard and the headfer of all other section of the dashboard
         Then I should see the Dashboard title
         And I should see the Your Balances section
         And I should see the Quick Actions section
@@ -36,4 +36,9 @@ Scenario: Validate Exchange rate section and see all our rate page
         Then I should be redirected to the Exchange Rates page
         Then I validate that every currency conversion row should contain valid data in Exchange rate page
 
-Scenario: Validate Recent Transactions section and see all transactions page
+Scenario: Validate Recent Transactions section and  navigation to see all transactions page
+    Then I should see the Recent Transactions section
+    And I should see a list of recent transactions
+    And each transaction should display valid information
+    When I click the See all transactions button
+    Then I should be redirected to the Transactions page

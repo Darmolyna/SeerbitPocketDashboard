@@ -5,9 +5,10 @@ class PrimaryPocketDashboardPage {
     // ============================
 
     elements = {
-
         //Blanace card
         dashboardTitle: () => cy.contains("Dashboard"),
+
+        primaryPocketTag: () => cy.contains("p", "PRIMARY POCKET"),
 
         yourBalances: () => cy.contains("Your Balances"),
 
@@ -76,11 +77,41 @@ class PrimaryPocketDashboardPage {
 
 
         // RECENT TRANSACTIONS
-        recentTransactions: () => cy.contains("Recent Transactions"),
 
-        moreInformationButton: () => cy.contains("More information"),
+        recentTransactionsSection: () =>
+            cy.contains("h2", "Recent Transactions")
+                .closest(".bg-white"),
 
-        seeAllTransactions: () => cy.contains("See all transactions"),
+        transactionRows: () =>
+            cy.contains("h2", "Recent Transactions")
+                .closest(".bg-white")
+                .find("div.flex.items-center.justify-between")
+                .not(":first"),
+
+        transactionName: () =>
+            cy.contains("h2", "Recent Transactions")
+                .closest(".bg-white")
+                .find(".space-y-0 > div")
+                .find("div.flex.items-center.gap-3")
+                .find("p")
+                .first(),
+
+        transactionDate: () =>
+            cy.contains("h2", "Recent Transactions")
+                .closest(".bg-white")
+                .find(".space-y-0 > div")
+                .find("p.text-sm"),
+
+        transactionAmount: () =>
+            cy.contains("h2", "Recent Transactions")
+                .closest(".bg-white")
+                .find(".space-y-0 > div > p"),
+
+        seeAllTransactionsButton: () =>
+            cy.contains("button", "See all transactions"),
+
+
+
 
 
         // SIDE PANEL OR NAV BAR
@@ -145,15 +176,24 @@ class PrimaryPocketDashboardPage {
             .should("be.visible");
     }
 
-    // Exchange Rates
     clickSeeAllRates() {
         this.elements.seeAllRatesButton().click();
     }
+
+    clickSeeAllTransactions() {
+
+        this.elements.seeAllTransactionsButton()
+            .scrollIntoView()
+            .click();
+    }
+
 
     // ============================
     // Validations
     // ============================
 
+
+    // POCKET CARDS AND DASHBOARD
     validateDashboardTitle() {
         this.elements.dashboardTitle().should("be.visible");
     }
@@ -172,17 +212,6 @@ class PrimaryPocketDashboardPage {
 
     validateRecentTransactionsSection() {
         this.elements.recentTransactions().should("be.visible");
-    }
-
-    validateSidebarMenus() {
-
-        this.elements.homeMenu().should("be.visible");
-        this.elements.transactionsMenu().should("be.visible");
-        this.elements.accountsMenu().should("be.visible");
-        this.elements.auditLogMenu().should("be.visible");
-        this.elements.sendMoneyMenu().should("be.visible");
-        this.elements.settingsMenu().should("be.visible");
-
     }
 
     validateAllPocketCards() {
@@ -414,6 +443,108 @@ class PrimaryPocketDashboardPage {
                     });
 
             });
+
+    }
+
+
+    // RECENT TRANSACTIONS
+    validateRecentTransactionsSection() {
+        this.scrollToRecentTransactions();
+        this.elements.recentTransactionsSection()
+            .should("be.visible");
+
+        this.elements.seeAllTransactionsButton()
+            .should("be.visible")
+            .and("be.enabled");
+    }
+
+
+    validateTransactionRows() {
+
+        this.elements.recentTransactionsSection()
+            .scrollIntoView()
+            .should("be.visible");
+
+
+        this.elements.transactionRows()
+            .should("have.length.greaterThan", 0)
+            .each(($row, index) => {
+
+                cy.log(`Validating Transaction ${index + 1}`);
+
+                cy.wrap($row).within(() => {
+
+
+                    // Transaction icon
+                    cy.get("svg")
+                        .should("exist")
+                        .and("be.visible");
+
+
+                    // Transaction name
+                    cy.get("p")
+                        .first()
+                        .invoke("text")
+                        .then((text) => {
+
+                            expect(text.trim())
+                                .to.not.equal("");
+
+                        });
+
+
+                    // Transaction date
+                    cy.get("p")
+                        .eq(1)
+                        .invoke("text")
+                        .then((date) => {
+
+                            expect(date.trim())
+                                .to.match(/ago|day|days/);
+
+                        });
+
+
+                    // Transaction amount
+                    cy.get("> p")
+                        .invoke("text")
+                        .then((amount) => {
+
+                            expect(amount.trim())
+                                .to.match(/^[A-Z]{3}\s[\d,.]+$/);
+
+                        });
+
+                });
+
+            });
+
+    }
+
+
+    validateNavigationToTransactions() {
+
+        this.elements.seeAllTransactionsButton()
+            .scrollIntoView()
+            .click();
+
+        cy.url()
+            .should("include", "/transactions");
+
+        cy.contains("H1", "Transactions").should("be.visible");
+
+    }
+
+    // SIDE BAR MENU
+
+    validateSidebarMenus() {
+
+        this.elements.homeMenu().should("be.visible");
+        this.elements.transactionsMenu().should("be.visible");
+        this.elements.accountsMenu().should("be.visible");
+        this.elements.auditLogMenu().should("be.visible");
+        this.elements.sendMoneyMenu().should("be.visible");
+        this.elements.settingsMenu().should("be.visible");
 
     }
 
