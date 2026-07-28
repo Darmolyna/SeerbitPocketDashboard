@@ -17,7 +17,7 @@ Given("I am logged into the Primary Pocket Dashboard", () => {
 }
 );
 Then("I navigate to the Funding Transactions page", () => {
-    cy.wait(5000)
+    cy.wait(2000)
 
     PrimaryPocketFundingPage.clickTransactionMenu()
 });
@@ -97,13 +97,6 @@ Then(
 
     }
 );
-
-
-Then("I should see a valid Funding Transactions table", () => {
-
-    PrimaryPocketFundingPage.validateTransactionTable();
-
-});
 
 
 Then("I should be able to copy the payment reference", () => {

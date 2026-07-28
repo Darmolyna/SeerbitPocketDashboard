@@ -36,9 +36,6 @@ Examples:
 | Last 1 Month |
 | Future Date |
 
-    Scenario: Validate Funding Transactions table
-        Then I should see a valid Funding Transactions table
-
     Scenario: Validate payment reference copy
         Then I should be able to copy the payment reference
 

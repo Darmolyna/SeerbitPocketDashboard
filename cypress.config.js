@@ -7,8 +7,11 @@ const {
   createEsbuildPlugin,
 } = require("@badeball/cypress-cucumber-preprocessor/esbuild");
 
+const fs = require("fs");
+const path = require("path");
+
 async function setupNodeEvents(on, config) {
-  // This is required for the preprocessor to be able to generate JSON reports after each run, and more,
+
   await addCucumberPreprocessorPlugin(on, config);
 
   on(
@@ -18,28 +21,77 @@ async function setupNodeEvents(on, config) {
     })
   );
 
-  // Make sure to return the config object as it might have been modified by the plugin.
+
+  // Get latest downloaded file
+  on("task", {
+
+    getLatestDownloadedFile() {
+
+      const downloadsFolder = path.join(
+        __dirname,
+        "cypress/downloads"
+      );
+
+      if (!fs.existsSync(downloadsFolder)) {
+        return null;
+      }
+
+      const files = fs.readdirSync(downloadsFolder);
+
+      if (!files.length) {
+        return null;
+      }
+
+      return files
+        .map(file => ({
+          name: file,
+          time: fs.statSync(
+            path.join(downloadsFolder, file)
+          ).mtime.getTime()
+        }))
+        .sort((a, b) => b.time - a.time)[0]
+        .name;
+
+    }
+
+  });
+
+
   return config;
 }
 
+
 module.exports = defineConfig({
+
   expose: {
     baseUrl: "https://develop.d1vg8wvg97d1gx.amplifyapp.com/"
   },
 
+
   retries: {
-    runMode: 2,   // Retry failed tests twice in `cypress run`
+    runMode: 2,
     openMode: 2
   },
 
-  defaultCommandTimeout: 10000,      // Default: 4000ms
-  pageLoadTimeout: 120000,           // Default: 60000ms
-  requestTimeout: 30000,             // Default: 5000ms
-  responseTimeout: 30000,            // Default: 10000ms
-  execTimeout: 10000,               // cy.exec()
-  taskTimeout: 10000,               // cy.task()
+
+  defaultCommandTimeout: 10000,
+  pageLoadTimeout: 120000,
+  requestTimeout: 30000,
+  responseTimeout: 30000,
+  execTimeout: 10000,
+
+  // Increase because file download may take time
+  taskTimeout: 30000,
+
+
   e2e: {
+
     specPattern: "**/*.feature",
+
+    downloadsFolder: "cypress/downloads",
+
     setupNodeEvents,
+
   },
+
 });
