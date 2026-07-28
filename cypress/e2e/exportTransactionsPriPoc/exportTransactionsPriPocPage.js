@@ -139,6 +139,9 @@ class ExportTransactionsPriPocPage {
             .last()
             .click();
 
+        //click ok button
+        this.elements.okButton().click()
+
     }
 
     clickExport() {
