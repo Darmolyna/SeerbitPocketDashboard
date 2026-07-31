@@ -12,7 +12,7 @@ class PrimaryPocketFundingPage {
         exportButton: () => cy.contains("button", "Export Transactions"),
 
         searchInput: () =>
-            cy.get('input[placeholder="Search pocket ID"]'),
+            cy.get('input[placeholder="Search reference"]'),
 
         filterButton: () =>
             cy.contains("button", "Filter"),
@@ -329,7 +329,7 @@ class PrimaryPocketFundingPage {
         const noDataMessage = "Oops, we have nothing to show!";
 
         const today = new Date();
-        today.setHours(23, 59, 59, 999);
+
 
         let startDate;
         let endDate;
@@ -389,7 +389,11 @@ class PrimaryPocketFundingPage {
 
         }
 
-        endDate = endDate || today;
+        endDate = endDate || new Date(today);
+
+        // Normalize the comparison range
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
 
         cy.log(`Filter: ${dateRange}`);
         cy.log(`Start Date: ${startDate}`);

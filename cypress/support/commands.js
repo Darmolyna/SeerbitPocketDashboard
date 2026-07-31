@@ -23,3 +23,13 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+
+Cypress.Commands.add("loginToPrimaryPocket", () => {
+    cy.viewport(1800, 1000);
+    cy.visit(Cypress.env("baseUrl"));
+
+    LoginPage.enterPrimaryPocketEmail();
+    LoginPage.enterPrimaryPocketPassword();
+    LoginPage.clickSignIn();
+});
