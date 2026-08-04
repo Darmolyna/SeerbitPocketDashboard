@@ -26,14 +26,14 @@ Then("I navigate to the Disbursement Transactions page", () => {
 
 Then("I should see the Disbursement Transactions page", () => {
 
-    PrimaryPocketFundingPage.validateFundingPage();
+    PrimaryPocketDisbursementPage.validateFundingPage();
 
 });
 
 
 When("I search using a Pocket ID {string}", (pocketId) => {
 
-    PrimaryPocketFundingPage.searchPocketId(pocketId);
+    PrimaryPocketDisbursementPage.searchPocketId(pocketId);
 
 });
 
@@ -53,7 +53,7 @@ Then(
 
 When("I filter disbursement transactions using a payment reference", () => {
 
-    PrimaryPocketFundingPage.clickFilter();
+    PrimaryPocketDisbursementPage.clickFilter();
 
     // Add filter selections here once date/payment reference modal is available
 
@@ -71,7 +71,7 @@ Then("only Disbursement transactions matching the payment reference should be di
 When("I filter disbursement transactions using {string} date range",
     (dateRange) => {
 
-        PrimaryPocketFundingPage.clickFilter();
+        PrimaryPocketDisbursementPage.clickFilter();
 
 
         if (dateRange === "No Filter") {
@@ -81,8 +81,8 @@ When("I filter disbursement transactions using {string} date range",
 
         if (dateRange !== "Empty Result") {
 
-            PrimaryPocketFundingPage.selectDateRange(dateRange);
-            PrimaryPocketFundingPage.clickApplyFilter();
+            PrimaryPocketDisbursementPage.selectDateRange(dateRange);
+            PrimaryPocketDisbursementPage.clickApplyFilter();
 
         }
 
@@ -94,7 +94,7 @@ Then(
     "only Disbursement transactions within the selected {string} range should be displayed",
     (dateRange) => {
 
-        PrimaryPocketFundingPage.validateAllTransactionPages(dateRange);
+        PrimaryPocketDisbursementPage.validateAllTransactionPages(dateRange);
 
     }
 );
@@ -102,22 +102,22 @@ Then(
 
 Then("I should be able to copy the payment reference", () => {
 
-    PrimaryPocketFundingPage.clickFirstCopyButton();
+    PrimaryPocketDisbursementPage.clickFirstCopyButton();
 
-    PrimaryPocketFundingPage.validatePaymentReferenceCopy();
+    PrimaryPocketDisbursementPage.validatePaymentReferenceCopy();
 
 });
 
 
 When("I export disbursement transactions", () => {
 
-    PrimaryPocketFundingPage.clickExport();
+    PrimaryPocketDisbursementPage.clickExport();
 
 });
 
 
 Then("the disbursement transactions export should start successfully", () => {
 
-    PrimaryPocketFundingPage.validateExportStarted();
+    PrimaryPocketDisbursementPage.validateExportStarted();
 
 });
