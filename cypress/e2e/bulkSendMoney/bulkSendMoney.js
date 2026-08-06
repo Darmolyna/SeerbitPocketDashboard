@@ -42,13 +42,6 @@ When("I select Bank Transfer to Send Money", () => {
 });
 
 
-When("I select Sub Pocket to Send Money", () => {
-
-    BulkSendMoneyPage.selectSubPocket();
-
-});
-
-
 When("I select {string} as the source pocket", (pocketId) => {
 
     BulkSendMoneyPage.selectPrimaryPocket(pocketId);
@@ -81,5 +74,33 @@ Then("the {string} file should be uploaded successfully", (fileName) => {
 Then("the Continue button should be enabled", () => {
 
     BulkSendMoneyPage.verifyContinueButtonEnabled();
+
+});
+
+When("I click Continue", () => {
+
+    BulkSendMoneyPage.clickContinue();
+
+});
+
+
+Then("the transaction details page should be displayed", () => {
+
+    BulkSendMoneyPage.verifyTransactionDetailsPageDisplayed();
+
+});
+
+
+Then("the transaction summary should be displayed", () => {
+
+    BulkSendMoneyPage.verifyTransactionSummaryDisplayed();
+
+});
+
+
+
+When("I select Sub Pocket to Send Money", () => {
+
+    BulkSendMoneyPage.selectSubPocket();
 
 });

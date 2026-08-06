@@ -13,6 +13,10 @@ Feature: Bulk Send Money
     And I upload the "bulk_bank_transfer.xlsx" file
     Then the "bulk_bank_transfer.xlsx" file should be uploaded successfully
     And the Continue button should be enabled
+    When I click Continue
+    
+    Then the transaction details page should be displayed
+    And the transaction summary should be displayed
 
 
 Scenario: Bulk Sub Pocket Transfer from Primary Pocket

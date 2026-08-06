@@ -31,7 +31,24 @@ class BulkSendMoneyPage {
             cy.contains("File uploaded:"),
 
         continueButton: () =>
-            cy.contains("button", "Continue")
+            cy.contains("button", "Continue"),
+
+        continueButton: () =>
+            cy.contains("button", "Continue").last(),
+
+        transactionsDetailsTitle: () =>
+            cy.contains("h1", "Transactions details"),
+
+        transactionFileName: () =>
+            cy.contains("div", "File name")
+                .parent()
+                .find("div.text-\\[18px\\]"),
+
+        validTransactionCount: () =>
+            cy.contains("span", "Valid:"),
+
+        invalidTransactionCount: () =>
+            cy.contains("span", "Invalid:")
 
     };
 
@@ -77,6 +94,14 @@ class BulkSendMoneyPage {
 
     }
 
+    clickContinue() {
+
+        this.elements.continueButton()
+            .click();
+
+    }
+
+
 
     uploadFile(fileName) {
 
@@ -112,6 +137,24 @@ class BulkSendMoneyPage {
 
         this.elements.continueButton()
             .should("not.be.disabled");
+
+    }
+
+    verifyTransactionDetailsPageDisplayed() {
+
+        this.elements.transactionsDetailsTitle()
+            .should("be.visible");
+
+    }
+
+
+    verifyTransactionSummaryDisplayed() {
+
+        this.elements.validTransactionCount()
+            .should("contain.text", "Valid:");
+
+        this.elements.invalidTransactionCount()
+            .should("contain.text", "Invalid:");
 
     }
 
