@@ -78,3 +78,11 @@ Then("the transaction file should be downloaded", () => {
     ExportTransactionsPriPocPage.validateDownloadedFile();
 
 });
+
+
+
+Then("I navigate to the Disbursement Transactions page", () => {
+    cy.wait(2000)
+
+    ExportTransactionsPriPocPage.clickDisbursementMenu()
+});

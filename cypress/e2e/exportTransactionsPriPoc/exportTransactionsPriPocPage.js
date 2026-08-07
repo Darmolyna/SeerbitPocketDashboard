@@ -39,7 +39,13 @@ class ExportTransactionsPriPocPage {
             cy.get('[data-testid="calendar-end"]'),
 
         noTransactionsMessage: () =>
-            cy.contains("No transactions found for the selected date range")
+            cy.contains("No transactions found for the selected date range"),
+
+
+
+        transactionMenu: () => cy.contains("nav a", "Transactions"),
+
+        disbursementMenu: () => cy.contains('button', 'Disbursement')
 
     }
 
@@ -179,6 +185,18 @@ class ExportTransactionsPriPocPage {
             .should("be.visible")
             .and("contain.text", "No transactions found for the selected date range");
 
+    }
+
+
+
+    clickDisbursementMenu() {
+        this.elements.transactionMenu()
+            .should("be.visible", { timeout: 10000 })
+            .click();
+
+        this.elements.disbursementMenu()
+            .should("be.visible", { timeout: 10000 })
+            .click();
     }
 
     /*
