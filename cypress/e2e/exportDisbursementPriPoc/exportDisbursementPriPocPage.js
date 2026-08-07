@@ -257,13 +257,13 @@ class ExportDisbursementPriPocPage {
 
     }
 
-
-
     validateDownloadedFile() {
 
         const downloadsFolder = "cypress/downloads";
 
-        cy.task("getLatestDownloadedFile")
+        cy.task("getLatestDownloadedFile", {
+            timeout: 30000
+        })
             .then((fileName) => {
 
                 expect(fileName)

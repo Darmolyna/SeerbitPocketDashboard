@@ -14,15 +14,27 @@ Feature: Bulk Send Money
     Then the "bulk_bank_transfer.xlsx" file should be uploaded successfully
     And the Continue button should be enabled
     When I click Continue
-    
     Then the transaction details page should be displayed
     And the transaction summary should be displayed
+    When I click Continue
+    Then I should see the OTP verification page
+    When I enter the OTP "123456"
+    Then all OTP fields should contain the entered values
+    When I click Continue
 
 
 Scenario: Bulk Sub Pocket Transfer from Primary Pocket
 
     When I select Sub Pocket to Send Money
     And I select "SBP0000829" as the source pocket
-    And I upload the "bulk-sub-pocket.xlsx" file
-    Then the "bulk-sub-pocket.xlsx" file should be uploaded successfully
+    And I upload the "bulk_pocket_to_subpocket.xlsx" file
+    Then the "bulk_pocket_to_subpocket.xlsx" file should be uploaded successfully
     And the Continue button should be enabled
+    When I click Continue
+    Then the transaction details page should be displayed
+    And the transaction summary should be displayed
+    When I click Continue
+    Then I should see the OTP verification page
+    When I enter the OTP "123456"
+    Then all OTP fields should contain the entered values
+    When I click Continue

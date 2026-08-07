@@ -69,6 +69,7 @@ Then("the Export button should be enabled", () => {
 When("I export the transactions", () => {
 
     ExportTransactionsPriPocPage.clickExportIfAvailable();
+    cy.wait(5000)
 
 });
 

@@ -33,8 +33,8 @@ class BulkSendMoneyPage {
         continueButton: () =>
             cy.contains("button", "Continue"),
 
-        continueButton: () =>
-            cy.contains("button", "Continue").last(),
+        // continueButton: () =>
+        //     cy.contains("button", "Continue").last(),
 
         transactionsDetailsTitle: () =>
             cy.contains("h1", "Transactions details"),
@@ -48,10 +48,23 @@ class BulkSendMoneyPage {
             cy.contains("span", "Valid:"),
 
         invalidTransactionCount: () =>
-            cy.contains("span", "Invalid:")
+            cy.contains("span", "Invalid:"),
+
+        pageTitle: () =>
+            cy.contains("h2", "Enter One Time Passcode"),
+
+        otpMessage: () =>
+            cy.contains("Please enter the 6-digit OTP sent to"),
+
+        otpInputs: () =>
+            cy.get('input[inputmode="numeric"][maxlength="1"]'),
+
+        otpContainer: () =>
+            cy.get("div.flex.justify-center.gap-1"),
 
     };
-
+    ///
+    ////
 
     openSendMoney() {
 
@@ -113,6 +126,26 @@ class BulkSendMoneyPage {
 
     }
 
+    validateOtpPage() {
+        this.elements.pageTitle()
+            .should("be.visible")
+            .and("have.text", "Enter One Time Passcode");
+
+        this.elements.otpMessage()
+            .should("be.visible")
+            .and("contain.text", "Please enter the 6-digit OTP sent to");
+
+        this.elements.otpInputs()
+            .should("have.length", 6)
+            .each(($input) => {
+                cy.wrap($input)
+                    .should("be.visible")
+                    .and("have.attr", "maxlength", "1");
+            });
+    }
+
+    ///
+    ///
 
     verifyFileUploaded() {
 
@@ -156,6 +189,30 @@ class BulkSendMoneyPage {
         this.elements.invalidTransactionCount()
             .should("contain.text", "Invalid:");
 
+    }
+
+    enterOtp(otp) {
+        const otpArray = otp.split("");
+
+        this.elements.otpInputs()
+            .each(($input, index) => {
+                cy.wrap($input)
+                    .type(otpArray[index]);
+            });
+    }
+
+    validateOtpPage() {
+
+        this.elements.pageTitle()
+            .should("be.visible")
+            .and("contain.text", "Enter One Time Passcode");
+
+        this.elements.otpMessage()
+            .should("be.visible")
+            .and("contain.text", "Please enter the 6-digit OTP sent to");
+
+        this.elements.otpInputs()
+            .should("have.length", 6);
     }
 
 }

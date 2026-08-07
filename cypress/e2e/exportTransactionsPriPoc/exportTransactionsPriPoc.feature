@@ -1,4 +1,4 @@
-Feature: Export Transactions
+Feature: Export Transactions Primary Pocket
 
     Background:
         Given I am logged into the Primary Pocket Dashboard

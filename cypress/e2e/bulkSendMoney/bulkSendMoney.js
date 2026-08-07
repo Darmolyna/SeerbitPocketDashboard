@@ -97,6 +97,24 @@ Then("the transaction summary should be displayed", () => {
 
 });
 
+Then("I should see the OTP verification page", () => {
+    BulkSendMoneyPage.validateOtpPage();
+});
+
+When("I enter the OTP {string}", (otp) => {
+    BulkSendMoneyPage.enterOtp(otp);
+});
+
+
+Then("all OTP fields should contain the entered values", () => {
+    BulkSendMoneyPage.elements.otpInputs()
+        .each(($input) => {
+            cy.wrap($input)
+                .invoke("val")
+                .should("not.be.empty");
+        });
+});
+
 
 
 When("I select Sub Pocket to Send Money", () => {
