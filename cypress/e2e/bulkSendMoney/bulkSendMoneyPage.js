@@ -203,6 +203,8 @@ class BulkSendMoneyPage {
 
     validateOtpPage() {
 
+        cy.wait(2000)
+
         this.elements.pageTitle()
             .should("be.visible")
             .and("contain.text", "Enter One Time Passcode");
