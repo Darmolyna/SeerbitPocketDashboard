@@ -1,62 +1,129 @@
 name: Cypress E2E Tests
 
 on:
-  push:
-    branches:
-      - main
-      - develop
+push:
+branches:
+- main
+- develop
 
-  pull_request:
-    branches:
-      - main
-      - develop
+pull_request:
+branches:
+- main
+- develop
 
-  workflow_dispatch:
-    inputs:
-      tags:
-        description: "Cucumber tag to run"
-        required: false
-        default: ""
+workflow_dispatch:
+inputs:
+tags:
+description: "Cucumber tag to run"
+required: false
+default: ""
+
+permissions:
+contents: write
 
 jobs:
-  cypress:
-    runs-on: ubuntu-latest
+cypress:
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+```
+steps:
+  - name: Checkout code
+    uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
+  - name: Setup Node.js
+    uses: actions/setup-node@v4
+    with:
+      node-version: 24
+      cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+  - name: Install dependencies
+    run: npm ci
 
-      - name: Run Cypress tests
-        uses: cypress-io/github-action@v7
-        with:
-          record: true
-          env: |
-            tags=${{ github.event.inputs.tags }}
-        env:
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
+  - name: Run Cypress tests
+    uses: cypress-io/github-action@v7
+    with:
+      record: true
+      env: |
+        tags=${{ github.event.inputs.tags }}
+    env:
+      CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+      CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
 
-      - name: Upload screenshots
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cypress-screenshots
-          path: cypress/screenshots
-          if-no-files-found: ignore
+  - name: Generate Mochawesome report
+    if: always()
+    run: |
+      mkdir -p cypress/reports
 
-      - name: Upload videos
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cypress-videos
-          path: cypress/videos
-          if-no-files-found: ignore
+      npx mochawesome-merge "cypress/reports/*.json" \
+        -o cypress/reports/merged.json
+
+      npx marge cypress/reports/merged.json \
+        -f index \
+        -o cypress/reports
+
+  - name: Upload Cypress report artifact
+    if: always()
+    uses: actions/upload-artifact@v4
+    with:
+      name: cypress-html-report
+      path: cypress/reports
+      if-no-files-found: warn
+
+  - name: Upload screenshots
+    if: failure()
+    uses: actions/upload-artifact@v4
+    with:
+      name: cypress-screenshots
+      path: cypress/screenshots
+      if-no-files-found: ignore
+
+  - name: Upload videos
+    if: always()
+    uses: actions/upload-artifact@v4
+    with:
+      name: cypress-videos
+      path: cypress/videos
+      if-no-files-found: ignore
+
+  - name: Prepare report for GitHub Pages
+    if: always()
+    run: |
+      mkdir -p public
+
+      if [ -f cypress/reports/index.html ]; then
+        cp -r cypress/reports/* public/
+      else
+        echo "Mochawesome report was not generated."
+        echo "<html><body><h1>Cypress Report</h1><p>No report was generated.</p></body></html>" > public/index.html
+      fi
+
+  - name: Deploy Cypress report to GitHub Pages
+    if: always()
+    uses: peaceiris/actions-gh-pages@v4
+    with:
+      github_token: ${{ secrets.GITHUB_TOKEN }}
+      publish_dir: ./public
+      publish_branch: gh-pages
+      force_orphan: true
+
+  - name: Send Cypress result to Slack
+    if: always()
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    run: |
+      STATUS="${{ job.status }}"
+
+      if [ "$STATUS" = "success" ]; then
+        MESSAGE=":white_check_mark: *Cypress tests passed successfully*"
+      else
+        MESSAGE=":x: *Cypress tests failed*"
+      fi
+
+      REPORT_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+
+      RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
+      curl -X POST \
+        -H 'Content-type: application/json' \
+        --data "{\"text\":\"$MESSAGE\n\n*Repository:* $GITHUB_REPOSITORY\n*Branch:* $GITHUB_REF_NAME\n\n:bar_chart: *Interactive Cypress Report:*\n$REPORT_URL\n\n:gear: *GitHub Actions Run:*\n$RUN_URL\"}" \
+        "$SLACK_WEBHOOK_URL"
