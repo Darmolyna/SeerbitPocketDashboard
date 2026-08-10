@@ -63,6 +63,8 @@ async function setupNodeEvents(on, config) {
 
 module.exports = defineConfig({
 
+  projectId: "rrx4i7",
+
   expose: {
     baseUrl: "https://develop.d1vg8wvg97d1gx.amplifyapp.com/"
   },

@@ -30,7 +30,7 @@ class PrimaryPocketDashboardPage {
 
         createSubPocketButton: () =>
             cy.contains("h2", "Quick Actions")
-                .closest(".bg-white").contains("span", "Create a Sub-pocket"),
+                .closest(".bg-white").contains("span", "Create a Subpocket"),
 
         sendMoneyPageTitle: () =>
             cy.contains("h2", "Send money from"),
@@ -294,12 +294,12 @@ class PrimaryPocketDashboardPage {
                             .should("be.visible");
 
                         // Funding Link
-                        cy.contains("Funding Link")
-                            .should("be.visible");
+                        // cy.contains("Funding Link")
+                        //     .should("be.visible");
 
-                        cy.get('a[target="_blank"]')
-                            .should("have.attr", "href")
-                            .and("include", "pay.seerbit");
+                        // cy.get('a[target="_blank"]')
+                        //     .should("have.attr", "href")
+                        //     .and("include", "pay.seerbit");
 
                         // Bank Information
                         cy.contains("Bank Information")

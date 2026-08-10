@@ -1,9 +1,10 @@
+@Export @regression @fullSuite
 Feature: Export Transactions and Disbursement Primary Pocket
 
     Background:
         Given I am logged into the Primary Pocket Dashboard
 
-    @regression @fullSuite @Export @exportTransactions
+    @exportTransactions
     Scenario Outline: Export Today transactions 
         And I navigate to the Funding Transactions page
         And I clcik the Export Transactions button
@@ -23,7 +24,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
         | 500  |
         | 1000 |
 
-    @regression @fullSuite @Export @exportTransactions
+    @exportTransactions
     Scenario Outline: Export Yesterday transactions
         And I navigate to the Funding Transactions page
         And I clcik the Export Transactions button
@@ -43,7 +44,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
         | 500  |
         | 1000 |
 
-    @regression @fullSuite @Export @exportTransactions
+    @exportTransactions
     Scenario Outline: Export weekly transactions
         And I navigate to the Funding Transactions page
         And I clcik the Export Transactions button
@@ -63,9 +64,9 @@ Feature: Export Transactions and Disbursement Primary Pocket
         | 500  |
         | 1000 |
 
-    @regression @fullSuite @Export @exportTransactions
+    @exportTransactions
     Scenario Outline: Export monthly transactions
-        Ad I navigate to the Funding Transactions page
+        And I navigate to the Funding Transactions page
         And I clcik the Export Transactions button
         And I select the Monthly date range
         When I select "<Rows>" rows
@@ -91,9 +92,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
 
 
 
-
-
-    @regression @fullSuite @Export @exportDisbursement
+    @exportDisbursement
     Scenario Outline: Export Today Disbursement
         And I navigate to the Disbursement Transactions page
         And I clcik the Export Transactions button
@@ -113,7 +112,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
         | 500  |
         | 1000 |
 
-    @regression @fullSuite @Export @exportDisbursement
+    @exportDisbursement
     Scenario Outline: Export Yesterday Disbursement
         And I navigate to the Disbursement Transactions page
         And I clcik the Export Transactions button
@@ -133,7 +132,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
         | 500  |
         | 1000 |
 
-    @regression @fullSuite @Export @exportDisbursement
+    @exportDisbursement
     Scenario Outline: Export weekly Disbursement
         And I navigate to the Disbursement Transactions page
         And I clcik the Export Transactions button
@@ -153,7 +152,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
         | 500  |
         | 1000 |
 
-    @regression @fullSuite @Export @exportDisbursement
+    @exportDisbursement
     Scenario Outline: Export monthly Disbursement
         And I navigate to the Disbursement Transactions page
         And I clcik the Export Transactions button

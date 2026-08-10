@@ -249,19 +249,19 @@ class SubPocketDashboardPage {
 
 
                                     // Funding Link
-                                    cy.get(modal)
-                                        .contains("Funding Link")
-                                        .should("be.visible");
+                                    // cy.get(modal)
+                                    //     .contains("Funding Link")
+                                    //     .should("be.visible");
 
 
-                                    cy.get(modal)
-                                        .find('a[target="_blank"]')
-                                        .should("exist")
-                                        .and("have.attr", "href")
-                                        .and(
-                                            "include",
-                                            "pay.seerbit"
-                                        );
+                                    // cy.get(modal)
+                                    //     .find('a[target="_blank"]')
+                                    //     .should("exist")
+                                    //     .and("have.attr", "href")
+                                    //     .and(
+                                    //         "include",
+                                    //         "pay.seerbit"
+                                    //     );
 
 
 

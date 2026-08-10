@@ -267,19 +267,21 @@ class ExportTransactionsPriPocPage {
 
         const downloadsFolder = "cypress/downloads";
 
-        cy.task("getLatestDownloadedFile")
-            .then((fileName) => {
+        // Wait briefly for the browser to finish downloading
+        cy.wait(2000);
 
-                expect(fileName)
-                    .to.exist;
+        cy.task("getLatestDownloadedFile").then((fileName) => {
 
-                expect(fileName.toLowerCase())
-                    .to.contain("transaction");
+            expect(fileName, "Downloaded file name").to.not.be.null;
+            expect(fileName, "Downloaded file name").to.not.be.undefined;
 
-                cy.readFile(`${downloadsFolder}/${fileName}`)
-                    .should("exist");
+            expect(fileName.toLowerCase()).to.contain("transaction");
 
-            });
+            cy.readFile(`${downloadsFolder}/${fileName}`, {
+                timeout: 30000,
+            }).should("exist");
+
+        });
 
     }
 
