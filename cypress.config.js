@@ -1,8 +1,10 @@
 const { defineConfig } = require("cypress");
 const createBundler = require("@bahmutov/cypress-esbuild-preprocessor");
+
 const {
   addCucumberPreprocessorPlugin,
 } = require("@badeball/cypress-cucumber-preprocessor");
+
 const {
   createEsbuildPlugin,
 } = require("@badeball/cypress-cucumber-preprocessor/esbuild");
@@ -11,7 +13,6 @@ const fs = require("fs");
 const path = require("path");
 
 async function setupNodeEvents(on, config) {
-
   await addCucumberPreprocessorPlugin(on, config);
 
   on(
@@ -21,12 +22,9 @@ async function setupNodeEvents(on, config) {
     })
   );
 
-
   // Get latest downloaded file
   on("task", {
-
     getLatestDownloadedFile() {
-
       const downloadsFolder = path.join(
         __dirname,
         "cypress/downloads"
@@ -43,47 +41,50 @@ async function setupNodeEvents(on, config) {
       }
 
       return files
-        .map(file => ({
+        .map((file) => ({
           name: file,
           time: fs.statSync(
             path.join(downloadsFolder, file)
-          ).mtime.getTime()
+          ).mtime.getTime(),
         }))
-        .sort((a, b) => b.time - a.time)[0]
-        .name;
-
-    }
+        .sort((a, b) => b.time - a.time)[0].name;
+    },
 
   });
 
+  // Log screenshot information
+  on("after:screenshot", (details) => {
+    console.log("Screenshot created:", details.path);
+  });
 
   return config;
 }
 
-
 module.exports = defineConfig({
-
   projectId: "rrx4i7",
 
   reporter: "mochawesome",
+
   reporterOptions: {
     reportDir: "cypress/reports",
     overwrite: false,
     html: false,
-    json: true
+    json: true,
+    embeddedScreenshots: true,
   },
 
+  // Capture screenshot automatically when a test fails
+  screenshotOnRunFailure: true,
 
   expose: {
-    baseUrl: "https://develop.d1vg8wvg97d1gx.amplifyapp.com/"
+    baseUrl:
+      "https://develop.d1vg8wvg97d1gx.amplifyapp.com/",
   },
-
 
   retries: {
-    //runMode: 2,
-    //openMode: 2
+    // runMode: 2,
+    // openMode: 2
   },
-
 
   defaultCommandTimeout: 10000,
   pageLoadTimeout: 120000,
@@ -94,9 +95,7 @@ module.exports = defineConfig({
   // Increase because file download may take time
   taskTimeout: 30000,
 
-
   e2e: {
-
     specPattern: "**/*.feature",
 
     downloadsFolder: "cypress/downloads",
@@ -104,5 +103,4 @@ module.exports = defineConfig({
     setupNodeEvents,
 
   },
-
 });

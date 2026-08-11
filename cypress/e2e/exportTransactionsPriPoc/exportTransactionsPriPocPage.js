@@ -2,6 +2,12 @@ class ExportTransactionsPriPocPage {
 
     elements = {
 
+        transactionMenu: () =>
+            cy.get("nav a", { timeout: 30000 })
+                .contains("Transactions", { timeout: 30000 }),
+
+        disbursementMenu: () => cy.contains('button', 'Disbursement'),
+
         exportTransactionsButton: () =>
             cy.contains("div", "Export Transactions"),
 
@@ -39,13 +45,7 @@ class ExportTransactionsPriPocPage {
             cy.get('[data-testid="calendar-end"]'),
 
         noTransactionsMessage: () =>
-            cy.contains("No transactions found for the selected date range"),
-
-
-
-        transactionMenu: () => cy.contains("nav a", "Transactions"),
-
-        disbursementMenu: () => cy.contains('button', 'Disbursement')
+            cy.contains("No transactions found for the selected date range")
 
     }
 
@@ -54,6 +54,22 @@ class ExportTransactionsPriPocPage {
     | Actions
     |--------------------------------------------------------------------------
     */
+
+    clickTransactionMenu() {
+        this.elements.transactionMenu()
+            .should("be.visible", { timeout: 15000 })
+            .click();
+    }
+
+    clickDisbursementMenu() {
+        this.elements.transactionMenu()
+            .should("be.visible", { timeout: 10000 })
+            .click();
+
+        this.elements.disbursementMenu()
+            .should("be.visible", { timeout: 10000 })
+            .click();
+    }
 
     clickExportTransactionsButton() {
         this.elements.exportTransactionsButton().click()
@@ -187,21 +203,13 @@ class ExportTransactionsPriPocPage {
 
     }
 
-    clickDisbursementMenu() {
-        this.elements.transactionMenu()
-            .should("be.visible", { timeout: 10000 })
-            .click();
-
-        this.elements.disbursementMenu()
-            .should("be.visible", { timeout: 10000 })
-            .click();
-    }
-
     /*
     |--------------------------------------------------------------------------
     | Validations
     |--------------------------------------------------------------------------
     */
+
+
 
     validateExportEnabled() {
 

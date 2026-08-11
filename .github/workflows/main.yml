@@ -50,7 +50,7 @@ jobs:
         with:
           record: true
           env: |
-            tags=${{ github.event.inputs.tags }}
+            tags=@Export
 
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}

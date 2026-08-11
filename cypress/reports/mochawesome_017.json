@@ -1,0 +1,124 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 0,
+    "pending": 2,
+    "failures": -1,
+    "start": "2026-08-11T11:29:27.947Z",
+    "end": "2026-08-11T11:29:27.991Z",
+    "duration": 44,
+    "testsRegistered": 2,
+    "passPercent": null,
+    "pendingPercent": 100,
+    "other": 1,
+    "hasOther": true,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "a7197684-1a7c-4ad7-8e97-96688a9f92ab",
+      "title": "",
+      "fullFile": "cypress/e2e/bulkSendMoney/bulkSendMoney.feature",
+      "file": "cypress/e2e/bulkSendMoney/bulkSendMoney.feature",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "2743e435-47ba-438d-a1e9-d0ab15d368de",
+          "title": "Bulk Send Money",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "Bulk Bank Transfer from Primary Pocket",
+              "fullTitle": "Bulk Send Money Bulk Bank Transfer from Primary Pocket",
+              "timedOut": null,
+              "duration": 0,
+              "state": "pending",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": true,
+              "context": null,
+              "code": "",
+              "err": {},
+              "uuid": "bd87e47a-e8a3-4dec-8b96-e2d4fa4f31a8",
+              "parentUUID": "2743e435-47ba-438d-a1e9-d0ab15d368de",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Bulk Sub Pocket Transfer from Primary Pocket",
+              "fullTitle": "Bulk Send Money Bulk Sub Pocket Transfer from Primary Pocket",
+              "timedOut": null,
+              "duration": 0,
+              "state": "pending",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": true,
+              "context": null,
+              "code": "",
+              "err": {},
+              "uuid": "9da176bb-6302-4bed-b297-4856c01b81a5",
+              "parentUUID": "2743e435-47ba-438d-a1e9-d0ab15d368de",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [],
+          "failures": [],
+          "pending": [
+            "bd87e47a-e8a3-4dec-8b96-e2d4fa4f31a8",
+            "9da176bb-6302-4bed-b297-4856c01b81a5"
+          ],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "8.0.1"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true
+      },
+      "version": "6.3.2"
+    }
+  }
+}

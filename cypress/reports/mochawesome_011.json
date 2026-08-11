@@ -1,0 +1,162 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 0,
+    "pending": 4,
+    "failures": -3,
+    "start": "2026-08-11T10:57:24.560Z",
+    "end": "2026-08-11T10:57:24.596Z",
+    "duration": 36,
+    "testsRegistered": 4,
+    "passPercent": null,
+    "pendingPercent": 100,
+    "other": 3,
+    "hasOther": true,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "9a16b6b5-d7e1-4f80-a64c-c54ef594c389",
+      "title": "",
+      "fullFile": "cypress/e2e/subPocketDashboard/subPocketDashboard.feature",
+      "file": "cypress/e2e/subPocketDashboard/subPocketDashboard.feature",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "05d70e91-376b-48f3-8d67-a91006bfd272",
+          "title": "Sub Pocket Dashboard",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "Verify Pocket card section of the dashboard",
+              "fullTitle": "Sub Pocket Dashboard Verify Pocket card section of the dashboard",
+              "timedOut": null,
+              "duration": 0,
+              "state": "pending",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": true,
+              "context": null,
+              "code": "",
+              "err": {},
+              "uuid": "840bcace-ff73-423d-8905-977cad7c5cec",
+              "parentUUID": "05d70e91-376b-48f3-8d67-a91006bfd272",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Verify Performance section of the Dashboard",
+              "fullTitle": "Sub Pocket Dashboard Verify Performance section of the Dashboard",
+              "timedOut": null,
+              "duration": 0,
+              "state": "pending",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": true,
+              "context": null,
+              "code": "",
+              "err": {},
+              "uuid": "d0eb2865-ba3f-4408-87f8-d07075731b6d",
+              "parentUUID": "05d70e91-376b-48f3-8d67-a91006bfd272",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Verify Pocket Balance section of the Dashboard",
+              "fullTitle": "Sub Pocket Dashboard Verify Pocket Balance section of the Dashboard",
+              "timedOut": null,
+              "duration": 0,
+              "state": "pending",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": true,
+              "context": null,
+              "code": "",
+              "err": {},
+              "uuid": "ff03fdac-d8b0-4ef0-a48a-b6bc84e9671c",
+              "parentUUID": "05d70e91-376b-48f3-8d67-a91006bfd272",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Validate Recent Transactions section and  navigation to see all transactions page",
+              "fullTitle": "Sub Pocket Dashboard Validate Recent Transactions section and  navigation to see all transactions page",
+              "timedOut": null,
+              "duration": 0,
+              "state": "pending",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": true,
+              "context": null,
+              "code": "",
+              "err": {},
+              "uuid": "f87a9494-becb-4d33-a531-ddd50c79a2b4",
+              "parentUUID": "05d70e91-376b-48f3-8d67-a91006bfd272",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [],
+          "failures": [],
+          "pending": [
+            "840bcace-ff73-423d-8905-977cad7c5cec",
+            "d0eb2865-ba3f-4408-87f8-d07075731b6d",
+            "ff03fdac-d8b0-4ef0-a48a-b6bc84e9671c",
+            "f87a9494-becb-4d33-a531-ddd50c79a2b4"
+          ],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "8.0.1"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true
+      },
+      "version": "6.3.2"
+    }
+  }
+}
