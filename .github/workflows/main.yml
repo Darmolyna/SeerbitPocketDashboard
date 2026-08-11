@@ -190,14 +190,6 @@ jobs:
           path: cypress/screenshots
           if-no-files-found: ignore
 
-      - name: Upload videos
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cypress-videos
-          path: cypress/videos
-          if-no-files-found: ignore
-
       # Clean GitHub Pages directory before publishing.
       # This prevents files from an older report from being reused.
       - name: Prepare report for GitHub Pages
@@ -248,8 +240,6 @@ jobs:
 
           REPORT_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
 
-          RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-
           STATUS="${{ steps.result.outputs.status }}"
           ICON="${{ steps.result.outputs.slack_icon }}"
 
@@ -279,7 +269,6 @@ jobs:
             --arg pending "$PENDING" \
             --arg duration "$DURATION" \
             --arg report "$REPORT_URL" \
-            --arg run "$RUN_URL" \
             --arg author "$AUTHOR" \
             --arg commit "$COMMIT_MESSAGE" \
             --arg tag "$TAG" \
@@ -302,10 +291,7 @@ jobs:
                 "📝 *Commit Message:* " + $commit + "\n\n" +
 
                 "📊 *Interactive Cypress Report:*\n" +
-                $report + "\n\n" +
-
-                "⚙️ *GitHub Actions Run:*\n" +
-                $run
+                $report
               )
             }')
 
