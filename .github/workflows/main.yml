@@ -1,4 +1,4 @@
-name: Cypress E2E Tests
+name: Pocket Dashboard Tests
 
 on:
   push:
@@ -38,6 +38,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # IMPORTANT:
+      # Remove reports from previous runs so the generated
+      # Mochawesome report contains ONLY this test run.
+      - name: Clean previous Cypress reports
+        run: |
+          echo "Cleaning previous Cypress reports..."
+
+          rm -rf cypress/reports
+          rm -rf cypress/results
+          rm -rf mochawesome-report
+          rm -rf public
+
+          mkdir -p cypress/reports
+
+          echo "Report directories cleaned."
+
       - name: Record start time
         id: start_time
         run: |
@@ -62,18 +78,28 @@ jobs:
         run: |
           echo "end=$(date +%s)" >> "$GITHUB_OUTPUT"
 
+      # Generate report ONLY from JSON files created by this run.
       - name: Generate Mochawesome report
         if: always()
         run: |
           mkdir -p cypress/reports
 
+          echo "Checking for Mochawesome JSON files..."
+
           if ls cypress/reports/*.json >/dev/null 2>&1; then
+
+            echo "Mochawesome JSON files found:"
+            ls -lah cypress/reports/*.json
+
             npx mochawesome-merge "cypress/reports/*.json" \
               -o cypress/reports/merged.json
 
             npx marge cypress/reports/merged.json \
               -f index \
               -o cypress/reports
+
+            echo "Mochawesome report generated successfully."
+
           else
             echo "No Mochawesome JSON files found."
           fi
@@ -172,14 +198,22 @@ jobs:
           path: cypress/videos
           if-no-files-found: ignore
 
+      # Clean GitHub Pages directory before publishing.
+      # This prevents files from an older report from being reused.
       - name: Prepare report for GitHub Pages
         if: always()
         run: |
+          rm -rf public
           mkdir -p public
 
           if [ -f cypress/reports/index.html ]; then
+
             cp -r cypress/reports/* public/
+
+            echo "Latest Cypress report copied to GitHub Pages."
+
           else
+
             echo "Mochawesome report was not generated."
 
             cat > public/index.html <<'EOF'
@@ -190,10 +224,11 @@ jobs:
           </head>
           <body>
             <h1>Cypress Report</h1>
-            <p>No report was generated.</p>
+            <p>No report was generated for this run.</p>
           </body>
           </html>
           EOF
+
           fi
 
       - name: Deploy Cypress report to GitHub Pages
