@@ -1,3 +1,4 @@
+@regression @fullSuite @bulkSendMoney
 Feature: Bulk Send Money
 
     Background:
@@ -5,9 +6,8 @@ Feature: Bulk Send Money
         And I navigate to the send Money section
         And I click bulk section
 
-
+    @bulkSendMoney1
     Scenario: Bulk Bank Transfer from Primary Pocket
-
     When I select Bank Transfer to Send Money
     And I select "SBP0000829" as the source pocket
     And I upload the "bulk_bank_transfer.xlsx" file
@@ -22,7 +22,7 @@ Feature: Bulk Send Money
     Then all OTP fields should contain the entered values
     When I click Continue
 
-
+    @bulkSendMoney2
 Scenario: Bulk Sub Pocket Transfer from Primary Pocket
 
     When I select Sub Pocket to Send Money

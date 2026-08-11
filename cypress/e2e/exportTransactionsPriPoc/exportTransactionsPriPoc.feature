@@ -4,7 +4,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
     Background:
         Given I am logged into the Primary Pocket Dashboard
 
-    @exportTransactions
+    @exportTransactions @exportTransactions1
     Scenario Outline: Export Today transactions 
         And I navigate to the Funding Transactions page
         And I clcik the Export Transactions button
@@ -24,7 +24,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
         | 500  |
         | 1000 |
 
-    @exportTransactions
+    @exportTransactions @exportTransactions2
     Scenario Outline: Export Yesterday transactions
         And I navigate to the Funding Transactions page
         And I clcik the Export Transactions button
@@ -44,7 +44,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
         | 500  |
         | 1000 |
 
-    @exportTransactions
+    @exportTransactions @exportTransactions3
     Scenario Outline: Export weekly transactions
         And I navigate to the Funding Transactions page
         And I clcik the Export Transactions button
@@ -64,7 +64,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
         | 500  |
         | 1000 |
 
-    @exportTransactions
+    @exportTransactions @exportTransactions4
     Scenario Outline: Export monthly transactions
         And I navigate to the Funding Transactions page
         And I clcik the Export Transactions button
@@ -92,7 +92,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
 
 
 
-    @exportDisbursement
+    @exportDisbursement @exportDisbursement1
     Scenario Outline: Export Today Disbursement
         And I navigate to the Disbursement Transactions page
         And I clcik the Export Transactions button
@@ -112,7 +112,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
         | 500  |
         | 1000 |
 
-    @exportDisbursement
+    @exportDisbursement @exportDisbursement2
     Scenario Outline: Export Yesterday Disbursement
         And I navigate to the Disbursement Transactions page
         And I clcik the Export Transactions button
@@ -132,7 +132,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
         | 500  |
         | 1000 |
 
-    @exportDisbursement
+    @exportDisbursement @exportDisbursement3
     Scenario Outline: Export weekly Disbursement
         And I navigate to the Disbursement Transactions page
         And I clcik the Export Transactions button
@@ -152,7 +152,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
         | 500  |
         | 1000 |
 
-    @exportDisbursement
+    @exportDisbursement @exportDisbursement4
     Scenario Outline: Export monthly Disbursement
         And I navigate to the Disbursement Transactions page
         And I clcik the Export Transactions button

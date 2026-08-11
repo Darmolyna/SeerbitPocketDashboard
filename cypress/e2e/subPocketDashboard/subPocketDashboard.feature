@@ -1,18 +1,24 @@
+@regression @fullSuite @smoke @subPocketDashboard
+
 Feature: Sub Pocket Dashboard
 
   Background:
     Given I am logged into the Sub Pocket Dashboard
 
-  Scenario: Verify Pocket card section of the dashboard 
+@subPocketDashboard1
+Scenario: Verify Pocket card section of the dashboard 
         Then I should see the Dashboard title
         And I should see the Your Balances section
         And I should see the Recent Transactions section
+
+@subPocketDashboard2
 Scenario: Verify Performance section of the Dashboard
-And I should see the Performance section
+        And I should see the Performance section
 
+
+@subPocketDashboard3
 Scenario: Verify Pocket Balance section of the Dashboard
-And I should see the Pocket Balance section
-
+    And I should see the Pocket Balance section
     Scenario: Validate Recent Transactions section and  navigation to see all transactions page
     And I should see the Recent Transactions section
     Then I should see the Recent Transactions section

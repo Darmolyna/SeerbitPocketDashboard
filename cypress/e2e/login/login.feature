@@ -1,3 +1,4 @@
+@regression @fullSuite @smoke @login
 Feature: Login Functionality for flow dashboard
   As a registered user
   I want to log in to my account
@@ -6,7 +7,7 @@ Feature: Login Functionality for flow dashboard
   Background:
     Given I navigate to the login page
     
-    @regression @fullSuite @smoke @login
+    @login1
   Scenario: Login validation with different credential combinations
     When I enter my email "<email>"
     And I enter my password "<password>"
@@ -21,12 +22,12 @@ Feature: Login Functionality for flow dashboard
   | test@seerbit.com                | WrongPassword      | Invalid Login Credentials     | negative  |
 
 
-    @regression @fullSuite @smoke @login
+    @login2
   Scenario: Forgot Password button and page load validation
     When I click the Forgot Password link
     Then I should be redirected to the Forgot Password page
 
-    @regression @fullSuite @smoke @login
+    @login3
   Scenario: Password visibility toggle
     When I enter my password "Password123"
     And I click the password visibility icon

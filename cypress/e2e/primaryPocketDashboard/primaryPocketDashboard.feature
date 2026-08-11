@@ -1,15 +1,19 @@
+@regression @fullSuite @smoke @primaryPocketDashboard
+
 Feature: Primary Pocket Dashboard
 
   Background:
     Given I am logged into the Primary Pocket Dashboard
 
-  Scenario: Verify Pocket card section of the dashboard and the headfer of all other section of the dashboard
+@primaryPocketDashboard1
+Scenario: Verify Pocket card section of the dashboard and the headfer of all other section of the dashboard
         Then I should see the Dashboard title
         And I should see the Your Balances section
         And I should see the Quick Actions section
         And I should see the Exchange Rates section
         And I should see the Recent Transactions section
 
+@primaryPocketDashboard2
 Scenario: Verify Sidebar Menus
         Then I should see the Home menu
         And I should see the Transactions menu
@@ -18,6 +22,7 @@ Scenario: Verify Sidebar Menus
         And I should see the Send Money menu
         And I should see the Settings menu
 
+@primaryPocketDashboard3
 Scenario: Verify Quick action section Send Money, Convert Funds and Create a sub pocket button works
         Then I should see the Dashboard title
         When I click the send money button 
@@ -27,7 +32,7 @@ Scenario: Verify Quick action section Send Money, Convert Funds and Create a sub
         When I click the create a sub pocket button 
         Then I should see the create a sub pocket page
 
-
+@primaryPocketDashboard4
 Scenario: Validate Exchange rate section and see all our rate page
         Ans I should see the Exchange Rates section
         And I should see the Currency and Rate headers
@@ -36,6 +41,7 @@ Scenario: Validate Exchange rate section and see all our rate page
         Then I should be redirected to the Exchange Rates page
         Then I validate that every currency conversion row should contain valid data in Exchange rate page
 
+@primaryPocketDashboard5
 Scenario: Validate Recent Transactions section and  navigation to see all transactions page
     Then I should see the Recent Transactions section
     And I should see a list of recent transactions
