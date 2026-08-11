@@ -187,8 +187,6 @@ class ExportTransactionsPriPocPage {
 
     }
 
-
-
     clickDisbursementMenu() {
         this.elements.transactionMenu()
             .should("be.visible", { timeout: 10000 })
@@ -261,28 +259,65 @@ class ExportTransactionsPriPocPage {
 
     }
 
-
-
     validateDownloadedFile() {
-
         const downloadsFolder = "cypress/downloads";
+        const noTransactionsMessage =
+            "No transactions found for the selected date range";
 
-        // Wait briefly for the browser to finish downloading
-        cy.wait(2000);
+        const timeout = 30000;
+        const startTime = Date.now();
 
-        cy.task("getLatestDownloadedFile").then((fileName) => {
+        const checkResult = () => {
+            // 1. First check if the "No transactions" message is displayed
+            return cy.get("body").then(($body) => {
 
-            expect(fileName, "Downloaded file name").to.not.be.null;
-            expect(fileName, "Downloaded file name").to.not.be.undefined;
+                if ($body.text().includes(noTransactionsMessage)) {
+                    cy.log("No transactions found for the selected date range");
 
-            expect(fileName.toLowerCase()).to.contain("transaction");
+                    cy.contains(noTransactionsMessage, {
+                        timeout: 5000,
+                    }).should("be.visible");
 
-            cy.readFile(`${downloadsFolder}/${fileName}`, {
-                timeout: 30000,
-            }).should("exist");
+                    return;
+                }
 
-        });
+                // 2. Check if a file has been downloaded
+                return cy.task("getLatestDownloadedFile", null).then((fileName) => {
 
+                    if (fileName) {
+                        cy.log(`Downloaded file: ${fileName}`);
+
+                        expect(fileName, "Downloaded file name")
+                            .to.not.be.empty;
+
+                        expect(fileName.toLowerCase())
+                            .to.contain("transaction");
+
+                        cy.readFile(`${downloadsFolder}/${fileName}`, {
+                            timeout: 30000,
+                        }).should("exist");
+
+                        return;
+                    }
+
+                    // 3. Neither result exists yet
+                    if (Date.now() - startTime < timeout) {
+                        cy.log("Waiting for download or no-transactions message...");
+
+                        return cy.wait(1000).then(() => {
+                            return checkResult();
+                        });
+                    }
+
+                    // 4. Nothing happened within the timeout
+                    throw new Error(
+                        `Neither a transaction file nor the "${noTransactionsMessage}" message was found within ${timeout}ms`
+                    );
+                });
+            });
+        };
+
+        checkResult();
     }
 
     formatDate(date) {

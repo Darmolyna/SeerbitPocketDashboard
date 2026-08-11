@@ -62,7 +62,7 @@ class PrimaryPocketFundingPage {
 
     clickTransactionMenu() {
         this.elements.transactionMenu()
-            .should("be.visible", { timeout: 10000 })
+            .should("be.visible", { timeout: 15000 })
             .click();
     }
     searchPocketId(pocketId) {

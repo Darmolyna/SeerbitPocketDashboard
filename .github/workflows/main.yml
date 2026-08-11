@@ -50,7 +50,8 @@ jobs:
         with:
           record: true
           env: |
-            tags= ${{ github.event.inputs.tags }}
+            tags=${{ github.event.inputs.tags }}
+
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
@@ -66,12 +67,16 @@ jobs:
         run: |
           mkdir -p cypress/reports
 
-          npx mochawesome-merge "cypress/reports/*.json" \
-            -o cypress/reports/merged.json
+          if ls cypress/reports/*.json >/dev/null 2>&1; then
+            npx mochawesome-merge "cypress/reports/*.json" \
+              -o cypress/reports/merged.json
 
-          npx marge cypress/reports/merged.json \
-            -f index \
-            -o cypress/reports
+            npx marge cypress/reports/merged.json \
+              -f index \
+              -o cypress/reports
+          else
+            echo "No Mochawesome JSON files found."
+          fi
 
       - name: Extract Cypress test statistics
         id: stats
@@ -97,10 +102,8 @@ jobs:
 
           fi
 
-          # Convert milliseconds to seconds
           DURATION_SECONDS=$((DURATION / 1000))
 
-          # Convert seconds to minutes and seconds
           MINUTES=$((DURATION_SECONDS / 60))
           SECONDS=$((DURATION_SECONDS % 60))
 
@@ -125,7 +128,6 @@ jobs:
 
           echo "author=$AUTHOR" >> "$GITHUB_OUTPUT"
 
-          # Handle multiline/special characters safely
           {
             echo "message<<EOF"
             echo "$MESSAGE"
@@ -140,12 +142,10 @@ jobs:
             echo "status=PASSED" >> "$GITHUB_OUTPUT"
             echo "icon=✅" >> "$GITHUB_OUTPUT"
             echo "slack_icon=:white_check_mark:" >> "$GITHUB_OUTPUT"
-            echo "message=Cypress tests passed successfully" >> "$GITHUB_OUTPUT"
           else
             echo "status=FAILED" >> "$GITHUB_OUTPUT"
             echo "icon=❌" >> "$GITHUB_OUTPUT"
             echo "slack_icon=:x:" >> "$GITHUB_OUTPUT"
-            echo "message=Cypress tests failed" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Upload Cypress report artifact
@@ -278,152 +278,6 @@ jobs:
             -H 'Content-type: application/json' \
             --data "$PAYLOAD" \
             "$SLACK_WEBHOOK_URL"
-
-      - name: Send Cypress result to Email
-        if: always()
-        uses: dawidd6/action-send-mail@v6
-        with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          secure: true
-
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-
-          subject: "${{ steps.result.outputs.icon }} Cypress Test Result - ${{ github.repository }} - ${{ github.ref_name }}"
-
-          to: your-email@example.com
-
-          from: Cypress Automation <${{ secrets.SMTP_USERNAME }}>
-
-          html_body: |
-            <!DOCTYPE html>
-
-            <html>
-
-            <head>
-
-              <meta charset="UTF-8">
-
-              <title>Cypress Test Report</title>
-
-            </head>
-
-            <body style="font-family: Arial, sans-serif;">
-
-              <h2>
-                ${{ steps.result.outputs.icon }}
-                Cypress Test Result: ${{ steps.result.outputs.status }}
-              </h2>
-
-              <p>
-                <strong>Repository:</strong>
-                ${{ github.repository }}
-              </p>
-
-              <p>
-                <strong>Branch:</strong>
-                ${{ github.ref_name }}
-              </p>
-
-              <p>
-                <strong>Cucumber Tag:</strong>
-                ${{ github.event.inputs.tags || 'All tests' }}
-              </p>
-
-              <hr>
-
-              <h3>🧪 Test Summary</h3>
-
-              <table
-                border="1"
-                cellpadding="10"
-                cellspacing="0"
-                style="border-collapse: collapse;"
-              >
-
-                <tr>
-                  <td><strong>Total Tests</strong></td>
-                  <td>${{ steps.stats.outputs.tests }}</td>
-                </tr>
-
-                <tr>
-                  <td><strong>✅ Passed</strong></td>
-                  <td>${{ steps.stats.outputs.passed }}</td>
-                </tr>
-
-                <tr>
-                  <td><strong>❌ Failed</strong></td>
-                  <td>${{ steps.stats.outputs.failed }}</td>
-                </tr>
-
-                <tr>
-                  <td><strong>⏭️ Pending/Skipped</strong></td>
-                  <td>${{ steps.stats.outputs.pending }}</td>
-                </tr>
-
-                <tr>
-                  <td><strong>⏱️ Execution Duration</strong></td>
-                  <td>${{ steps.stats.outputs.duration }}</td>
-                </tr>
-
-              </table>
-
-              <hr>
-
-              <h3>👤 Commit Information</h3>
-
-              <p>
-                <strong>Author:</strong>
-                ${{ steps.commit.outputs.author }}
-              </p>
-
-              <p>
-                <strong>Commit Message:</strong>
-                ${{ steps.commit.outputs.message }}
-              </p>
-
-              <hr>
-
-              <h3>📊 Cypress Report</h3>
-
-              <p>
-                <a
-                  href="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
-                  style="
-                    display:inline-block;
-                    padding:12px 20px;
-                    background:#2ea44f;
-                    color:#ffffff;
-                    text-decoration:none;
-                    border-radius:6px;
-                    font-weight:bold;
-                  "
-                >
-                  View Interactive Cypress Report
-                </a>
-              </p>
-
-              <h3>⚙️ GitHub Actions</h3>
-
-              <p>
-                <a
-                  href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                >
-                  View GitHub Actions Run
-                </a>
-              </p>
-
-              <hr>
-
-              <p style="color:#666;">
-                This email was automatically generated by the Cypress
-                CI/CD pipeline.
-              </p>
-
-            </body>
-
-            </html>
 
       - name: Fail workflow if Cypress tests failed
         if: always()

@@ -1,0 +1,200 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 0,
+    "pending": 6,
+    "failures": -5,
+    "start": "2026-08-11T10:23:24.724Z",
+    "end": "2026-08-11T10:23:24.749Z",
+    "duration": 25,
+    "testsRegistered": 6,
+    "passPercent": null,
+    "pendingPercent": 100,
+    "other": 5,
+    "hasOther": true,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "16f298bb-b3b4-4c24-9b5e-1b3cfa0da6ff",
+      "title": "",
+      "fullFile": "cypress/e2e/login/login.feature",
+      "file": "cypress/e2e/login/login.feature",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "5fad3916-cdd8-4a1d-aae0-89073608efa4",
+          "title": "Login Functionality for flow dashboard",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "Login validation with different credential combinations (example #1)",
+              "fullTitle": "Login Functionality for flow dashboard Login validation with different credential combinations (example #1)",
+              "timedOut": null,
+              "duration": 0,
+              "state": "pending",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": true,
+              "context": null,
+              "code": "",
+              "err": {},
+              "uuid": "42245b4f-884c-453a-b492-c6065c63aa56",
+              "parentUUID": "5fad3916-cdd8-4a1d-aae0-89073608efa4",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Login validation with different credential combinations (example #2)",
+              "fullTitle": "Login Functionality for flow dashboard Login validation with different credential combinations (example #2)",
+              "timedOut": null,
+              "duration": 0,
+              "state": "pending",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": true,
+              "context": null,
+              "code": "",
+              "err": {},
+              "uuid": "a3b6de00-f640-411c-80c2-d2d6334b21fe",
+              "parentUUID": "5fad3916-cdd8-4a1d-aae0-89073608efa4",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Login validation with different credential combinations (example #3)",
+              "fullTitle": "Login Functionality for flow dashboard Login validation with different credential combinations (example #3)",
+              "timedOut": null,
+              "duration": 0,
+              "state": "pending",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": true,
+              "context": null,
+              "code": "",
+              "err": {},
+              "uuid": "f3c3b01a-d796-487a-ae0e-10c4071c9641",
+              "parentUUID": "5fad3916-cdd8-4a1d-aae0-89073608efa4",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Login validation with different credential combinations (example #4)",
+              "fullTitle": "Login Functionality for flow dashboard Login validation with different credential combinations (example #4)",
+              "timedOut": null,
+              "duration": 0,
+              "state": "pending",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": true,
+              "context": null,
+              "code": "",
+              "err": {},
+              "uuid": "9b248674-aba8-4a9c-a793-db34f2aaa7ed",
+              "parentUUID": "5fad3916-cdd8-4a1d-aae0-89073608efa4",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Forgot Password button and page load validation",
+              "fullTitle": "Login Functionality for flow dashboard Forgot Password button and page load validation",
+              "timedOut": null,
+              "duration": 0,
+              "state": "pending",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": true,
+              "context": null,
+              "code": "",
+              "err": {},
+              "uuid": "9f32640b-e89e-42df-b18d-e089e82edb61",
+              "parentUUID": "5fad3916-cdd8-4a1d-aae0-89073608efa4",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Password visibility toggle",
+              "fullTitle": "Login Functionality for flow dashboard Password visibility toggle",
+              "timedOut": null,
+              "duration": 0,
+              "state": "pending",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": true,
+              "context": null,
+              "code": "",
+              "err": {},
+              "uuid": "053c4c55-6656-4278-a514-b58c62e58b02",
+              "parentUUID": "5fad3916-cdd8-4a1d-aae0-89073608efa4",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [],
+          "failures": [],
+          "pending": [
+            "42245b4f-884c-453a-b492-c6065c63aa56",
+            "a3b6de00-f640-411c-80c2-d2d6334b21fe",
+            "f3c3b01a-d796-487a-ae0e-10c4071c9641",
+            "9b248674-aba8-4a9c-a793-db34f2aaa7ed",
+            "9f32640b-e89e-42df-b18d-e089e82edb61",
+            "053c4c55-6656-4278-a514-b58c62e58b02"
+          ],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "8.0.1"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true
+      },
+      "version": "6.3.2"
+    }
+  }
+}

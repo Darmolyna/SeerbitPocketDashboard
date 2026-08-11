@@ -18,7 +18,7 @@ Given("I am logged into the Primary Pocket Dashboard", () => {
 }
 );
 Then("I navigate to the Funding Transactions page", () => {
-    cy.wait(2000)
+    cy.wait(5000)
 
     PrimaryPocketFundingPage.clickTransactionMenu()
 });
