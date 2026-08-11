@@ -1,0 +1,182 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 0,
+    "pending": 5,
+    "failures": -4,
+    "start": "2026-08-11T11:50:01.162Z",
+    "end": "2026-08-11T11:50:01.195Z",
+    "duration": 33,
+    "testsRegistered": 5,
+    "passPercent": null,
+    "pendingPercent": 100,
+    "other": 4,
+    "hasOther": true,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "458d60b3-6c4d-4a79-ab22-744f703f8fab",
+      "title": "",
+      "fullFile": "cypress/e2e/primaryPocketDashboard/primaryPocketDashboard.feature",
+      "file": "cypress/e2e/primaryPocketDashboard/primaryPocketDashboard.feature",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "c71366db-0ee4-4049-8934-7675c3f9b2bf",
+          "title": "Primary Pocket Dashboard",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "Verify Pocket card section of the dashboard and the headfer of all other section of the dashboard",
+              "fullTitle": "Primary Pocket Dashboard Verify Pocket card section of the dashboard and the headfer of all other section of the dashboard",
+              "timedOut": null,
+              "duration": 0,
+              "state": "pending",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": true,
+              "context": null,
+              "code": "",
+              "err": {},
+              "uuid": "06bf4a24-8993-4825-ad48-c5c2c685a6e2",
+              "parentUUID": "c71366db-0ee4-4049-8934-7675c3f9b2bf",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Verify Sidebar Menus",
+              "fullTitle": "Primary Pocket Dashboard Verify Sidebar Menus",
+              "timedOut": null,
+              "duration": 0,
+              "state": "pending",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": true,
+              "context": null,
+              "code": "",
+              "err": {},
+              "uuid": "2e116aa4-56d8-4001-90d2-1081a33134e3",
+              "parentUUID": "c71366db-0ee4-4049-8934-7675c3f9b2bf",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Verify Quick action section Send Money, Convert Funds and Create a sub pocket button works",
+              "fullTitle": "Primary Pocket Dashboard Verify Quick action section Send Money, Convert Funds and Create a sub pocket button works",
+              "timedOut": null,
+              "duration": 0,
+              "state": "pending",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": true,
+              "context": null,
+              "code": "",
+              "err": {},
+              "uuid": "2c8d0688-1c31-42e6-9eb9-3ed6a58757d6",
+              "parentUUID": "c71366db-0ee4-4049-8934-7675c3f9b2bf",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Validate Exchange rate section and see all our rate page",
+              "fullTitle": "Primary Pocket Dashboard Validate Exchange rate section and see all our rate page",
+              "timedOut": null,
+              "duration": 0,
+              "state": "pending",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": true,
+              "context": null,
+              "code": "",
+              "err": {},
+              "uuid": "2451b7a1-f759-4212-95fb-1353e9da3748",
+              "parentUUID": "c71366db-0ee4-4049-8934-7675c3f9b2bf",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Validate Recent Transactions section and  navigation to see all transactions page",
+              "fullTitle": "Primary Pocket Dashboard Validate Recent Transactions section and  navigation to see all transactions page",
+              "timedOut": null,
+              "duration": 0,
+              "state": "pending",
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": true,
+              "context": null,
+              "code": "",
+              "err": {},
+              "uuid": "2578afe8-819f-4024-8c61-a160d5c00909",
+              "parentUUID": "c71366db-0ee4-4049-8934-7675c3f9b2bf",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [],
+          "failures": [],
+          "pending": [
+            "06bf4a24-8993-4825-ad48-c5c2c685a6e2",
+            "2e116aa4-56d8-4001-90d2-1081a33134e3",
+            "2c8d0688-1c31-42e6-9eb9-3ed6a58757d6",
+            "2451b7a1-f759-4212-95fb-1353e9da3748",
+            "2578afe8-819f-4024-8c61-a160d5c00909"
+          ],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "8.0.1"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "embeddedScreenshots": true
+      },
+      "version": "6.3.2"
+    }
+  }
+}
