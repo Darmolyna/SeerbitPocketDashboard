@@ -38,15 +38,28 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Record start time
+        id: start_time
+        run: |
+          echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
+
       - name: Run Cypress tests
+        id: cypress
+        continue-on-error: true
         uses: cypress-io/github-action@v7
         with:
           record: true
           env: |
-            tags=${{ github.event.inputs.tags }}
+            tags= @Login           #${{ github.event.inputs.tags }}
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
+
+      - name: Record end time
+        id: end_time
+        if: always()
+        run: |
+          echo "end=$(date +%s)" >> "$GITHUB_OUTPUT"
 
       - name: Generate Mochawesome report
         if: always()
@@ -60,6 +73,81 @@ jobs:
             -f index \
             -o cypress/reports
 
+      - name: Extract Cypress test statistics
+        id: stats
+        if: always()
+        run: |
+          REPORT="cypress/reports/merged.json"
+
+          if [ -f "$REPORT" ]; then
+
+            PASSED=$(jq '.stats.passes // 0' "$REPORT")
+            FAILED=$(jq '.stats.failures // 0' "$REPORT")
+            PENDING=$(jq '.stats.pending // 0' "$REPORT")
+            TESTS=$(jq '.stats.tests // 0' "$REPORT")
+            DURATION=$(jq '.stats.duration // 0' "$REPORT")
+
+          else
+
+            PASSED=0
+            FAILED=0
+            PENDING=0
+            TESTS=0
+            DURATION=0
+
+          fi
+
+          # Convert milliseconds to seconds
+          DURATION_SECONDS=$((DURATION / 1000))
+
+          # Convert seconds to minutes and seconds
+          MINUTES=$((DURATION_SECONDS / 60))
+          SECONDS=$((DURATION_SECONDS % 60))
+
+          if [ "$MINUTES" -gt 0 ]; then
+            FORMATTED_DURATION="${MINUTES}m ${SECONDS}s"
+          else
+            FORMATTED_DURATION="${SECONDS}s"
+          fi
+
+          echo "tests=$TESTS" >> "$GITHUB_OUTPUT"
+          echo "passed=$PASSED" >> "$GITHUB_OUTPUT"
+          echo "failed=$FAILED" >> "$GITHUB_OUTPUT"
+          echo "pending=$PENDING" >> "$GITHUB_OUTPUT"
+          echo "duration=$FORMATTED_DURATION" >> "$GITHUB_OUTPUT"
+
+      - name: Get commit information
+        id: commit
+        if: always()
+        run: |
+          AUTHOR=$(git log -1 --pretty=format:'%an')
+          MESSAGE=$(git log -1 --pretty=format:'%s')
+
+          echo "author=$AUTHOR" >> "$GITHUB_OUTPUT"
+
+          # Handle multiline/special characters safely
+          {
+            echo "message<<EOF"
+            echo "$MESSAGE"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Set Cypress result
+        id: result
+        if: always()
+        run: |
+          if [ "${{ steps.cypress.outcome }}" = "success" ]; then
+            echo "status=PASSED" >> "$GITHUB_OUTPUT"
+            echo "icon=✅" >> "$GITHUB_OUTPUT"
+            echo "slack_icon=:white_check_mark:" >> "$GITHUB_OUTPUT"
+            echo "message=Cypress tests passed successfully" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=FAILED" >> "$GITHUB_OUTPUT"
+            echo "icon=❌" >> "$GITHUB_OUTPUT"
+            echo "slack_icon=:x:" >> "$GITHUB_OUTPUT"
+            echo "message=Cypress tests failed" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Upload Cypress report artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -69,7 +157,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload screenshots
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots
@@ -93,7 +181,19 @@ jobs:
             cp -r cypress/reports/* public/
           else
             echo "Mochawesome report was not generated."
-            echo "<html><body><h1>Cypress Report</h1><p>No report was generated.</p></body></html>" > public/index.html
+
+            cat > public/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Cypress Report</title>
+          </head>
+          <body>
+            <h1>Cypress Report</h1>
+            <p>No report was generated.</p>
+          </body>
+          </html>
+          EOF
           fi
 
       - name: Deploy Cypress report to GitHub Pages
@@ -110,19 +210,225 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          STATUS="${{ job.status }}"
-
-          if [ "$STATUS" = "success" ]; then
-            MESSAGE=":white_check_mark: *Cypress tests passed successfully*"
-          else
-            MESSAGE=":x: *Cypress tests failed*"
-          fi
 
           REPORT_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
 
           RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 
+          STATUS="${{ steps.result.outputs.status }}"
+          ICON="${{ steps.result.outputs.slack_icon }}"
+
+          TESTS="${{ steps.stats.outputs.tests }}"
+          PASSED="${{ steps.stats.outputs.passed }}"
+          FAILED="${{ steps.stats.outputs.failed }}"
+          PENDING="${{ steps.stats.outputs.pending }}"
+          DURATION="${{ steps.stats.outputs.duration }}"
+
+          AUTHOR="${{ steps.commit.outputs.author }}"
+          COMMIT_MESSAGE="${{ steps.commit.outputs.message }}"
+
+          TAG="${{ github.event.inputs.tags }}"
+
+          if [ -z "$TAG" ]; then
+            TAG="All tests"
+          fi
+
+          PAYLOAD=$(jq -n \
+            --arg icon "$ICON" \
+            --arg status "$STATUS" \
+            --arg repository "$GITHUB_REPOSITORY" \
+            --arg branch "$GITHUB_REF_NAME" \
+            --arg tests "$TESTS" \
+            --arg passed "$PASSED" \
+            --arg failed "$FAILED" \
+            --arg pending "$PENDING" \
+            --arg duration "$DURATION" \
+            --arg report "$REPORT_URL" \
+            --arg run "$RUN_URL" \
+            --arg author "$AUTHOR" \
+            --arg commit "$COMMIT_MESSAGE" \
+            --arg tag "$TAG" \
+            '{
+              text: (
+                $icon + " *Cypress Test Result: " + $status + "*\n\n" +
+
+                "*Repository:* " + $repository + "\n" +
+                "*Branch:* " + $branch + "\n" +
+                "*Tag:* " + $tag + "\n\n" +
+
+                "🧪 *Test Summary*\n" +
+                "• Total Tests: " + $tests + "\n" +
+                "• Passed: " + $passed + "\n" +
+                "• Failed: " + $failed + "\n" +
+                "• Pending/Skipped: " + $pending + "\n" +
+                "• Duration: " + $duration + "\n\n" +
+
+                "👤 *Commit Author:* " + $author + "\n" +
+                "📝 *Commit Message:* " + $commit + "\n\n" +
+
+                "📊 *Interactive Cypress Report:*\n" +
+                $report + "\n\n" +
+
+                "⚙️ *GitHub Actions Run:*\n" +
+                $run
+              )
+            }')
+
           curl -X POST \
             -H 'Content-type: application/json' \
-            --data "{\"text\":\"$MESSAGE\n\n*Repository:* $GITHUB_REPOSITORY\n*Branch:* $GITHUB_REF_NAME\n\n:bar_chart: *Interactive Cypress Report:*\n$REPORT_URL\n\n:gear: *GitHub Actions Run:*\n$RUN_URL\"}" \
+            --data "$PAYLOAD" \
             "$SLACK_WEBHOOK_URL"
+
+      - name: Send Cypress result to Email
+        if: always()
+        uses: dawidd6/action-send-mail@v6
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+
+          subject: "${{ steps.result.outputs.icon }} Cypress Test Result - ${{ github.repository }} - ${{ github.ref_name }}"
+
+          to: your-email@example.com
+
+          from: Cypress Automation <${{ secrets.SMTP_USERNAME }}>
+
+          html_body: |
+            <!DOCTYPE html>
+
+            <html>
+
+            <head>
+
+              <meta charset="UTF-8">
+
+              <title>Cypress Test Report</title>
+
+            </head>
+
+            <body style="font-family: Arial, sans-serif;">
+
+              <h2>
+                ${{ steps.result.outputs.icon }}
+                Cypress Test Result: ${{ steps.result.outputs.status }}
+              </h2>
+
+              <p>
+                <strong>Repository:</strong>
+                ${{ github.repository }}
+              </p>
+
+              <p>
+                <strong>Branch:</strong>
+                ${{ github.ref_name }}
+              </p>
+
+              <p>
+                <strong>Cucumber Tag:</strong>
+                ${{ github.event.inputs.tags || 'All tests' }}
+              </p>
+
+              <hr>
+
+              <h3>🧪 Test Summary</h3>
+
+              <table
+                border="1"
+                cellpadding="10"
+                cellspacing="0"
+                style="border-collapse: collapse;"
+              >
+
+                <tr>
+                  <td><strong>Total Tests</strong></td>
+                  <td>${{ steps.stats.outputs.tests }}</td>
+                </tr>
+
+                <tr>
+                  <td><strong>✅ Passed</strong></td>
+                  <td>${{ steps.stats.outputs.passed }}</td>
+                </tr>
+
+                <tr>
+                  <td><strong>❌ Failed</strong></td>
+                  <td>${{ steps.stats.outputs.failed }}</td>
+                </tr>
+
+                <tr>
+                  <td><strong>⏭️ Pending/Skipped</strong></td>
+                  <td>${{ steps.stats.outputs.pending }}</td>
+                </tr>
+
+                <tr>
+                  <td><strong>⏱️ Execution Duration</strong></td>
+                  <td>${{ steps.stats.outputs.duration }}</td>
+                </tr>
+
+              </table>
+
+              <hr>
+
+              <h3>👤 Commit Information</h3>
+
+              <p>
+                <strong>Author:</strong>
+                ${{ steps.commit.outputs.author }}
+              </p>
+
+              <p>
+                <strong>Commit Message:</strong>
+                ${{ steps.commit.outputs.message }}
+              </p>
+
+              <hr>
+
+              <h3>📊 Cypress Report</h3>
+
+              <p>
+                <a
+                  href="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+                  style="
+                    display:inline-block;
+                    padding:12px 20px;
+                    background:#2ea44f;
+                    color:#ffffff;
+                    text-decoration:none;
+                    border-radius:6px;
+                    font-weight:bold;
+                  "
+                >
+                  View Interactive Cypress Report
+                </a>
+              </p>
+
+              <h3>⚙️ GitHub Actions</h3>
+
+              <p>
+                <a
+                  href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                >
+                  View GitHub Actions Run
+                </a>
+              </p>
+
+              <hr>
+
+              <p style="color:#666;">
+                This email was automatically generated by the Cypress
+                CI/CD pipeline.
+              </p>
+
+            </body>
+
+            </html>
+
+      - name: Fail workflow if Cypress tests failed
+        if: always()
+        run: |
+          if [ "${{ steps.cypress.outcome }}" != "success" ]; then
+            echo "Cypress tests failed."
+            exit 1
+          fi
