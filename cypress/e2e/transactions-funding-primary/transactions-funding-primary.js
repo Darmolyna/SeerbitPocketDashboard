@@ -41,10 +41,10 @@ Then(
     "I should see {string} for Pocket ID {string}",
     (result, pocketId) => {
 
-        // PrimaryPocketFundingPage.validateSearchResults(
-        //     result,
-        //     pocketId
-        // );
+        PrimaryPocketFundingPage.validateSearchResults(
+            result,
+            pocketId
+        );
 
     }
 );

@@ -42,10 +42,10 @@ Then(
     "I should see {string} for Pocket ID {string}",
     (result, pocketId) => {
 
-        // PrimaryPocketFundingPage.validateSearchResults(
-        //     result,
-        //     pocketId
-        // );
+        PrimaryPocketFundingPage.validateSearchResults(
+            result,
+            pocketId
+        );
 
     }
 );
@@ -55,7 +55,7 @@ When("I filter disbursement transactions using a payment reference", () => {
 
     PrimaryPocketDisbursementPage.clickFilter();
 
-    // Add filter selections here once date/payment reference modal is available
+    //Add filter selections here once date/payment reference modal is available
 
 });
 

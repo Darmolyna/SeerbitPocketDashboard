@@ -710,7 +710,28 @@ jobs:
                 </div>
 
               </section>
+              
+              <section class="action">
 
+                <div>
+                  <h2>
+                    Detailed Test Results
+                  </h2>
+
+                  <p>
+                    View individual scenarios, screenshots,
+                    assertions and test execution details.
+                  </p>
+                </div>
+
+                <a
+                  class="button"
+                  href="./mochawesome/index.html"
+                >
+                  View Detailed Report →
+                </a>
+
+              </section>
 
               <section class="stats">
 
@@ -813,27 +834,7 @@ jobs:
               </section>
 
 
-              <section class="action">
-
-                <div>
-                  <h2>
-                    Detailed Test Results
-                  </h2>
-
-                  <p>
-                    View individual scenarios, screenshots,
-                    assertions and test execution details.
-                  </p>
-                </div>
-
-                <a
-                  class="button"
-                  href="./mochawesome/index.html"
-                >
-                  View Detailed Report →
-                </a>
-
-              </section>
+             
 
 
               <footer>
