@@ -119,4 +119,4 @@ Then("the transactions export should start successfully", () => {
 
     PrimaryPocketFundingPage.validateExportStarted();
 
-});
+})
