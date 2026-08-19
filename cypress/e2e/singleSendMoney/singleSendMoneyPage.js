@@ -446,6 +446,112 @@ class SingleSendMoneyPage {
     }
 
 
+    validateTransactionAndChargeInDisbursementTable() {
+        this.elements.disbursementTable({ timeout: 30000 })
+            .should("be.visible");
+
+        cy.get("@paymentReference").then((ref) => {
+            cy.log(`Verifying transaction and charge for ref: ${ref}`);
+
+            const refPrefix = ref.substring(0, 12);
+
+            cy.get('input[placeholder="Search reference"]')
+                .should("be.visible")
+                .clear()
+                .type(refPrefix);
+
+            cy.wait(3000);
+
+            cy.get("table.min-w-full tbody tr", { timeout: 15000 })
+                .should("have.length.gte", 1);
+
+            cy.get("table.min-w-full tbody tr")
+                .first()
+                .then(($row) => {
+                    const rowText = Cypress.$($row).text();
+                    cy.log(`Transaction row: ${rowText.substring(0, 300)}`);
+                    expect(rowText).to.include(refPrefix);
+                    expect(rowText).to.match(/Successful|Completed/);
+                });
+
+            cy.get('input[placeholder="Search reference"]')
+                .clear()
+                .type(`Charge-${ref}`);
+
+            cy.wait(3000);
+
+            cy.get("table.min-w-full tbody tr", { timeout: 15000 })
+                .should("have.length.gte", 1);
+
+            cy.get("table.min-w-full tbody tr")
+                .first()
+                .then(($row) => {
+                    const rowText = Cypress.$($row).text();
+                    cy.log(`Charge row: ${rowText.substring(0, 300)}`);
+                    expect(rowText).to.include("Charge-");
+                    expect(rowText).to.match(/Successful|Completed/);
+                });
+        });
+    }
+
+    clickPaymentReferenceLink() {
+        cy.get("@paymentReference").then((ref) => {
+            const refPrefix = ref.substring(0, 12);
+
+            cy.get('input[placeholder="Search reference"]')
+                .should("be.visible")
+                .clear()
+                .type(refPrefix);
+
+            cy.wait(3000);
+
+            cy.get("table.min-w-full tbody tr", { timeout: 15000 })
+                .should("have.length.gte", 1);
+
+            cy.get("table.min-w-full tbody tr")
+                .first()
+                .find("a.text-blue-500")
+                .should("be.visible")
+                .click();
+        });
+    }
+
+    validateTransactionDetailsPage() {
+        cy.url({ timeout: 30000 }).should("include", "/transactions/");
+
+        cy.get("body", { timeout: 30000 }).then(($body) => {
+            const text = ($body[0].innerText || $body[0].textContent || "");
+            cy.log(`Transaction details page text: ${text.substring(0, 500)}`);
+
+            const hasDetails =
+                text.includes("Transaction Details") ||
+                text.includes("Transaction Details:") ||
+                text.includes("Sender Information") ||
+                text.includes("Receiver Information") ||
+                text.includes("Breakdown of Amounts");
+            expect(hasDetails, "Transaction details page not loaded").to.be.true;
+        });
+    }
+
+    validateTransactionDetailsInformation() {
+        cy.get("@paymentReference").then((ref) => {
+            const refPrefix = ref.substring(0, 12);
+
+            cy.get("body", { timeout: 15000 }).then(($body) => {
+                const text = ($body[0].innerText || $body[0].textContent || "");
+                cy.log(`Details page text sample: ${text.substring(0, 500)}`);
+
+                expect(text).to.include(refPrefix);
+                expect(text).to.match(/Successful|Transaction Successful/);
+                expect(text).to.match(/NGN\s*1|1\.00/);
+                expect(text).to.match(/SBP0017144/);
+                expect(text).to.match(/SBP0020694/);
+                expect(text).to.match(/TRANSFER|Transfer/);
+            });
+        });
+    }
+
+
     // ============================
     // Validations
     // ============================

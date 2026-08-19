@@ -92,7 +92,10 @@ Feature: Single Send Money
         And I should see the correct balance was debited
         When I click the View Transaction History button
         Then I should see the Transactions disbursement page
-        And the disbursement table should contain the transaction
+        And the disbursement table should contain the transaction and charge
+        When I click the payment reference link
+        Then I should see the transaction details page
+        And the transaction details should show correct information
 
     @singleSendMoney8a
     Scenario: Insufficient pocket balance for payout on Sub pocket transfer

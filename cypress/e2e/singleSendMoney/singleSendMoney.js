@@ -100,8 +100,20 @@ Then("I should see the Transactions disbursement page", () => {
     SingleSendMoneyPage.validateDisbursementPage();
 });
 
-Then("the disbursement table should contain the transaction", () => {
-    SingleSendMoneyPage.validateTransactionInDisbursementTable();
+Then("the disbursement table should contain the transaction and charge", () => {
+    SingleSendMoneyPage.validateTransactionAndChargeInDisbursementTable();
+});
+
+When("I click the payment reference link", () => {
+    SingleSendMoneyPage.clickPaymentReferenceLink();
+});
+
+Then("I should see the transaction details page", () => {
+    SingleSendMoneyPage.validateTransactionDetailsPage();
+});
+
+Then("the transaction details should show correct information", () => {
+    SingleSendMoneyPage.validateTransactionDetailsInformation();
 });
 
 
