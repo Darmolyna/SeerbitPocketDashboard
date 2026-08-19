@@ -402,12 +402,14 @@ class SingleSendMoneyPage {
             .should("be.visible");
 
         cy.get("@paymentReference").then((ref) => {
-            cy.log(`Searching for reference: ${ref}`);
+            cy.log(`Verifying transaction and charge for ref: ${ref}`);
+
+            const refPrefix = ref.substring(0, 12);
 
             cy.get('input[placeholder="Search reference"]')
                 .should("be.visible")
                 .clear()
-                .type(ref);
+                .type(refPrefix);
 
             cy.wait(3000);
 
@@ -419,7 +421,25 @@ class SingleSendMoneyPage {
                 .then(($row) => {
                     const rowText = Cypress.$($row).text();
                     cy.log(`Transaction row: ${rowText.substring(0, 300)}`);
-                    expect(rowText).to.match(/NGN|₦/);
+                    expect(rowText).to.include(refPrefix);
+                    expect(rowText).to.match(/Successful|Completed/);
+                });
+
+            cy.get('input[placeholder="Search reference"]')
+                .clear()
+                .type(`Charge-${ref}`);
+
+            cy.wait(3000);
+
+            cy.get("table.min-w-full tbody tr", { timeout: 15000 })
+                .should("have.length.gte", 1);
+
+            cy.get("table.min-w-full tbody tr")
+                .first()
+                .then(($row) => {
+                    const rowText = Cypress.$($row).text();
+                    cy.log(`Charge row: ${rowText.substring(0, 300)}`);
+                    expect(rowText).to.include("Charge-");
                     expect(rowText).to.match(/Successful|Completed/);
                 });
         });
