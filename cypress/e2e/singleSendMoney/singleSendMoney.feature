@@ -76,17 +76,23 @@ Feature: Single Send Money
     Scenario: Successful Sub pocket single transfer
         When I click the Sub pocket button
         And I select the primary pocket "SBP0017144"
+        And I store the source pocket balance
         And I enter pocket ID "SBP0020694"
         And I enter amount "1"
         And I enter narration "Automated test transfer"
         And I click the Continue button
         Then I should see the transaction confirmation page
+        And I should capture the transaction charge
         When I click the Continue button on confirmation page
         Then I should see the OTP verification page
         When I enter the OTP "123456"
         Then all OTP fields should be filled
         When I click the Continue button after OTP
         Then I should see a successful transaction page
+        And I should see the correct balance was debited
+        When I click the View Transaction History button
+        Then I should see the Transactions disbursement page
+        And the disbursement table should contain the transaction
 
     @singleSendMoney8a
     Scenario: Insufficient pocket balance for payout on Sub pocket transfer
@@ -180,7 +186,7 @@ Feature: Single Send Money
         When I click the Bank transfer button
         And I enter account number "0780290893"
         And I select a bank
-        And I enter amount "500"
+        And I enter amount "1"
         And I enter narration "Automated bank transfer"
         And I click the Continue button
         Then I should see the transaction confirmation page

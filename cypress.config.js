@@ -50,22 +50,6 @@ async function setupNodeEvents(on, config) {
         .sort((a, b) => b.time - a.time)[0].name;
     },
 
-    logFormHTML(html) {
-      const outputPath = path.join(__dirname, "cypress/debug-output.html");
-      fs.writeFileSync(outputPath, html);
-      console.log(`\n=== FORM HTML written to ${outputPath} ===`);
-      console.log(html.substring(0, 3000));
-      return null;
-    },
-
-    logInputs(inputs) {
-      console.log("\n=== ALL INPUTS ===");
-      inputs.forEach((inp) => {
-        console.log(`  Input ${inp.index}: name="${inp.name}" type="${inp.type}" placeholder="${inp.placeholder}" id="${inp.id}" class="${inp.className}" value="${inp.value}"`);
-      });
-      return null;
-    },
-
   });
 
   // Log screenshot information

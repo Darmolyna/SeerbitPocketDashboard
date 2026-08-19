@@ -80,6 +80,30 @@ When("I select the primary pocket {string}", (pocketId) => {
     SingleSendMoneyPage.selectPrimaryPocket(pocketId);
 });
 
+When("I store the source pocket balance", () => {
+    SingleSendMoneyPage.storeBalanceBeforeTransaction();
+});
+
+Then("I should capture the transaction charge", () => {
+    SingleSendMoneyPage.captureTransactionCharge();
+});
+
+Then("I should see the correct balance was debited", () => {
+    SingleSendMoneyPage.validateBalanceDebited();
+});
+
+When("I click the View Transaction History button", () => {
+    SingleSendMoneyPage.clickViewTransactionHistory();
+});
+
+Then("I should see the Transactions disbursement page", () => {
+    SingleSendMoneyPage.validateDisbursementPage();
+});
+
+Then("the disbursement table should contain the transaction", () => {
+    SingleSendMoneyPage.validateTransactionInDisbursementTable();
+});
+
 
 /* ============================
    FORM FIELDS
