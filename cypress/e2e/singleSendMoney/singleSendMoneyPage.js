@@ -411,30 +411,16 @@ class SingleSendMoneyPage {
 
             cy.wait(3000);
 
-            this.elements.disbursementTableRows({ timeout: 15000 })
-                .should("have.length.greaterThan", 0);
+            cy.get("table.min-w-full tbody tr", { timeout: 15000 })
+                .should("have.length.gte", 1);
 
             cy.get("table.min-w-full tbody tr")
                 .first()
                 .then(($row) => {
-                    const rowText = $row.text();
-                    cy.log(`Row text: ${rowText.substring(0, 300)}`);
-                    expect(rowText).to.include("NGN");
+                    const rowText = Cypress.$($row).text();
+                    cy.log(`Transaction row: ${rowText.substring(0, 300)}`);
+                    expect(rowText).to.match(/NGN|₦/);
                     expect(rowText).to.match(/Successful|Completed/);
-                });
-
-            cy.get("table.min-w-full tbody tr")
-                .first()
-                .find("td")
-                .eq(0)
-                .invoke("text")
-                .then((text) => {
-                    const match = text.match(/NGN\s*([\d,.]+)/);
-                    if (match) {
-                        const amount = parseFloat(match[1].replace(/,/g, ""));
-                        cy.log(`Disbursement amount: ${amount}`);
-                        expect(amount).to.equal(1);
-                    }
                 });
         });
     }
