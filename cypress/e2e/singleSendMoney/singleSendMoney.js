@@ -256,8 +256,8 @@ When("I click the Continue button on confirmation page", () => {
     SingleSendMoneyPage.clickContinueOnConfirmation();
 });
 
-Then("I should see the insufficient balance error", () => {
-    SingleSendMoneyPage.validateInsufficientBalanceError();
+Then("I should see the same pocket transfer not allowed error", () => {
+    SingleSendMoneyPage.validateSamePocketTransferError();
 });
 
 

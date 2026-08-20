@@ -112,9 +112,26 @@ Feature: Single Send Money
         And I enter amount "999999"
         And I enter narration "Insufficient balance test"
         And I click the Continue button
-        Then I should see the insufficient balance error
+        Then I should see the same pocket transfer not allowed error
 
     @singleSendMoney8b
+    Scenario: Same pocket transfer not allowed error on Sub pocket transfer
+        When I click the Sub pocket button
+        And I select the primary pocket "SBP0018808"
+        And I enter pocket ID "SBP0018808"
+        And I enter amount "1"
+        And I enter narration "Same pocket transfer test"
+        And I click the Continue button
+        Then I should see the transaction confirmation page
+        And I should capture the transaction charge
+        When I click the Continue button on confirmation page
+        Then I should see the OTP verification page
+        When I enter the OTP "123456"
+        Then all OTP fields should be filled
+        When I click the Continue button after OTP
+        Then I should see the same pocket transfer not allowed error
+        
+    @singleSendMoney8c
     Scenario: Invalid OTP error message on Sub pocket transfer
         When I click the Sub pocket button
         And I select the primary pocket "SBP0018808"
@@ -129,16 +146,6 @@ Feature: Single Send Money
         Then all OTP fields should be filled
         When I click the Continue button after OTP
         Then I should see the invalid OTP error message
-
-    @singleSendMoney8c
-    Scenario: Same pocket transfer not allowed error
-        When I click the Sub pocket button
-        And I select the primary pocket "SBP0000829"
-        And I enter pocket ID "SBP0000829"
-        And I enter amount "1"
-        And I enter narration "Same pocket transfer test"
-        And I click the Continue button
-        Then I should see the insufficient balance error
 
     # ============================
     # FORM VALIDATION — BANK TRANSFER

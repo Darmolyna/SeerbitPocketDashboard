@@ -968,19 +968,8 @@ class SingleSendMoneyPage {
     }
 
     validateSamePocketTransferError() {
-        cy.document({ timeout: 30000 }).then((doc) => {
-            const text = doc.body.innerText || doc.body.textContent;
-            const sample = text.substring(0, 500);
-            cy.log(`PAGE TEXT: ${sample}`);
-            const hasError =
-                text.includes("Same pocket") ||
-                text.includes("same pocket") ||
-                text.includes("cannot transfer to the same") ||
-                text.includes("transfer to yourself") ||
-                text.includes("not allowed") ||
-                text.includes("Invalid transfer");
-            expect(hasError, `Page text sample: ${sample}`).to.be.true;
-        });
+        cy.contains("Payment Failed!", { timeout: 30000 }).should("be.visible");
+        cy.get("p", { timeout: 15000 }).contains("Same pocket transfer not allowed").should("be.visible");
     }
 
 
