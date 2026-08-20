@@ -253,8 +253,8 @@ When("I click the Continue button after OTP", () => {
     SingleSendMoneyPage.clickContinueAfterOtp();
 });
 
-Then("I should see the transaction failed error", () => {
-    SingleSendMoneyPage.validateTransactionFailedError();
+Then("I should see the invalid OTP error message", () => {
+    SingleSendMoneyPage.validateInvalidOtpError();
 });
 
 Then("I should see a successful transaction page", () => {

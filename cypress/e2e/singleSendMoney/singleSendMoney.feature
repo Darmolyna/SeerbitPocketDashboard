@@ -108,7 +108,7 @@ Feature: Single Send Money
         Then I should see the insufficient balance error
 
     @singleSendMoney8b
-    Scenario: Transaction failed for invalid OTP on Sub pocket transfer
+    Scenario: Invalid OTP error message on Sub pocket transfer
         When I click the Sub pocket button
         And I select the primary pocket "SBP0017144"
         And I enter pocket ID "SBP0020694"
@@ -121,7 +121,7 @@ Feature: Single Send Money
         When I enter the OTP "000000"
         Then all OTP fields should be filled
         When I click the Continue button after OTP
-        Then I should see the transaction failed error
+        Then I should see the invalid OTP error message
 
     @singleSendMoney8c
     Scenario: Same pocket transfer not allowed error

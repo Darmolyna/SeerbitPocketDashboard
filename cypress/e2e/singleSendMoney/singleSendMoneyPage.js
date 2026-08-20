@@ -745,22 +745,10 @@ class SingleSendMoneyPage {
             .click();
     }
 
-    validateTransactionFailedError() {
-        cy.get("body", { timeout: 30000 }).then(($body) => {
-            const text = ($body[0].innerText || $body[0].textContent || "");
-            const sample = text.substring(0, 500);
-            cy.log(`PAGE TEXT: ${sample}`);
-            const hasError =
-                text.includes("Transaction failed") ||
-                text.includes("Invalid OTP") ||
-                text.includes("invalid otp") ||
-                text.includes("OTP verification failed") ||
-                text.includes("Verification failed") ||
-                text.includes("failed") ||
-                text.includes("Enter One Time Passcode") ||
-                text.includes("One Time Passcode");
-            expect(hasError, `Page text sample: ${sample}`).to.be.true;
-        });
+    validateInvalidOtpError() {
+        cy.get("p", { timeout: 30000 })
+            .contains(/invalid otp|Invalid OTP|OTP.*invalid|otp.*failed|OTP verification failed|Verification failed/)
+            .should("be.visible");
     }
 
     validateSuccessfulTransaction() {
