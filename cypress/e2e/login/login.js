@@ -30,7 +30,6 @@ Then("the system should display {string}", (result) => {
             .should('be.visible')
             .and('contain', result)
     } else {
-        cy.wait(2000)
         cy.contains(result, { timeout: 10000 }).should('be.visible');
     }
 })

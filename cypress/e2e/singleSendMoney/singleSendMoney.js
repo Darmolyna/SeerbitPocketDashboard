@@ -17,8 +17,8 @@ Given("I am logged into the Primary Pocket Dashboard", () => {
 });
 
 Given("I navigate to the Send Money page", () => {
-    cy.wait(3000);
     SingleSendMoneyPage.openSendMoney();
+    SingleSendMoneyPage.validateTransferTypeSection();
 });
 
 Given("I navigate to single column", () => {
@@ -68,7 +68,6 @@ Then("the Bank transfer type should be selected", () => {
 });
 
 When("I click the Bank transfer button", () => {
-    cy.wait(3000)
     SingleSendMoneyPage.clickBankTransfer();
 });
 

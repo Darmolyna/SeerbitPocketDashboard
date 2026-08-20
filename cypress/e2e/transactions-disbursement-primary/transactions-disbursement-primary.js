@@ -18,8 +18,6 @@ Given("I am logged into the Primary Pocket Dashboard", () => {
 }
 );
 Then("I navigate to the Disbursement Transactions page", () => {
-    cy.wait(2000)
-
     PrimaryPocketDisbursementPage.clickDisbursementMenu()
 });
 

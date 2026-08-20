@@ -228,8 +228,8 @@ class PrimaryPocketDisbursementPage {
             .should("be.visible")
             .click();
 
-
-        cy.wait(15000)
+        this.elements.transactionRows({ timeout: 15000 })
+            .should("have.length.gte", 1);
 
     }
 
@@ -563,10 +563,7 @@ class PrimaryPocketDisbursementPage {
                         .click();
 
 
-                    cy.wait(3000);
-
-
-                    this.elements.transactionRows()
+                    this.elements.transactionRows({ timeout: 15000 })
                         .should("have.length.greaterThan", 0)
                         .each(($row) => {
 

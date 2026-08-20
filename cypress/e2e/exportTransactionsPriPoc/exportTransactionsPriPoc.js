@@ -18,8 +18,6 @@ Given("I am logged into the Primary Pocket Dashboard", () => {
 }
 );
 Then("I navigate to the Funding Transactions page", () => {
-    cy.wait(5000)
-
     ExportTransactionsPriPocPage.clickTransactionMenu()
 });
 
@@ -69,7 +67,6 @@ Then("the Export button should be enabled", () => {
 When("I export the transactions", () => {
 
     ExportTransactionsPriPocPage.clickExportIfAvailable();
-    cy.wait(5000)
 
 });
 
@@ -82,7 +79,5 @@ Then("the transaction file should be downloaded", () => {
 
 
 Then("I navigate to the Disbursement Transactions page", () => {
-    cy.wait(2000)
-
     ExportTransactionsPriPocPage.clickDisbursementMenu()
 });

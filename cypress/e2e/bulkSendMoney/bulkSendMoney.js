@@ -16,7 +16,7 @@ Given("I am logged into the Primary Pocket Dashboard", () => {
     LoginPage.enterPrimaryPocketPassword();
     LoginPage.clickSignIn();
 
-    cy.wait(5000);
+    cy.url().should("not.include", "/login", { timeout: 30000 });
 
 });
 

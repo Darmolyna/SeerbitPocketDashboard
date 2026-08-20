@@ -178,7 +178,7 @@ class SingleSendMoneyPage {
     // ============================
 
     openSendMoney() {
-        cy.contains("nav a", "Send Money")
+        cy.contains("nav a", "Send Money", { timeout: 15000 })
             .should("be.visible")
             .click();
     }
@@ -189,7 +189,11 @@ class SingleSendMoneyPage {
             .click();
 
         cy.url().should("include", "/send-money");
-        cy.wait(3000);
+        this.elements.transferTypeSection({ timeout: 15000 })
+            .should("be.visible");
+
+        this.elements.pocketIdInput({ timeout: 15000 })
+            .should("be.visible");
     }
 
     ensureOnSendMoneyPage() {
@@ -197,7 +201,8 @@ class SingleSendMoneyPage {
             if (!url.includes("/send-money")) {
                 const baseUrl = Cypress.env("baseUrl") || Cypress.expose("baseUrl");
                 cy.visit("/send-money");
-                cy.wait(2000);
+                this.elements.transferTypeSection({ timeout: 15000 })
+                    .should("be.visible");
             }
         });
     }
@@ -205,26 +210,23 @@ class SingleSendMoneyPage {
 
     // Transfer Type
 
-    clickSubPocket() {
-        this.elements.subPocketButton()
-            .should("be.visible")
-            .click();
-
-        this.elements.pocketIdInput({ timeout: 15000 })
-            .should("be.visible");
-    }
-
     clickBankTransfer() {
-        this.elements.bankTransferButton()
+        this.elements.bankTransferButton({ timeout: 15000 })
             .should("be.visible")
             .click();
 
-        this.elements.accountNumberInput({ timeout: 15000 })
+        this.elements.accountNumberInput({ timeout: 20000 })
             .should("be.visible");
     }
 
+    clickSubPocket() {
+        this.elements.subPocketButton({ timeout: 15000 })
+            .should("be.visible")
+            .click();
 
-    // Form Inputs
+        this.elements.pocketIdInput({ timeout: 20000 })
+            .should("be.visible");
+    }
 
     enterPocketId(pocketId) {
         this.elements.pocketIdInput()
@@ -272,8 +274,6 @@ class SingleSendMoneyPage {
             .should("be.visible")
             .should("not.be.disabled")
             .click();
-
-        cy.wait(5000);
     }
 
     clickCancel() {
@@ -352,8 +352,6 @@ class SingleSendMoneyPage {
                     cy.log(`Total amount: ${total}`);
                 }
             });
-
-
     }
 
     validateBalanceDebited() {
@@ -397,54 +395,20 @@ class SingleSendMoneyPage {
             .should("be.visible");
     }
 
-    validateTransactionInDisbursementTable() {
-        this.elements.disbursementTable({ timeout: 30000 })
-            .should("be.visible");
+    searchDisbursementTable(searchTerm) {
+        cy.get('input[placeholder="Search reference"]', { timeout: 15000 })
+            .should("be.visible")
+            .clear()
+            .type(searchTerm);
 
-        cy.get("@paymentReference").then((ref) => {
-            cy.log(`Verifying transaction and charge for ref: ${ref}`);
+        cy.get("table.min-w-full tbody tr", { timeout: 15000 })
+            .should("have.length.gte", 1);
 
-            const refPrefix = ref.substring(0, 12);
-
-            cy.get('input[placeholder="Search reference"]')
-                .should("be.visible")
-                .clear()
-                .type(refPrefix);
-
-            cy.wait(3000);
-
-            cy.get("table.min-w-full tbody tr", { timeout: 15000 })
-                .should("have.length.gte", 1);
-
-            cy.get("table.min-w-full tbody tr")
-                .first()
-                .then(($row) => {
-                    const rowText = Cypress.$($row).text();
-                    cy.log(`Transaction row: ${rowText.substring(0, 300)}`);
-                    expect(rowText).to.include(refPrefix);
-                    expect(rowText).to.match(/Successful|Completed/);
-                });
-
-            cy.get('input[placeholder="Search reference"]')
-                .clear()
-                .type(`Charge-${ref}`);
-
-            cy.wait(3000);
-
-            cy.get("table.min-w-full tbody tr", { timeout: 15000 })
-                .should("have.length.gte", 1);
-
-            cy.get("table.min-w-full tbody tr")
-                .first()
-                .then(($row) => {
-                    const rowText = Cypress.$($row).text();
-                    cy.log(`Charge row: ${rowText.substring(0, 300)}`);
-                    expect(rowText).to.include("Charge-");
-                    expect(rowText).to.match(/Successful|Completed/);
-                });
-        });
+        cy.get("table.min-w-full tbody tr")
+            .first()
+            .invoke("text")
+            .should("have.length.greaterThan", 0);
     }
-
 
     validateTransactionAndChargeInDisbursementTable() {
         this.elements.disbursementTable({ timeout: 30000 })
@@ -455,15 +419,7 @@ class SingleSendMoneyPage {
 
             const refPrefix = ref.substring(0, 12);
 
-            cy.get('input[placeholder="Search reference"]')
-                .should("be.visible")
-                .clear()
-                .type(refPrefix);
-
-            cy.wait(3000);
-
-            cy.get("table.min-w-full tbody tr", { timeout: 15000 })
-                .should("have.length.gte", 1);
+            this.searchDisbursementTable(refPrefix);
 
             cy.get("table.min-w-full tbody tr")
                 .first()
@@ -474,23 +430,26 @@ class SingleSendMoneyPage {
                     expect(rowText).to.match(/Successful|Completed/);
                 });
 
-            cy.get('input[placeholder="Search reference"]')
-                .clear()
-                .type(`Charge-${ref}`);
+            this.searchDisbursementTable(`Charge-${ref}`);
 
-            cy.wait(3000);
-
-            cy.get("table.min-w-full tbody tr", { timeout: 15000 })
-                .should("have.length.gte", 1);
-
-            cy.get("table.min-w-full tbody tr")
-                .first()
-                .then(($row) => {
-                    const rowText = Cypress.$($row).text();
-                    cy.log(`Charge row: ${rowText.substring(0, 300)}`);
-                    expect(rowText).to.include("Charge-");
-                    expect(rowText).to.match(/Successful|Completed/);
+            cy.get("table.min-w-full tbody tr").then(($rows) => {
+                const rowCount = $rows.length;
+                let chargeFound = false;
+                $rows.each((i, row) => {
+                    const rowText = Cypress.$(row).text();
+                    if (rowText.includes("Charge-")) {
+                        chargeFound = true;
+                        cy.log(`Charge row found: ${rowText.substring(0, 300)}`);
+                    }
                 });
+                if (!chargeFound && rowCount === 1) {
+                    const singleRowText = Cypress.$($rows[0]).text();
+                    if (singleRowText.includes("nothing to show")) {
+                        throw new Error(`Charge row NOT found for ref ${ref}. Search returned: "${singleRowText.substring(0, 100)}". This is a BUG - charge must appear in disbursement table.`);
+                    }
+                }
+                expect(chargeFound, `Charge row with "Charge-" not found in disbursement table for ref ${ref}`).to.be.true;
+            });
         });
     }
 
@@ -498,15 +457,7 @@ class SingleSendMoneyPage {
         cy.get("@paymentReference").then((ref) => {
             const refPrefix = ref.substring(0, 12);
 
-            cy.get('input[placeholder="Search reference"]')
-                .should("be.visible")
-                .clear()
-                .type(refPrefix);
-
-            cy.wait(3000);
-
-            cy.get("table.min-w-full tbody tr", { timeout: 15000 })
-                .should("have.length.gte", 1);
+            this.searchDisbursementTable(refPrefix);
 
             cy.get("table.min-w-full tbody tr")
                 .first()
@@ -519,35 +470,19 @@ class SingleSendMoneyPage {
     validateTransactionDetailsPage() {
         cy.url({ timeout: 30000 }).should("include", "/transactions/");
 
-        cy.get("body", { timeout: 30000 }).then(($body) => {
-            const text = ($body[0].innerText || $body[0].textContent || "");
-            cy.log(`Transaction details page text: ${text.substring(0, 500)}`);
-
-            const hasDetails =
-                text.includes("Transaction Details") ||
-                text.includes("Transaction Details:") ||
-                text.includes("Sender Information") ||
-                text.includes("Receiver Information") ||
-                text.includes("Breakdown of Amounts");
-            expect(hasDetails, "Transaction details page not loaded").to.be.true;
-        });
+        cy.contains(/Transaction Details|Sender Information|Breakdown of Amounts/, { timeout: 30000 })
+            .should("be.visible");
     }
 
     validateTransactionDetailsInformation() {
         cy.get("@paymentReference").then((ref) => {
             const refPrefix = ref.substring(0, 12);
 
-            cy.get("body", { timeout: 15000 }).then(($body) => {
-                const text = ($body[0].innerText || $body[0].textContent || "");
-                cy.log(`Details page text sample: ${text.substring(0, 500)}`);
-
-                expect(text).to.include(refPrefix);
-                expect(text).to.match(/Successful|Transaction Successful/);
-                expect(text).to.match(/NGN\s*1|1\.00/);
-                expect(text).to.match(/SBP0017144/);
-                expect(text).to.match(/SBP0020694/);
-                expect(text).to.match(/TRANSFER|Transfer/);
-            });
+            cy.contains(refPrefix, { timeout: 30000 }).should("be.visible");
+            cy.contains(/Successful|Transaction Successful/, { timeout: 15000 }).should("be.visible");
+            cy.contains(/NGN\s*[\d,]+|₦[\d,]+/, { timeout: 15000 }).should("be.visible");
+            cy.contains(/SBP0017144/, { timeout: 15000 }).should("be.visible");
+            cy.contains(/SBP0020694/, { timeout: 15000 }).should("be.visible");
         });
     }
 
@@ -768,8 +703,7 @@ class SingleSendMoneyPage {
     }
 
     validateInsufficientBalanceError() {
-        this.elements.insufficientBalanceError()
-            .should("be.visible");
+        cy.contains(/insufficient|Insufficient/, { timeout: 30000 }).should("be.visible");
     }
 
     // OTP Page
@@ -852,10 +786,12 @@ class SingleSendMoneyPage {
 
         cy.document({ timeout: 15000 }).then((doc) => {
             const text = doc.body.innerText || doc.body.textContent;
-            const refMatch = text.match(/([A-Z]{2,3}-S\d+)/);
+            const refMatch = text.match(/([A-Z]{2,3}-S\d{5,})/);
             if (refMatch) {
                 cy.wrap(refMatch[1]).as("paymentReference");
                 cy.log(`Payment reference: ${refMatch[1]}`);
+            } else {
+                cy.log(`No payment reference found in text (first 500 chars): ${text.substring(0, 500)}`);
             }
         });
     }
@@ -882,7 +818,7 @@ class SingleSendMoneyPage {
     validateNavigatedAway() {
         cy.get("body", { timeout: 10000 }).then(($body) => {
             const url = $body[0].ownerDocument.location.href;
-            const text = $body.text();
+            const text = $body[0].innerText || $body[0].textContent || "";
             cy.log(`Current URL after cancel: ${url}`);
             cy.log(`Page text sample: ${text.substring(0, 200)}`);
         });

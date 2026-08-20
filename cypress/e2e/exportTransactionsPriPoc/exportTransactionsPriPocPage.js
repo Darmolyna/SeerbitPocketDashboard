@@ -312,7 +312,9 @@ class ExportTransactionsPriPocPage {
                     if (Date.now() - startTime < timeout) {
                         cy.log("Waiting for download or no-transactions message...");
 
-                        return cy.wait(1000).then(() => {
+                        return new Cypress.Promise((resolve) => {
+                            setTimeout(resolve, 1000);
+                        }).then(() => {
                             return checkResult();
                         });
                     }

@@ -406,7 +406,7 @@ class PrimaryPocketDashboardPage {
     //Validate currency conversion table
     validateCurrencyConversionTable() {
 
-        this.elements.currencyConversionRows()
+        this.elements.currencyConversionRows({ timeout: 15000 })
             .should("have.length.greaterThan", 0)
             .each(($row, index) => {
 

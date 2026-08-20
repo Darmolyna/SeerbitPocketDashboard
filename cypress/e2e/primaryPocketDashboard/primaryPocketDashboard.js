@@ -134,8 +134,6 @@ Then("I should be redirected to the Exchange Rates page", () => {
 });
 
 Then("I validate that every currency conversion row should contain valid data in Exchange rate page", () => {
-    cy.wait(5000)
-
     PrimaryPocketDashboardPage.validateCurrencyConversionTable();
 
 });
