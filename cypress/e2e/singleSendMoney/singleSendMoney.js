@@ -99,12 +99,12 @@ Then("I should see the Transactions disbursement page", () => {
     SingleSendMoneyPage.validateDisbursementPage();
 });
 
-Then("the disbursement table should contain the transaction and charge", () => {
-    SingleSendMoneyPage.validateTransactionAndChargeInDisbursementTable();
+Then("the disbursement table should contain the transaction", () => {
+    SingleSendMoneyPage.validateTransactionInDisbursementTable();
 });
 
-When("I click the payment reference link", () => {
-    SingleSendMoneyPage.clickPaymentReferenceLink();
+When("I click the transaction payment reference link", () => {
+    SingleSendMoneyPage.clickTransactionPaymentReferenceLink();
 });
 
 Then("I should see the transaction details page", () => {
@@ -113,6 +113,34 @@ Then("I should see the transaction details page", () => {
 
 Then("the transaction details should show correct information", () => {
     SingleSendMoneyPage.validateTransactionDetailsInformation();
+});
+
+Then("the Print Receipt button should be visible", () => {
+    SingleSendMoneyPage.validatePrintReceipt();
+});
+
+Then("the Download Receipt button should be visible", () => {
+    SingleSendMoneyPage.validateDownloadReceipt();
+});
+
+When("I navigate back to the disbursement table", () => {
+    SingleSendMoneyPage.goBackToDisbursementTable();
+});
+
+Then("the disbursement table should contain the charge", () => {
+    SingleSendMoneyPage.validateChargeInDisbursementTable();
+});
+
+When("I click the charge payment reference link", () => {
+    SingleSendMoneyPage.clickChargePaymentReferenceLink();
+});
+
+Then("I should see the charge details page", () => {
+    SingleSendMoneyPage.validateChargeDetailsPage();
+});
+
+Then("the charge details should show correct information", () => {
+    SingleSendMoneyPage.validateChargeDetailsInformation();
 });
 
 

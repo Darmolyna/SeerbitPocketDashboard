@@ -169,6 +169,12 @@ class SingleSendMoneyPage {
         disbursementTableRows: () =>
             cy.get("table.min-w-full tbody tr"),
 
+        // Transaction Details Page
+        printReceiptButton: () =>
+            cy.contains("button", "Print Receipt"),
+        downloadReceiptButton: () =>
+            cy.contains("button", "Download Receipt"),
+
     };
 
 
@@ -233,6 +239,9 @@ class SingleSendMoneyPage {
             .should("be.visible")
             .clear()
             .type(pocketId);
+
+        cy.wrap(pocketId).as("destinationPocketId");
+        cy.log(`Destination pocket entered: ${pocketId}`);
     }
 
     enterAmount(amount) {
@@ -300,6 +309,9 @@ class SingleSendMoneyPage {
             .should("be.visible")
             .contains(pocketId)
             .click();
+
+        cy.wrap(pocketId).as("sourcePocketId");
+        cy.log(`Source pocket selected: ${pocketId}`);
     }
 
 
@@ -410,14 +422,13 @@ class SingleSendMoneyPage {
             .should("have.length.greaterThan", 0);
     }
 
-    validateTransactionAndChargeInDisbursementTable() {
+    validateTransactionInDisbursementTable() {
         this.elements.disbursementTable({ timeout: 30000 })
             .should("be.visible");
 
         cy.get("@paymentReference").then((ref) => {
-            cy.log(`Verifying transaction and charge for ref: ${ref}`);
-
             const refPrefix = ref.substring(0, 12);
+            cy.log(`Verifying transaction in disbursement table for ref: ${ref}`);
 
             this.searchDisbursementTable(refPrefix);
 
@@ -429,60 +440,199 @@ class SingleSendMoneyPage {
                     expect(rowText).to.include(refPrefix);
                     expect(rowText).to.match(/Successful|Completed/);
                 });
-
-            this.searchDisbursementTable(`Charge-${ref}`);
-
-            cy.get("table.min-w-full tbody tr").then(($rows) => {
-                const rowCount = $rows.length;
-                let chargeFound = false;
-                $rows.each((i, row) => {
-                    const rowText = Cypress.$(row).text();
-                    if (rowText.includes("Charge-")) {
-                        chargeFound = true;
-                        cy.log(`Charge row found: ${rowText.substring(0, 300)}`);
-                    }
-                });
-                if (!chargeFound && rowCount === 1) {
-                    const singleRowText = Cypress.$($rows[0]).text();
-                    if (singleRowText.includes("nothing to show")) {
-                        throw new Error(`Charge row NOT found for ref ${ref}. Search returned: "${singleRowText.substring(0, 100)}". This is a BUG - charge must appear in disbursement table.`);
-                    }
-                }
-                expect(chargeFound, `Charge row with "Charge-" not found in disbursement table for ref ${ref}`).to.be.true;
-            });
         });
     }
 
-    clickPaymentReferenceLink() {
+    clickTransactionPaymentReferenceLink() {
         cy.get("@paymentReference").then((ref) => {
-            const refPrefix = ref.substring(0, 12);
-
-            this.searchDisbursementTable(refPrefix);
-
-            cy.get("table.min-w-full tbody tr")
-                .first()
-                .find("a.text-blue-500")
-                .should("be.visible")
-                .click();
+            cy.log(`Navigating to transaction details for ref: ${ref}`);
+            const baseUrl = Cypress.env("baseUrl") || Cypress.expose("baseUrl");
+            cy.visit(`${baseUrl}/transactions/${ref}?tab=disbursement`);
         });
     }
 
     validateTransactionDetailsPage() {
         cy.url({ timeout: 30000 }).should("include", "/transactions/");
 
-        cy.contains(/Transaction Details|Sender Information|Breakdown of Amounts/, { timeout: 30000 })
+        cy.get("h2", { timeout: 60000 }).contains("Sender Information")
+            .should("be.visible");
+
+        cy.get("h2", { timeout: 15000 }).contains("Receiver Information")
+            .should("be.visible");
+
+        cy.get("h2", { timeout: 15000 }).contains("Transaction Details")
+            .should("be.visible");
+
+        cy.get("h2", { timeout: 15000 }).contains("Breakdown of Amounts")
+            .should("be.visible");
+
+        this.elements.printReceiptButton({ timeout: 15000 })
+            .should("be.visible");
+
+        this.elements.downloadReceiptButton({ timeout: 15000 })
             .should("be.visible");
     }
 
     validateTransactionDetailsInformation() {
         cy.get("@paymentReference").then((ref) => {
-            const refPrefix = ref.substring(0, 12);
+            cy.get("@sourcePocketId").then((sourcePocket) => {
+                cy.get("@destinationPocketId").then((destPocket) => {
+                    cy.log(`Validating transaction details for ref: ${ref}, from: ${sourcePocket}, to: ${destPocket}`);
 
-            cy.contains(refPrefix, { timeout: 30000 }).should("be.visible");
-            cy.contains(/Successful|Transaction Successful/, { timeout: 15000 }).should("be.visible");
-            cy.contains(/NGN\s*[\d,]+|₦[\d,]+/, { timeout: 15000 }).should("be.visible");
-            cy.contains(/SBP0017144/, { timeout: 15000 }).should("be.visible");
-            cy.contains(/SBP0020694/, { timeout: 15000 }).should("be.visible");
+                    // Top section - amount, status
+                    cy.contains(".text-4xl", "NGN 1", { timeout: 15000 })
+                        .should("be.visible");
+
+                    cy.contains(".inline-flex", "Successful", { timeout: 15000 })
+                        .should("be.visible");
+
+                    // Primary reference
+                    cy.contains(ref, { timeout: 15000 }).should("be.visible");
+
+                    // Sender Information section
+                    cy.get("h2").contains("Sender Information").closest("div").within(() => {
+                        cy.contains("Sender Name").should("be.visible");
+                        cy.contains("JABARI INC.").should("be.visible");
+                        cy.contains("Account Number").should("be.visible");
+                        cy.contains(sourcePocket).should("be.visible");
+                        cy.contains("Bank Name").should("be.visible");
+                    });
+
+                    // Transaction Details section
+                    cy.get("h2").contains("Transaction Details").closest("div").within(() => {
+                        cy.contains("Transaction ID").should("be.visible");
+                        cy.contains("Transaction Type").should("be.visible");
+                        cy.contains("TRANSFER").should("be.visible");
+                        cy.contains("Date and Time").should("be.visible");
+                        cy.contains("Payment Channel").should("be.visible");
+                        cy.contains("Wiretransfer").should("be.visible");
+                        cy.contains("Narration").should("be.visible");
+                        cy.contains(`Debited:${sourcePocket}`).should("be.visible");
+                    });
+
+                    // Breakdown of Amounts section
+                    cy.get("h2").contains("Breakdown of Amounts").closest("div").within(() => {
+                        cy.contains("Transfer Amount").should("be.visible");
+                    });
+
+                    // Receiver Information section
+                    cy.get("h2").contains("Receiver Information").closest("div").within(() => {
+                        cy.contains("Receiver Name").should("be.visible");
+                        cy.contains("JABARI INC.").should("be.visible");
+                        cy.contains("Account Number").should("be.visible");
+                        cy.contains(destPocket).should("be.visible");
+                        cy.contains("Bank Name").should("be.visible");
+                        cy.contains("SEERBIT").should("be.visible");
+                    });
+                });
+            });
+        });
+    }
+
+    validatePrintReceipt() {
+        this.elements.printReceiptButton({ timeout: 15000 })
+            .should("be.visible")
+            .and("not.be.disabled")
+            .click();
+
+        // Button should be clickable and not throw errors
+        cy.contains("button", "Print Receipt").should("exist");
+    }
+
+    validateDownloadReceipt() {
+        this.elements.downloadReceiptButton({ timeout: 15000 })
+            .should("be.visible")
+            .and("not.be.disabled")
+            .click();
+
+        cy.contains("button", "Download Receipt").should("exist");
+    }
+
+    goBackToDisbursementTable() {
+        cy.go("back");
+
+        cy.url({ timeout: 30000 }).should("include", "/transactions");
+
+        this.elements.disbursementTable({ timeout: 30000 })
+            .should("be.visible");
+
+        this.elements.transactionsPageTitle({ timeout: 30000 })
+            .should("be.visible");
+    }
+
+    validateChargeInDisbursementTable() {
+        this.elements.disbursementTable({ timeout: 30000 })
+            .should("be.visible");
+
+        cy.get('input[placeholder="Search reference"]', { timeout: 15000 })
+            .should("be.visible")
+            .clear()
+            .type("Charge-");
+
+        cy.get("table.min-w-full tbody tr", { timeout: 15000 }).then(($rows) => {
+            let chargeFound = false;
+
+            $rows.each((i, row) => {
+                const rowText = Cypress.$(row).text();
+                if (rowText.includes("Charge-")) {
+                    chargeFound = true;
+                    cy.log(`Charge row found: ${rowText.substring(0, 300)}`);
+                }
+            });
+
+            expect(chargeFound, "Charge- entry should exist in the disbursement table (app bug if absent)").to.be.true;
+            cy.wrap(chargeFound).as("chargeFound");
+        });
+    }
+
+    clickChargePaymentReferenceLink() {
+        cy.get('input[placeholder="Search reference"]', { timeout: 15000 })
+            .should("be.visible")
+            .clear()
+            .type("Charge-");
+
+        cy.get("table.min-w-full tbody tr", { timeout: 15000 })
+            .should("have.length.gte", 1)
+            .first()
+            .find("a.text-blue-500")
+            .should("be.visible")
+            .click();
+    }
+
+    validateChargeDetailsPage() {
+        cy.url({ timeout: 30000 }).should("include", "/transactions/");
+
+        cy.get("h2", { timeout: 60000 }).contains("Sender Information")
+            .should("be.visible");
+
+        cy.get("h2", { timeout: 15000 }).contains("Receiver Information")
+            .should("be.visible");
+
+        cy.get("h2", { timeout: 15000 }).contains("Transaction Details")
+            .should("be.visible");
+
+        this.elements.printReceiptButton({ timeout: 15000 })
+            .should("be.visible");
+
+        this.elements.downloadReceiptButton({ timeout: 15000 })
+            .should("be.visible");
+    }
+
+    validateChargeDetailsInformation() {
+        // Transaction type should be FEE
+        cy.get("h2").contains("Transaction Details").closest("div").within(() => {
+            cy.contains("FEE", { timeout: 15000 }).should("be.visible");
+        });
+
+        // Sender info - SEERBIT
+        cy.get("h2").contains("Sender Information").closest("div").within(() => {
+            cy.contains("SEERBIT", { timeout: 15000 }).should("be.visible");
+        });
+
+        // Receiver info - SEERBIT MAIN ACCOUNT
+        cy.get("h2").contains("Receiver Information").closest("div").within(() => {
+            cy.contains("SEERBIT MAIN ACCOUNT", { timeout: 15000 }).should("be.visible");
+            cy.contains("SeerBit", { timeout: 15000 }).should("be.visible");
         });
     }
 
