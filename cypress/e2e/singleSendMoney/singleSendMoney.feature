@@ -75,7 +75,7 @@ Feature: Single Send Money
     @singleSendMoney8
     Scenario: Successful Sub pocket single transfer
         When I click the Sub pocket button
-        And I select the primary pocket "SBP0017144"
+        And I select the primary pocket "SBP0018808"
         And I store the source pocket balance
         And I enter pocket ID "SBP0020694"
         And I enter amount "1"
@@ -107,7 +107,7 @@ Feature: Single Send Money
     @singleSendMoney8a
     Scenario: Insufficient pocket balance for payout on Sub pocket transfer
         When I click the Sub pocket button
-        And I select the primary pocket "SBP0017144"
+        And I select the primary pocket "SBP0018808"
         And I enter pocket ID "SBP0020694"
         And I enter amount "999999"
         And I enter narration "Insufficient balance test"
@@ -117,7 +117,7 @@ Feature: Single Send Money
     @singleSendMoney8b
     Scenario: Invalid OTP error message on Sub pocket transfer
         When I click the Sub pocket button
-        And I select the primary pocket "SBP0017144"
+        And I select the primary pocket "SBP0018808"
         And I enter pocket ID "SBP0020694"
         And I enter amount "1"
         And I enter narration "Invalid OTP test"

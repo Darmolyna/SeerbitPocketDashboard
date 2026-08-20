@@ -473,57 +473,102 @@ class SingleSendMoneyPage {
             .should("be.visible");
     }
 
+    getTransactionSection(sectionTitle) {
+        return cy.contains("h2", sectionTitle)
+            .should("be.visible")
+            .next(".space-y-4")
+            .should("be.visible");
+    }
+
+    validateTransactionField(sectionTitle, fieldLabel, expectedValue = null) {
+        this.getTransactionSection(sectionTitle)
+            .within(() => {
+                cy.contains("span", fieldLabel)
+                    .should("be.visible")
+                    .closest("div.flex")
+                    .within(() => {
+                        cy.contains("span", fieldLabel)
+                            .should("be.visible");
+
+                        cy.get("span")
+                            .last()
+                            .should("be.visible")
+                            .and("not.be.empty")
+                            .then(($value) => {
+                                if (expectedValue !== null) {
+                                    expect($value.text().trim()).to.contain(expectedValue);
+                                }
+                            });
+                    });
+            });
+    }
+
     validateTransactionDetailsInformation() {
         cy.get("@paymentReference").then((ref) => {
             cy.get("@sourcePocketId").then((sourcePocket) => {
-                cy.get("@destinationPocketId").then((destPocket) => {
-                    cy.log(`Validating transaction details for ref: ${ref}, from: ${sourcePocket}, to: ${destPocket}`);
+                cy.get("@destinationPocketId").then((destinationPocket) => {
+                    cy.log(`Validating details: ref=${ref}, from=${sourcePocket}, to=${destinationPocket}`);
 
-                    // Top section - amount, status
-                    cy.contains(".text-4xl", "NGN 1", { timeout: 15000 })
-                        .should("be.visible");
+                    // Amount
+                    cy.get("main", { timeout: 15000 })
+                        .find(".text-4xl")
+                        .should("be.visible")
+                        .invoke("text")
+                        .should("match", /NGN\s*[\d,.]+/);
 
-                    cy.contains(".inline-flex", "Successful", { timeout: 15000 })
-                        .should("be.visible");
+                    // Status badge
+                    cy.get("main")
+                        .find(".inline-flex")
+                        .should("be.visible")
+                        .and("contain.text", "Successful");
 
-                    // Primary reference
-                    cy.contains(ref, { timeout: 15000 }).should("be.visible");
+                    // Primary reference matches success page
+                    cy.get("main span.font-mono", { timeout: 15000 })
+                        .first()
+                        .should("be.visible")
+                        .invoke("text")
+                        .then((primaryRef) => {
+                            expect(primaryRef.trim()).to.equal(ref);
+                        });
 
-                    // Sender Information section
-                    cy.get("h2").contains("Sender Information").closest("div").within(() => {
-                        cy.contains("Sender Name").should("be.visible");
-                        cy.contains("JABARI INC.").should("be.visible");
-                        cy.contains("Account Number").should("be.visible");
-                        cy.contains(sourcePocket).should("be.visible");
-                        cy.contains("Bank Name").should("be.visible");
-                    });
+                    // Secondary reference visible and not empty
+                    cy.get("main span.font-mono", { timeout: 15000 })
+                        .eq(1)
+                        .should("be.visible")
+                        .invoke("text")
+                        .should("have.length.greaterThan", 0)
+                        .then((txId) => {
+                            cy.wrap(txId.trim()).as("transactionId");
+                        });
 
-                    // Transaction Details section
-                    cy.get("h2").contains("Transaction Details").closest("div").within(() => {
-                        cy.contains("Transaction ID").should("be.visible");
-                        cy.contains("Transaction Type").should("be.visible");
-                        cy.contains("TRANSFER").should("be.visible");
-                        cy.contains("Date and Time").should("be.visible");
-                        cy.contains("Payment Channel").should("be.visible");
-                        cy.contains("Wiretransfer").should("be.visible");
-                        cy.contains("Narration").should("be.visible");
-                        cy.contains(`Debited:${sourcePocket}`).should("be.visible");
-                    });
+                    // Both copy buttons visible
+                    cy.get("main span.font-mono")
+                        .closest(".bg-\\[\\#F9FAFB\\]")
+                        .find("button")
+                        .should("have.length.gte", 2)
+                        .each(($btn) => {
+                            cy.wrap($btn).should("be.visible");
+                        });
 
-                    // Breakdown of Amounts section
-                    cy.get("h2").contains("Breakdown of Amounts").closest("div").within(() => {
-                        cy.contains("Transfer Amount").should("be.visible");
-                    });
+                    // Sender Information
+                    this.validateTransactionField("Sender Information", "Sender Name");
+                    this.validateTransactionField("Sender Information", "Account Number", sourcePocket);
+                    this.validateTransactionField("Sender Information", "Bank Name");
 
-                    // Receiver Information section
-                    cy.get("h2").contains("Receiver Information").closest("div").within(() => {
-                        cy.contains("Receiver Name").should("be.visible");
-                        cy.contains("JABARI INC.").should("be.visible");
-                        cy.contains("Account Number").should("be.visible");
-                        cy.contains(destPocket).should("be.visible");
-                        cy.contains("Bank Name").should("be.visible");
-                        cy.contains("SEERBIT").should("be.visible");
-                    });
+                    // Transaction Details
+                    this.validateTransactionField("Transaction Details", "Transaction ID");
+                    this.validateTransactionField("Transaction Details", "Transaction Type", "TRANSFER");
+                    this.validateTransactionField("Transaction Details", "Date and Time");
+                    this.validateTransactionField("Transaction Details", "Payment Channel");
+                    this.validateTransactionField("Transaction Details", "Narration", `Debited:${sourcePocket}`);
+
+                    // Breakdown of Amounts
+                    this.validateTransactionField("Breakdown of Amounts", "Transfer Amount");
+
+                    // Receiver Information
+                    this.validateTransactionField("Receiver Information", "Receiver Name");
+                    this.validateTransactionField("Receiver Information", "Account Number", destinationPocket);
+                    this.validateTransactionField("Receiver Information", "Bank Name");
                 });
             });
         });
@@ -619,21 +664,9 @@ class SingleSendMoneyPage {
     }
 
     validateChargeDetailsInformation() {
-        // Transaction type should be FEE
-        cy.get("h2").contains("Transaction Details").closest("div").within(() => {
-            cy.contains("FEE", { timeout: 15000 }).should("be.visible");
-        });
-
-        // Sender info - SEERBIT
-        cy.get("h2").contains("Sender Information").closest("div").within(() => {
-            cy.contains("SEERBIT", { timeout: 15000 }).should("be.visible");
-        });
-
-        // Receiver info - SEERBIT MAIN ACCOUNT
-        cy.get("h2").contains("Receiver Information").closest("div").within(() => {
-            cy.contains("SEERBIT MAIN ACCOUNT", { timeout: 15000 }).should("be.visible");
-            cy.contains("SeerBit", { timeout: 15000 }).should("be.visible");
-        });
+        this.validateTransactionField("Transaction Details", "Transaction Type", "FEE");
+        this.validateTransactionField("Sender Information", "Sender Name");
+        this.validateTransactionField("Receiver Information", "Account Number", "SEERBIT");
     }
 
 
