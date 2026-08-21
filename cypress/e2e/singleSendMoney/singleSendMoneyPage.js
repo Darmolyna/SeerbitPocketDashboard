@@ -318,13 +318,17 @@ class SingleSendMoneyPage {
     // Balance & Transaction Tracking
 
     storeBalanceBeforeTransaction() {
-        this.elements.sourcePocketBalance()
-            .should("be.visible")
-            .invoke("text")
-            .then((text) => {
-                const balance = parseFloat(text.replace(/[^0-9.]/g, ""));
-                cy.wrap(balance).as("balanceBefore");
-                cy.log(`Balance before transaction: ${balance}`);
+        cy.get("form#send-money-form button")
+            .first()
+            .within(() => {
+                cy.get("span.whitespace-nowrap", { timeout: 10000 })
+                    .last()
+                    .invoke("text")
+                    .then((text) => {
+                        const balance = parseFloat(text.replace(/[^0-9.]/g, ""));
+                        cy.wrap(balance).as("balanceBefore");
+                        cy.log(`Balance before transaction from form: ${text.trim()} => ${balance}`);
+                    });
             });
     }
 
@@ -383,6 +387,59 @@ class SingleSendMoneyPage {
                             expect(transferredAmount).to.be.closeTo(transactionAmount, 0.01);
                         }
                     });
+            });
+        });
+    }
+
+    validateAmountInDisbursementTable() {
+        cy.get("@transactionCharge").then((transactionCharge) => {
+            cy.get("@totalAmount").then((totalAmount) => {
+                const transactionAmount = totalAmount - transactionCharge;
+                cy.log(`Expected amount in disbursement table: ${transactionAmount}`);
+
+                cy.get("table.min-w-full tbody tr")
+                    .first()
+                    .within(() => {
+                        cy.get("td")
+                            .eq(0)
+                            .invoke("text")
+                            .then((text) => {
+                                const match = text.match(/NGN\s*([\d,.]+)/);
+                                if (match) {
+                                    const tableAmount = parseFloat(match[1].replace(/,/g, ""));
+                                    cy.log(`Amount in disbursement table: ${tableAmount}`);
+                                    expect(tableAmount).to.equal(transactionAmount);
+                                }
+                            });
+                    });
+            });
+        });
+    }
+
+    validateBalanceInDisbursementTable() {
+        cy.get("@balanceBefore").then((balanceBefore) => {
+            cy.get("@transactionCharge").then((transactionCharge) => {
+                cy.get("@totalAmount").then((totalAmount) => {
+                    const transactionAmount = totalAmount - transactionCharge;
+                    const expectedBalance = balanceBefore - transactionAmount;
+                    cy.log(`Expected balance in disbursement table: ${balanceBefore} - ${transactionAmount} = ${expectedBalance}`);
+
+                    cy.get("table.min-w-full tbody tr")
+                        .first()
+                        .within(() => {
+                            cy.get("td")
+                                .eq(4)
+                                .invoke("text")
+                                .then((text) => {
+                                    const match = text.match(/NGN\s*([\d,.]+)/);
+                                    if (match) {
+                                        const tableBalance = parseFloat(match[1].replace(/,/g, ""));
+                                        cy.log(`Balance in disbursement table: ${tableBalance}`);
+                                        expect(tableBalance).to.equal(expectedBalance);
+                                    }
+                                });
+                        });
+                });
             });
         });
     }

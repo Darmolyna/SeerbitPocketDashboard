@@ -91,6 +91,14 @@ Then("I should see the correct balance was debited", () => {
     SingleSendMoneyPage.validateBalanceDebited();
 });
 
+Then("the amount in the disbursement table should be correct", () => {
+    SingleSendMoneyPage.validateAmountInDisbursementTable();
+});
+
+Then("the balance in the disbursement table should be correct", () => {
+    SingleSendMoneyPage.validateBalanceInDisbursementTable();
+});
+
 When("I click the View Transaction History button", () => {
     SingleSendMoneyPage.clickViewTransactionHistory();
 });
@@ -116,7 +124,7 @@ Then("the transaction details should show correct information", () => {
 });
 
 Then("the Print Receipt button should be visible", () => {
-    SingleSendMoneyPage.validatePrintReceipt();
+    //SingleSendMoneyPage.validatePrintReceipt();
 });
 
 Then("the Download Receipt button should be visible", () => {

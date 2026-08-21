@@ -93,6 +93,8 @@ Feature: Single Send Money
         When I click the View Transaction History button
         Then I should see the Transactions disbursement page
         And the disbursement table should contain the transaction
+        And the amount in the disbursement table should be correct
+        And the balance in the disbursement table should be correct
         When I click the transaction payment reference link
         Then I should see the transaction details page
         And the transaction details should show correct information
