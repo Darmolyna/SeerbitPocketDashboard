@@ -104,7 +104,7 @@ Then("the transaction status in the disbursement table should match the success 
 });
 
 Then("the balance in the disbursement table should be correct", () => {
-    //SingleSendMoneyPage.validateBalanceInDisbursementTable();
+    SingleSendMoneyPage.validateBalanceInDisbursementTable();
 });
 
 Then("the charge amount in the disbursement table should be correct", () => {
