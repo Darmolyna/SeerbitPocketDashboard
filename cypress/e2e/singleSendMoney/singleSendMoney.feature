@@ -93,6 +93,8 @@ Feature: Single Send Money
         When I click the View Transaction History button
         Then I should see the Transactions disbursement page
         And the disbursement table should contain the transaction
+        And the payment reference in the disbursement table should match the success page
+        And the transaction status in the disbursement table should match the success page
         And the amount in the disbursement table should be correct
         And the balance in the disbursement table should be correct
         When I click the transaction payment reference link
@@ -102,6 +104,8 @@ Feature: Single Send Money
         And the Download Receipt button should be visible
         When I navigate back to the disbursement table
         Then the disbursement table should contain the charge
+        And the charge payment reference in the disbursement table should match the success page
+        And the charge transaction status in the disbursement table should match the success page
         And the charge amount in the disbursement table should be correct
         And the balance after charge in the disbursement table should be correct
         When I click the charge payment reference link

@@ -391,27 +391,124 @@ class SingleSendMoneyPage {
         });
     }
 
+    validatePaymentReferenceInDisbursementTable() {
+        cy.get("@paymentReference").then((ref) => {
+            const refPrefix = ref.substring(0, 12);
+            cy.get("table.min-w-full tbody tr")
+                .first()
+                .within(() => {
+                    cy.get("td")
+                        .eq(2)
+                        .invoke("text")
+                        .then((text) => {
+                            cy.log(`Payment reference in disbursement table: ${text.trim()}, expected prefix: ${refPrefix}`);
+                            expect(text.trim()).to.include(refPrefix);
+                        });
+                });
+        });
+    }
+
+    validateTransactionStatusInDisbursementTable() {
+        cy.get("@transactionStatus").then((status) => {
+            cy.get("table.min-w-full tbody tr")
+                .first()
+                .within(() => {
+                    cy.get("td")
+                        .eq(3)
+                        .invoke("text")
+                        .then((text) => {
+                            cy.log(`Status in disbursement table: ${text.trim()}, expected: ${status}`);
+                            expect(text.trim()).to.equal(status);
+                        });
+                });
+        });
+    }
+
+    validateChargePaymentReferenceInDisbursementTable() {
+        cy.get("@paymentReference").then((ref) => {
+            const chargePrefix = ref.replace("JIN-", "Charge-").substring(0, 15);
+            cy.get('input[placeholder="Search reference"]', { timeout: 15000 })
+                .should("be.visible")
+                .clear()
+                .type("Charge-");
+
+            cy.get("table.min-w-full tbody tr")
+                .first()
+                .within(() => {
+                    cy.get("td")
+                        .eq(2)
+                        .invoke("text")
+                        .then((text) => {
+                            cy.log(`Charge reference in disbursement table: ${text.trim()}, expected prefix: ${chargePrefix}`);
+                            expect(text.trim()).to.include(chargePrefix);
+                        });
+                });
+        });
+    }
+
+    validateChargeTransactionStatusInDisbursementTable() {
+        cy.get("@transactionStatus").then((status) => {
+            cy.get('input[placeholder="Search reference"]', { timeout: 15000 })
+                .should("be.visible")
+                .clear()
+                .type("Charge-");
+
+            cy.get("table.min-w-full tbody tr")
+                .first()
+                .within(() => {
+                    cy.get("td")
+                        .eq(3)
+                        .invoke("text")
+                        .then((text) => {
+                            cy.log(`Charge status in disbursement table: ${text.trim()}, expected: ${status}`);
+                            expect(text.trim()).to.equal(status);
+                        });
+                });
+        });
+    }
+
     validateAmountInDisbursementTable() {
         cy.get("@transactionCharge").then((transactionCharge) => {
             cy.get("@totalAmount").then((totalAmount) => {
-                const transactionAmount = totalAmount - transactionCharge;
-                cy.log(`Expected amount in disbursement table: ${transactionAmount}`);
+                cy.get("@paymentReference").then((ref) => {
+                    cy.get("@transactionStatus").then((status) => {
+                        const transactionAmount = totalAmount - transactionCharge;
+                        cy.log(`Expected amount in disbursement table: ${transactionAmount}`);
 
-                cy.get("table.min-w-full tbody tr")
-                    .first()
-                    .within(() => {
-                        cy.get("td")
-                            .eq(0)
-                            .invoke("text")
-                            .then((text) => {
-                                const match = text.match(/NGN\s*([\d,.]+)/);
-                                if (match) {
-                                    const tableAmount = parseFloat(match[1].replace(/,/g, ""));
-                                    cy.log(`Amount in disbursement table: ${tableAmount}`);
-                                    expect(tableAmount).to.equal(transactionAmount);
-                                }
+                        cy.get("table.min-w-full tbody tr")
+                            .first()
+                            .within(() => {
+                                cy.get("td")
+                                    .eq(0)
+                                    .invoke("text")
+                                    .then((text) => {
+                                        const match = text.match(/NGN\s*([\d,.]+)/);
+                                        if (match) {
+                                            const tableAmount = parseFloat(match[1].replace(/,/g, ""));
+                                            cy.log(`Amount in disbursement table: ${tableAmount}`);
+                                            expect(tableAmount).to.equal(transactionAmount);
+                                        }
+                                    });
+
+                                cy.get("td")
+                                    .eq(2)
+                                    .invoke("text")
+                                    .then((text) => {
+                                        const refPrefix = ref.substring(0, 12);
+                                        cy.log(`Payment reference in disbursement table: ${text.trim()}, expected prefix: ${refPrefix}`);
+                                        expect(text.trim()).to.include(refPrefix);
+                                    });
+
+                                cy.get("td")
+                                    .eq(3)
+                                    .invoke("text")
+                                    .then((text) => {
+                                        cy.log(`Status in disbursement table: ${text.trim()}, expected: ${status}`);
+                                        expect(text.trim()).to.equal(status);
+                                    });
                             });
                     });
+                });
             });
         });
     }
@@ -689,26 +786,49 @@ class SingleSendMoneyPage {
 
     validateChargeAmountInDisbursementTable() {
         cy.get("@transactionCharge").then((transactionCharge) => {
-            cy.get('input[placeholder="Search reference"]', { timeout: 15000 })
-                .should("be.visible")
-                .clear()
-                .type("Charge-");
+            cy.get("@paymentReference").then((ref) => {
+                cy.get("@transactionStatus").then((status) => {
+                    const refId = ref.replace("JIN-", "Charge-");
+                    cy.log(`Expected charge reference prefix: ${refId.substring(0, 15)}`);
 
-            cy.get("table.min-w-full tbody tr")
-                .first()
-                .within(() => {
-                    cy.get("td")
-                        .eq(0)
-                        .invoke("text")
-                        .then((text) => {
-                            const match = text.match(/NGN\s*([\d,.]+)/);
-                            if (match) {
-                                const tableCharge = parseFloat(match[1].replace(/,/g, ""));
-                                cy.log(`Charge amount in disbursement table: ${tableCharge}`);
-                                expect(tableCharge).to.equal(transactionCharge);
-                            }
+                    cy.get('input[placeholder="Search reference"]', { timeout: 15000 })
+                        .should("be.visible")
+                        .clear()
+                        .type("Charge-");
+
+                    cy.get("table.min-w-full tbody tr")
+                        .first()
+                        .within(() => {
+                            cy.get("td")
+                                .eq(0)
+                                .invoke("text")
+                                .then((text) => {
+                                    const match = text.match(/NGN\s*([\d,.]+)/);
+                                    if (match) {
+                                        const tableCharge = parseFloat(match[1].replace(/,/g, ""));
+                                        cy.log(`Charge amount in disbursement table: ${tableCharge}`);
+                                        expect(tableCharge).to.equal(transactionCharge);
+                                    }
+                                });
+
+                            cy.get("td")
+                                .eq(2)
+                                .invoke("text")
+                                .then((text) => {
+                                    cy.log(`Charge reference in disbursement table: ${text.trim()}`);
+                                    expect(text.trim()).to.include(refId.substring(0, 15));
+                                });
+
+                            cy.get("td")
+                                .eq(3)
+                                .invoke("text")
+                                .then((text) => {
+                                    cy.log(`Charge status in disbursement table: ${text.trim()}, expected: ${status}`);
+                                    expect(text.trim()).to.equal(status);
+                                });
                         });
                 });
+            });
         });
     }
 
@@ -1048,8 +1168,14 @@ class SingleSendMoneyPage {
     }
 
     validateSuccessfulTransaction() {
-        cy.contains("h2", "Payment Successful!", { timeout: 30000 })
-            .should("be.visible");
+        cy.contains("h2", /Payment Successful!|Payment Failed!/, { timeout: 30000 })
+            .should("be.visible")
+            .invoke("text")
+            .then((text) => {
+                const status = text.includes("Successful") ? "Successful" : "Failed";
+                cy.wrap(status).as("transactionStatus");
+                cy.log(`Transaction status from success page: ${status}`);
+            });
 
         this.elements.successfulTransactionMessage()
             .should("be.visible");

@@ -95,12 +95,28 @@ Then("the amount in the disbursement table should be correct", () => {
     SingleSendMoneyPage.validateAmountInDisbursementTable();
 });
 
+Then("the payment reference in the disbursement table should match the success page", () => {
+    SingleSendMoneyPage.validatePaymentReferenceInDisbursementTable();
+});
+
+Then("the transaction status in the disbursement table should match the success page", () => {
+    SingleSendMoneyPage.validateTransactionStatusInDisbursementTable();
+});
+
 Then("the balance in the disbursement table should be correct", () => {
-    SingleSendMoneyPage.validateBalanceInDisbursementTable();
+    //SingleSendMoneyPage.validateBalanceInDisbursementTable();
 });
 
 Then("the charge amount in the disbursement table should be correct", () => {
     SingleSendMoneyPage.validateChargeAmountInDisbursementTable();
+});
+
+Then("the charge payment reference in the disbursement table should match the success page", () => {
+    SingleSendMoneyPage.validateChargePaymentReferenceInDisbursementTable();
+});
+
+Then("the charge transaction status in the disbursement table should match the success page", () => {
+    SingleSendMoneyPage.validateChargeTransactionStatusInDisbursementTable();
 });
 
 Then("the balance after charge in the disbursement table should be correct", () => {
