@@ -886,7 +886,8 @@ class SingleSendMoneyPage {
     }
 
     validateInsufficientBalanceError() {
-        cy.contains(/insufficient|Insufficient/, { timeout: 30000 }).should("be.visible");
+        cy.contains("p", /Insufficient pocket balance for payout|Insufficient pocket balance/, { timeout: 30000 })
+            .should("be.visible");
     }
 
     // OTP Page

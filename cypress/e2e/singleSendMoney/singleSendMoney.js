@@ -289,6 +289,10 @@ Then("I should see a successful transaction page", () => {
     SingleSendMoneyPage.validateSuccessfulTransaction();
 });
 
+Then("I should see the insufficient balance error", () => {
+    SingleSendMoneyPage.validateInsufficientBalanceError();
+});
+
 Then("I should see the same pocket transfer error", () => {
     SingleSendMoneyPage.validateSamePocketTransferError();
 });

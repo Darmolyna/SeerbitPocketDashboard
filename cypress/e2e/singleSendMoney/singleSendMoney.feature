@@ -112,7 +112,7 @@ Feature: Single Send Money
         And I enter amount "999999"
         And I enter narration "Insufficient balance test"
         And I click the Continue button
-        Then I should see the same pocket transfer not allowed error
+        Then I should see the insufficient balance error
 
     @singleSendMoney8b
     Scenario: Same pocket transfer not allowed error on Sub pocket transfer
