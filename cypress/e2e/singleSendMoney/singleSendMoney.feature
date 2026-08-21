@@ -102,6 +102,8 @@ Feature: Single Send Money
         And the Download Receipt button should be visible
         When I navigate back to the disbursement table
         Then the disbursement table should contain the charge
+        And the charge amount in the disbursement table should be correct
+        And the balance after charge in the disbursement table should be correct
         When I click the charge payment reference link
         Then I should see the charge details page
         And the charge details should show correct information

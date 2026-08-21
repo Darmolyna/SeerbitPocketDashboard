@@ -99,6 +99,14 @@ Then("the balance in the disbursement table should be correct", () => {
     SingleSendMoneyPage.validateBalanceInDisbursementTable();
 });
 
+Then("the charge amount in the disbursement table should be correct", () => {
+    SingleSendMoneyPage.validateChargeAmountInDisbursementTable();
+});
+
+Then("the balance after charge in the disbursement table should be correct", () => {
+    SingleSendMoneyPage.validateBalanceAfterChargeInDisbursementTable();
+});
+
 When("I click the View Transaction History button", () => {
     SingleSendMoneyPage.clickViewTransactionHistory();
 });

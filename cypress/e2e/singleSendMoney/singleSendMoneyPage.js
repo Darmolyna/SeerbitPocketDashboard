@@ -687,6 +687,61 @@ class SingleSendMoneyPage {
         });
     }
 
+    validateChargeAmountInDisbursementTable() {
+        cy.get("@transactionCharge").then((transactionCharge) => {
+            cy.get('input[placeholder="Search reference"]', { timeout: 15000 })
+                .should("be.visible")
+                .clear()
+                .type("Charge-");
+
+            cy.get("table.min-w-full tbody tr")
+                .first()
+                .within(() => {
+                    cy.get("td")
+                        .eq(0)
+                        .invoke("text")
+                        .then((text) => {
+                            const match = text.match(/NGN\s*([\d,.]+)/);
+                            if (match) {
+                                const tableCharge = parseFloat(match[1].replace(/,/g, ""));
+                                cy.log(`Charge amount in disbursement table: ${tableCharge}`);
+                                expect(tableCharge).to.equal(transactionCharge);
+                            }
+                        });
+                });
+        });
+    }
+
+    validateBalanceAfterChargeInDisbursementTable() {
+        cy.get("@balanceBefore").then((balanceBefore) => {
+            cy.get("@transactionCharge").then((transactionCharge) => {
+                const expectedBalance = balanceBefore - transactionCharge;
+                cy.log(`Expected balance after charge: ${balanceBefore} - ${transactionCharge} = ${expectedBalance}`);
+
+                cy.get('input[placeholder="Search reference"]', { timeout: 15000 })
+                    .should("be.visible")
+                    .clear()
+                    .type("Charge-");
+
+                cy.get("table.min-w-full tbody tr")
+                    .first()
+                    .within(() => {
+                        cy.get("td")
+                            .eq(4)
+                            .invoke("text")
+                            .then((text) => {
+                                const match = text.match(/NGN\s*([\d,.]+)/);
+                                if (match) {
+                                    const tableBalance = parseFloat(match[1].replace(/,/g, ""));
+                                    cy.log(`Balance after charge in disbursement table: ${tableBalance}`);
+                                    expect(tableBalance).to.equal(expectedBalance);
+                                }
+                            });
+                    });
+            });
+        });
+    }
+
     clickChargePaymentReferenceLink() {
         cy.get('input[placeholder="Search reference"]', { timeout: 15000 })
             .should("be.visible")
