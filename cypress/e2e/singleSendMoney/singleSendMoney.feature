@@ -100,6 +100,7 @@ Feature: Single Send Money
         When I click the transaction payment reference link
         Then I should see the transaction details page
         And the transaction details should show correct information
+        And I capture the transaction details from the page
         And the Print Receipt button should be visible
         And the Download Receipt button should be visible
         When I navigate back to the disbursement table

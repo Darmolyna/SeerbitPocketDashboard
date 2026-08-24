@@ -24,30 +24,50 @@ async function setupNodeEvents(on, config) {
 
   // Get latest downloaded file
   on("task", {
-    getLatestDownloadedFile() {
+    getLatestDownloadedFile(ext) {
       const downloadsFolder = path.join(
         __dirname,
         "cypress/downloads"
       );
 
-      if (!fs.existsSync(downloadsFolder)) {
-        return null;
-      }
+      return new Promise((resolve) => {
+        let attempts = 0;
+        const maxAttempts = 20;
 
-      const files = fs.readdirSync(downloadsFolder);
+        const check = () => {
+          attempts++;
 
-      if (!files.length) {
-        return null;
-      }
+          if (!fs.existsSync(downloadsFolder)) {
+            if (attempts < maxAttempts) {
+              setTimeout(check, 500);
+            } else {
+              resolve(null);
+            }
+            return;
+          }
 
-      return files
-        .map((file) => ({
-          name: file,
-          time: fs.statSync(
-            path.join(downloadsFolder, file)
-          ).mtime.getTime(),
-        }))
-        .sort((a, b) => b.time - a.time)[0].name;
+          const files = fs.readdirSync(downloadsFolder)
+            .filter((f) => ext ? f.endsWith(ext) : true);
+
+          if (files.length) {
+            const latest = files
+              .map((file) => ({
+                name: file,
+                time: fs.statSync(
+                  path.join(downloadsFolder, file)
+                ).mtime.getTime(),
+              }))
+              .sort((a, b) => b.time - a.time)[0].name;
+            resolve(path.join(downloadsFolder, latest));
+          } else if (attempts < maxAttempts) {
+            setTimeout(check, 500);
+          } else {
+            resolve(null);
+          }
+        };
+
+        check();
+      });
     },
 
   });

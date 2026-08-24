@@ -738,13 +738,104 @@ class SingleSendMoneyPage {
         cy.contains("button", "Print Receipt").should("exist");
     }
 
-    validateDownloadReceipt() {
-        this.elements.downloadReceiptButton({ timeout: 15000 })
+    captureTransactionDetails() {
+        cy.get("main", { timeout: 15000 })
+            .find(".text-4xl")
             .should("be.visible")
-            .and("not.be.disabled")
-            .click();
+            .invoke("text")
+            .then((text) => {
+                cy.wrap(text.trim()).as("capturedAmount");
+                cy.log(`Captured amount: ${text.trim()}`);
+            });
 
-        cy.contains("button", "Download Receipt").should("exist");
+        cy.get("@paymentReference").then((ref) => {
+            cy.wrap(ref).as("capturedReference");
+            cy.log(`Captured reference: ${ref}`);
+        });
+
+        this.getTransactionSection("Sender Information")
+            .within(() => {
+                cy.contains("span", "Sender Name")
+                    .closest("div.flex")
+                    .within(() => {
+                        cy.get("span").last()
+                            .invoke("text")
+                            .then((text) => {
+                                cy.wrap(text.trim()).as("capturedSender");
+                                cy.log(`Captured sender: ${text.trim()}`);
+                            });
+                    });
+            });
+
+        this.getTransactionSection("Receiver Information")
+            .within(() => {
+                cy.contains("span", "Receiver Name")
+                    .closest("div.flex")
+                    .within(() => {
+                        cy.get("span").last()
+                            .invoke("text")
+                            .then((text) => {
+                                cy.wrap(text.trim()).as("capturedReceiver");
+                                cy.log(`Captured receiver: ${text.trim()}`);
+                            });
+                    });
+            });
+
+        this.getTransactionSection("Transaction Details")
+            .within(() => {
+                cy.contains("span", "Narration")
+                    .closest("div.flex")
+                    .within(() => {
+                        cy.get("span").last()
+                            .invoke("text")
+                            .then((text) => {
+                                cy.wrap(text.trim()).as("capturedDescription");
+                                cy.log(`Captured description: ${text.trim()}`);
+                            });
+                    });
+            });
+
+        cy.get("@transactionStatus").then((status) => {
+            cy.wrap(status).as("capturedStatus");
+            cy.log(`Captured status: ${status}`);
+        });
+    }
+
+    validateDownloadReceipt() {
+        cy.get("@capturedAmount").then((amount) => {
+            cy.get("@capturedReference").then((reference) => {
+                cy.get("@capturedSender").then((sender) => {
+                    cy.get("@capturedReceiver").then((receiver) => {
+                        cy.get("@capturedDescription").then((description) => {
+                            cy.get("@capturedStatus").then((status) => {
+                                cy.log(`Validating receipt against: amount=${amount}, ref=${reference}, sender=${sender}, receiver=${receiver}, desc=${description}, status=${status}`);
+
+                                this.elements.downloadReceiptButton({ timeout: 15000 })
+                                    .should("be.visible")
+                                    .and("not.be.disabled")
+                                    .click();
+
+                                cy.task("getLatestDownloadedFile", ".pdf").then((filePath) => {
+                                    cy.readFile(filePath, null).then((pdfBuffer) => {
+                                        const pdfParse = require("pdf-parse");
+                                        return pdfParse(pdfBuffer);
+                                    }).then((pdf) => {
+                                        const receiptText = pdf.text;
+                                        cy.log(`PDF text (first 500 chars): ${receiptText.substring(0, 500)}`);
+
+                                        expect(receiptText).to.contain(amount);
+                                        expect(receiptText).to.contain(reference);
+                                        expect(receiptText).to.contain(sender);
+                                        expect(receiptText).to.contain(receiver);
+                                        expect(receiptText).to.contain(status);
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
     }
 
     goBackToDisbursementTable() {
