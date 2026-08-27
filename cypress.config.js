@@ -24,6 +24,17 @@ async function setupNodeEvents(on, config) {
 
   // Get latest downloaded file
   on("task", {
+    parsePdf(filePath) {
+      const { PDFParse } = require("pdf-parse");
+      const fs = require("fs");
+      const data = new Uint8Array(fs.readFileSync(filePath));
+      const parser = new PDFParse({ data });
+      return parser.getText().then((result) => {
+        parser.destroy();
+        return result.text;
+      });
+    },
+
     getLatestDownloadedFile(ext) {
       const downloadsFolder = path.join(
         __dirname,

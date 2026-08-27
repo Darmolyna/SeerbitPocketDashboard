@@ -48,19 +48,16 @@ Then(
 );
 
 
-When("I filter transactions using a payment reference", () => {
+When("I search transactions using a payment reference", () => {
 
-    PrimaryPocketFundingPage.clickFilter();
-
-    // Add filter selections here once date/payment reference modal is available
+    PrimaryPocketFundingPage.captureFirstPaymentReference();
 
 });
 
 
 Then("only transactions matching the payment reference should be displayed", () => {
 
-    cy.get("table tbody tr")
-        .should("have.length.greaterThan", 0);
+    PrimaryPocketFundingPage.validatePaymentReferenceResults();
 
 });
 

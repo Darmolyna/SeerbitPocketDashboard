@@ -1,6 +1,9 @@
-class PrimaryPocketFundingPage {
+class SubPocketFundingPage {
 
     elements = {
+
+        subPocketContext: () =>
+            cy.contains("p", "CELL SUB POCKET"),
 
         transactionMenu: () => cy.contains("nav a", "Transactions"),
 
@@ -9,22 +12,17 @@ class PrimaryPocketFundingPage {
 
         fundingTab: () => cy.contains("button", "Funding"),
 
-        exportButton: () => cy.contains("button", "Export Transactions"),
+        disbursementTab: () =>
+            cy.contains("button", "Disbursement"),
+
+        exportButton: () =>
+            cy.contains("button", "Export Transactions"),
 
         searchInput: () =>
             cy.get('input[placeholder="Search reference"]'),
 
         filterButton: () =>
-            cy.contains('button[data-slot="trigger"]', "Filter"),
-
-        filterSearchInput: () =>
-            cy.get('input[placeholder="Search"]'),
-
-        resetButton: () =>
-            cy.contains("button", "Reset"),
-
-        emptyStateMessage: () =>
-            cy.contains("Oops, we have nothing to show!"),
+            cy.contains("button", "Filter"),
 
         dateRangeInput: () =>
             cy.get('[data-picker="date-range"] input'),
@@ -50,15 +48,19 @@ class PrimaryPocketFundingPage {
             cy.get("table tbody tr"),
 
         copyButtons: () =>
-            cy.get("button").find("svg.lucide-copy"),
+            cy.get("button svg.lucide-copy"),
 
         paymentReferenceLinks: () =>
             cy.get('a[href*="/transactions/"]'),
 
-        nextPageButton: () =>
-            cy.get("nav")
-                .find("button")
-                .last(),
+        paginationText: () =>
+            cy.contains("p", /Showing \d+ of \d+/),
+
+        paginationButtons: () =>
+            cy.get("nav").find("button"),
+
+        emptyStateMessage: () =>
+            cy.contains("Oops, we have nothing to show!"),
 
     };
 
@@ -73,32 +75,87 @@ class PrimaryPocketFundingPage {
         this.elements.transactionMenu()
             .should("be.visible", { timeout: 15000 })
             .click();
+
+        cy.url().should("include", "/transactions");
     }
-    searchPocketId(pocketId) {
 
-        // Pocket ID search now happens through the filter modal:
-        // click Filter, type the pocket ID, then Apply Filter.
-        this.elements.filterButton()
-            .click();
+    ensureFundingTabActive() {
 
-        this.elements.filterSearchInput()
+        this.elements.fundingTab()
+            .should("be.visible", { timeout: 15000 })
+            .invoke("attr", "class")
+            .then((classes) => {
+
+                if (!classes.includes("#E61B17")) {
+                    this.elements.fundingTab().click();
+                }
+
+            });
+
+        this.waitForTableData();
+
+    }
+
+    waitForTableData() {
+
+        // The table renders a loading skeleton (single td colspan=100)
+        // until the funding data is fetched, then rows with 6 cells appear.
+        cy.get("table tbody tr td", { timeout: 20000 })
+            .should("have.length.at.least", 6);
+
+    }
+
+    waitForTableDataOrEmpty() {
+
+        // After a search/filter, the table either reloads its data
+        // (rows with 6 cells) or shows the empty state message.
+        cy.get("body", { timeout: 20000 }).should(($body) => {
+
+            const hasEmptyState = $body.text()
+                .includes("Oops, we have nothing to show!");
+
+            const hasData = Cypress.$("table tbody tr td").length >= 6;
+
+            expect(hasEmptyState || hasData).to.be.true;
+
+        });
+
+    }
+
+    captureFirstPaymentReference() {
+
+        this.elements.paymentReferenceLinks()
+            .first()
+            .invoke("text")
+            .then((text) => {
+
+                const reference = text.trim().split("...")[0];
+
+                expect(reference).not.to.be.empty;
+
+                cy.wrap(reference).as("fundingSearchTerm");
+
+                cy.log(`Searching for payment reference: ${reference}`);
+
+                this.elements.searchInput()
+                    .clear()
+                    .type(reference);
+
+            });
+
+    }
+
+    searchPaymentReference(reference) {
+
+        this.elements.searchInput()
             .clear()
-            .type(pocketId, { delay: 0 });
-
-        this.clickApplyFilter();
+            .type(reference);
 
     }
 
     clickFilter() {
 
         this.elements.filterButton()
-            .click();
-
-    }
-
-    clickReset() {
-
-        this.elements.resetButton()
             .click();
 
     }
@@ -233,76 +290,19 @@ class PrimaryPocketFundingPage {
             .should("be.visible")
             .click();
 
-        // The table either reloads data (6 cells per row) or shows the
-        // "Oops, we have nothing to show!" empty state (single colspan td).
-        this.waitForTableDataOrEmpty();
+        cy.get("body").then(($body) => {
 
-    }
+            if (!$body.text().includes("Oops, we have nothing to show!")) {
 
+                this.elements.transactionRows({ timeout: 15000 })
+                    .should("have.length.greaterThan", 0);
 
-    /*
-
-    |--------------------------------------------------------------------------
-    | Payment reference search (top "Search reference" input)
-    |--------------------------------------------------------------------------
-    */
-
-    captureFirstPaymentReference() {
-
-        this.elements.paymentReferenceLinks()
-            .first()
-            .invoke("text")
-            .then((text) => {
-
-                const reference = text.trim().split("...")[0];
-
-                expect(reference).not.to.be.empty;
-
-                cy.wrap(reference).as("fundingSearchTerm");
-
-                cy.log(`Searching for payment reference: ${reference}`);
-
-                this.elements.searchInput()
-                    .clear()
-                    .type(reference);
-
-            });
-
-    }
-
-    searchPaymentReference(reference) {
-
-        this.elements.searchInput()
-            .clear()
-            .type(reference);
-
-    }
-
-    waitForTableData() {
-
-        // The table renders a loading skeleton (single td colspan=100)
-        // until the data is fetched, then rows with 6 cells appear.
-        cy.get("table tbody tr td", { timeout: 20000 })
-            .should("have.length.at.least", 6);
-
-    }
-
-    waitForTableDataOrEmpty() {
-
-        // After a search/filter, the table either reloads its data
-        // (rows with 6 cells) or shows the empty state message.
-        cy.get("body", { timeout: 20000 }).should(($body) => {
-
-            const hasEmptyState = $body.text()
-                .includes("Oops, we have nothing to show!");
-
-            const hasData = Cypress.$("table tbody tr td").length >= 6;
-
-            expect(hasEmptyState || hasData).to.be.true;
+            }
 
         });
 
     }
+
 
     /*
     |--------------------------------------------------------------------------
@@ -315,85 +315,25 @@ class PrimaryPocketFundingPage {
         this.elements.pageTitle()
             .should("be.visible");
 
-        // this.elements.fundingTab()
-        //     .should("have.class", "border-[#E61B17]");
+        this.elements.fundingTab()
+            .should("be.visible")
+            .invoke("attr", "class")
+            .should("contain", "#E61B17");
 
-        // this.elements.exportButton()
-        //     .should("be.visible");
+        this.elements.disbursementTab()
+            .should("be.visible");
 
-        // this.elements.searchInput()
-        //     .should("be.visible");
+        this.elements.exportButton()
+            .should("be.visible");
 
-        // this.elements.filterButton()
-        //     .should("be.visible");
+        this.elements.searchInput()
+            .should("be.visible");
 
-    }
+        this.elements.filterButton()
+            .should("be.visible");
 
-    validateSearchResults(result, searchText) {
-
-        const emptyMessage = "Oops, we have nothing to show!";
-
-        this.waitForTableDataOrEmpty();
-
-        // Filtering by pocket ID is reflected in the URL query string.
-        cy.url().should("include", `funding_pocketId=${searchText}`);
-
-        cy.get("body").then(($body) => {
-
-            if (result === "no transactions") {
-
-                expect($body.text()).to.include(emptyMessage);
-
-                this.elements.emptyStateMessage()
-                    .should("be.visible");
-
-                return;
-
-            }
-
-            expect($body.text()).not.to.include(emptyMessage);
-
-            // Loop through every page of results and validate each row.
-            // NOTE: source name is not asserted yet after pocket ID filter.
-            this.loopAllPages(() => {
-                this.validateSearchResultRows();
-            });
-
-        });
-
-    }
-
-    validateSearchResultRows() {
-
-        this.elements.transactionRows()
-            .should("have.length.greaterThan", 0);
-
-        this.elements.transactionRows()
-            .then(($rows) => {
-
-                $rows.each((index, row) => {
-
-                    const $row = Cypress.$(row);
-
-                    const cells = $row.find("td");
-
-                    expect(cells.length).to.equal(6);
-
-                    // Amount, payment reference, Status, balance, date created
-                    // must all be populated. Source name is intentionally not
-                    // asserted after a pocket ID filter.
-                    expect(cells.eq(1).text().trim()).not.to.equal("");
-                    expect(cells.eq(2).text().trim()).not.to.equal("");
-                    expect(cells.eq(3).text().trim()).not.to.equal("");
-                    expect(cells.eq(4).text().trim()).not.to.equal("");
-                    expect(cells.eq(5).text().trim()).not.to.equal("");
-
-                    expect($row.find('a[href*="/transactions/"]').length)
-                        .to.be.at.least(1);
-
-                });
-
-            });
+        this.elements.subPocketContext()
+            .should("be.visible");
 
     }
 
@@ -426,10 +366,10 @@ class PrimaryPocketFundingPage {
 
             });
 
-        this.elements.tableRows()
+        this.elements.transactionRows({ timeout: 20000 })
             .should("have.length.greaterThan", 0);
 
-        this.elements.tableRows()
+        this.elements.transactionRows()
             .then(($rows) => {
 
                 $rows.each((index, row) => {
@@ -444,14 +384,11 @@ class PrimaryPocketFundingPage {
 
     }
 
-    validatePaymentReferenceResults() {
+validateSearchResultReference() {
 
         cy.get("@fundingSearchTerm").then((reference) => {
 
             this.waitForTableDataOrEmpty();
-
-            // Searching by payment reference is reflected in the URL.
-            cy.url().should("include", `funding_reference=${reference}`);
 
             cy.get("body").then(($body) => {
 
@@ -484,6 +421,13 @@ class PrimaryPocketFundingPage {
 
     }
 
+    validateNoTransactionsMessage() {
+
+        this.elements.emptyStateMessage()
+            .should("be.visible");
+
+    }
+
     validatePaymentReferenceCopy() {
 
         this.elements.copyButtons()
@@ -494,8 +438,111 @@ class PrimaryPocketFundingPage {
 
     validateExportStarted() {
 
-        this.elements.exportButton()
-            .should("exist");
+        cy.get("body").then(($body) => {
+
+            const exportModalOpen =
+                $body.text().includes("Export transactions");
+
+            const exportButtonVisible = $body.find(
+                "button"
+            ).toArray().some(button =>
+                Cypress.$(button).text().includes("Export Transactions")
+            );
+
+            expect(exportModalOpen || exportButtonVisible)
+                .to.be.true;
+
+        });
+
+    }
+
+    validateTransactionRowInfo() {
+
+        this.waitForTableData();
+
+        this.elements.transactionRows({ timeout: 20000 })
+            .should("have.length.greaterThan", 0);
+
+        this.elements.transactionRows()
+            .then(($rows) => {
+
+                $rows.each((rowIndex, row) => {
+
+                    const cells = Cypress.$(row).find("td");
+
+                    expect(cells.length).to.equal(6);
+
+                    // Source Name/Number
+                    const sourceParagraphs = Cypress.$(cells[0]).find("p");
+
+                    expect(sourceParagraphs.length).to.equal(2);
+
+                    sourceParagraphs.each((index, paragraph) => {
+
+                        expect(
+                            Cypress.$(paragraph).text().trim()
+                        ).not.to.be.empty;
+
+                    });
+
+                    // Amount
+                    expect(
+                        Cypress.$(cells[1]).text().replace(/\s+/g, " ").trim()
+                    ).to.match(/^NGN \d[\d,.]*$/);
+
+                    // Payment reference: link + copy button
+                    expect(
+                        Cypress.$(cells[2]).find('a[href*="/transactions/"]').length
+                    ).to.equal(1);
+
+                    expect(
+                        Cypress.$(cells[2]).find("svg.lucide-copy").length
+                    ).to.equal(1);
+
+                    // Status
+                    expect(
+                        Cypress.$(cells[3]).text().trim()
+                    ).to.equal("Successful");
+
+                    // Balance
+                    expect(
+                        Cypress.$(cells[4]).text().replace(/\s+/g, " ").trim()
+                    ).to.match(/^NGN \d[\d,.]*$/);
+
+                    // Date created: date + time
+                    const dateCreated = Cypress.$(cells[5]).text().replace(/\s+/g, " ").trim();
+
+                    expect(dateCreated)
+                        .to.match(/^\d{1,2} [A-Z][a-z]{2}, \d{4}/);
+
+                    expect(dateCreated.toLowerCase())
+                        .to.match(/(am|pm)/);
+
+                });
+
+            });
+
+    }
+
+    validatePaginationControls() {
+
+        this.waitForTableData();
+
+        this.elements.paginationText()
+            .should("exist")
+            .then(($pagination) => {
+
+                expect($pagination.text()).to.match(/Showing \d+ of \d+/);
+
+            });
+
+        cy.get("nav").find("button")
+            .should("have.length.greaterThan", 0)
+            .then(($buttons) => {
+
+                expect($buttons.first().text().trim()).to.equal("1");
+
+            });
 
     }
 
@@ -634,19 +681,12 @@ class PrimaryPocketFundingPage {
 
     validateAllTransactionPages(dateRange) {
 
-        this.loopAllPages(() => {
+        const validateCurrentPage = () => {
 
             this.validateFilteredTransactions(dateRange);
 
-        });
-
-    }
-
-    loopAllPages(pageValidator) {
-
-        const validateCurrentPage = () => {
-            pageValidator();
         };
+
 
         const navigateNextPage = () => {
 
@@ -654,103 +694,111 @@ class PrimaryPocketFundingPage {
 
                 const noDataMessage = "Oops, we have nothing to show!";
 
+
                 if ($body.text().includes(noDataMessage)) {
+
                     cy.log("No transactions available. Skipping pagination.");
                     return;
+
                 }
+
 
                 const paginationButtons = $body.find("nav button");
 
-                // Pagination is not displayed when there is only one page
+
+                // Pagination arrow is not displayed when there is only one page
                 if (paginationButtons.length === 0) {
+
                     cy.log("Pagination not displayed. Only one page available.");
                     return;
+
                 }
 
-                const currentPageButton = [...paginationButtons]
+
+                const currentPage = [...paginationButtons]
                     .find(button =>
-                        Cypress.$(button).hasClass("text-red-500")
+                        Cypress.$(button)
+                            .hasClass("text-red-500")
                     );
 
-                if (!currentPageButton) {
+
+                if (!currentPage) {
+
                     cy.log("Current page not found. Stopping pagination.");
                     return;
+
                 }
+
 
                 const currentPageNumber =
-                    Number(currentPageButton.innerText.trim());
+                    Number(currentPage.innerText.trim());
 
-                const showingMatch =
-                    $body.text().match(/Showing \d+ of (\d+)/);
 
-                if (!showingMatch) {
-                    cy.log("Total result count not found. Stopping pagination.");
-                    return;
+                const nextPageNumber =
+                    String(currentPageNumber + 1);
+
+
+                const hasNextPage =
+                    [...paginationButtons]
+                        .some(button =>
+                            button.innerText.trim() === nextPageNumber
+                        );
+
+
+                if (hasNextPage) {
+
+
+                    cy.log(`Navigating to page ${nextPageNumber}`);
+
+
+                    let firstRowBeforeClick;
+
+                    this.elements.transactionRows()
+                        .first()
+                        .invoke("text")
+                        .then((rowText) => {
+                            firstRowBeforeClick = rowText.trim();
+                        });
+
+
+                    cy.wrap(paginationButtons[paginationButtons.length - 1])
+                        .click();
+
+
+                    this.waitForTableData();
+
+
+                    this.elements.transactionRows()
+                        .first()
+                        .invoke("text")
+                        .then((newRowText) => {
+
+                            expect(newRowText.trim())
+                                .not.to.equal("");
+
+                            expect(newRowText.trim())
+                                .not.to.equal(firstRowBeforeClick);
+
+                        });
+
+
+                    validateCurrentPage();
+
+
+                    navigateNextPage();
+
+
+                } else {
+
+                    cy.log("No next page available. Pagination completed.");
+
                 }
 
-                const totalPages =
-                    Math.ceil(Number(showingMatch[1]) / 10);
-
-                if (currentPageNumber >= totalPages) {
-                    cy.log("All pages validated. Pagination completed.");
-                    return;
-                }
-
-                cy.log(`Validating page ${currentPageNumber} of ${totalPages}`);
-
-                const lastButton =
-                    paginationButtons[paginationButtons.length - 1];
-
-                const lastButtonText =
-                    Cypress.$(lastButton).text().trim();
-
-                // The "next" arrow is the last nav button with an icon and
-                // no visible text. When it is absent the current page is the
-                // last page of results, so pagination is complete.
-                const hasNextArrow =
-                    lastButton.querySelector("svg") &&
-                    lastButtonText === "";
-
-                if (!hasNextArrow || currentPageNumber >= totalPages) {
-                    cy.log("Reached the last page. Pagination completed.");
-                    return;
-                }
-
-                let firstRowBeforeClick;
-
-                this.elements.transactionRows()
-                    .first()
-                    .invoke("text")
-                    .then((rowText) => {
-                        firstRowBeforeClick = rowText.trim();
-                    });
-
-                // The pagination sits below the fold; scroll before clicking.
-                cy.wrap(lastButton)
-                    .scrollIntoView()
-                    .click();
-
-                // Wait for the table to swap in the new page's rows.
-                // Using a retrying assertion covers the fetch/swap delay.
-                this.elements.transactionRows()
-                    .first()
-                    .invoke("text")
-                    .should((text) => {
-
-                        const newRowText = String(text).trim();
-
-                        expect(newRowText).not.to.equal("");
-                        expect(newRowText).not.to.equal(firstRowBeforeClick);
-
-                    });
-
-                validateCurrentPage();
-
-                navigateNextPage();
 
             });
 
         };
+
 
         validateCurrentPage();
 
@@ -859,4 +907,4 @@ class PrimaryPocketFundingPage {
 
 }
 
-export default new PrimaryPocketFundingPage();
+export default new SubPocketFundingPage();

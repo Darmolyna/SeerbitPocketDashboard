@@ -816,18 +816,21 @@ class SingleSendMoneyPage {
                                     .click();
 
                                 cy.task("getLatestDownloadedFile", ".pdf").then((filePath) => {
-                                    cy.readFile(filePath, null).then((pdfBuffer) => {
-                                        const pdfParse = require("pdf-parse");
-                                        return pdfParse(pdfBuffer);
-                                    }).then((pdf) => {
-                                        const receiptText = pdf.text;
+                                    cy.task("parsePdf", filePath).then((receiptText) => {
                                         cy.log(`PDF text (first 500 chars): ${receiptText.substring(0, 500)}`);
 
-                                        expect(receiptText).to.contain(amount);
-                                        expect(receiptText).to.contain(reference);
-                                        expect(receiptText).to.contain(sender);
-                                        expect(receiptText).to.contain(receiver);
-                                        expect(receiptText).to.contain(status);
+                                        const normalizedText = receiptText.replace(/\s+/g, "");
+                                        const normalizedAmount = amount.replace(/\s+/g, "");
+                                        const normalizedReference = reference.replace(/\s+/g, "");
+                                        const normalizedSender = sender.replace(/\s+/g, "");
+                                        const normalizedReceiver = receiver.replace(/\s+/g, "");
+                                        const normalizedStatus = status.replace(/\s+/g, "");
+
+                                        expect(normalizedText).to.contain(normalizedAmount);
+                                        expect(normalizedText).to.contain(normalizedReference);
+                                        expect(normalizedText).to.contain(normalizedSender);
+                                        expect(normalizedText).to.contain(normalizedReceiver);
+                                        expect(normalizedText).to.contain(normalizedStatus);
                                     });
                                 });
                             });
