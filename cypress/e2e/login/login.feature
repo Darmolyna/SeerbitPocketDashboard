@@ -16,7 +16,7 @@ Feature: Login Functionality for flow dashboard
 
     Examples:
   | email                           | password           | result                      | tag       |
-  | test@seerbit.com               | Test@124            | JABARI INC.                | positive Primary Pocket |
+  | test@seerbit.com               | Test@1234            | JABARI INC.                | positive Primary Pocket |
   | ayomide.afolabi@seerbit.com    | Password@@1           | JABARI INC.                | positive Sub Pocket |
   | invalid@example.com             | ValidPassword123   | Invalid Login Credentials     | negative  |
   | test@seerbit.com                | WrongPassword      | Invalid Login Credentials     | negative  |

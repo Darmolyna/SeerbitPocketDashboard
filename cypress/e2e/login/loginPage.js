@@ -54,7 +54,7 @@ class LoginPage {
     enterPrimaryPocketPassword() {
         this.elements.passwordInput()
             .clear()
-            .type('Test@124')
+            .type('Test@1234')
     }
 
     enterSubPocketEmail() {
