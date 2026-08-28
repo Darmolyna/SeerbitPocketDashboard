@@ -268,7 +268,6 @@ class ExportTransactionsPriPocPage {
     }
 
     validateDownloadedFile() {
-        const downloadsFolder = "cypress/downloads";
         const noTransactionsMessage =
             "No transactions found for the selected date range";
 
@@ -301,7 +300,7 @@ class ExportTransactionsPriPocPage {
                         expect(fileName.toLowerCase())
                             .to.contain("transaction");
 
-                        cy.readFile(`${downloadsFolder}/${fileName}`, {
+                        cy.readFile(fileName, {
                             timeout: 30000,
                         }).should("exist");
 

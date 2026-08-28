@@ -1,3 +1,7 @@
+function parseAmount(value) {
+    return parseFloat(String(value).replace(/,/g, ""));
+}
+
 class PrimaryPocketFundingPage {
 
     elements = {
@@ -35,6 +39,21 @@ class PrimaryPocketFundingPage {
 
         applyFilterButton: () =>
             cy.contains("button", "Apply Filter"),
+
+        exportModal: () =>
+            cy.contains("h2", "Export transactions"),
+
+        exportDateRangeIcon: () =>
+            cy.get('[data-picker="date-range"] svg[aria-label="calendar"]'),
+
+        exportRowsSelect: () =>
+            cy.get("select"),
+
+        exportColumnButtons: () =>
+            cy.get(".grid button"),
+
+        exportModalExportButton: () =>
+            cy.contains("button", /^Export$/),
 
         transactionRows: () =>
             cy.get("table tbody tr"),
@@ -494,8 +513,223 @@ class PrimaryPocketFundingPage {
 
     validateExportStarted() {
 
-        this.elements.exportButton()
-            .should("exist");
+        this.validateExportModal();
+
+        // "Monthly" (previous month) is the only preset range with data
+        // in the current dataset, so it produces an actual download.
+        this.selectExportDateRange("Monthly");
+
+        this.validateExportButtonEnabled();
+
+        this.elements.exportModalExportButton()
+            .click();
+
+        this.validateDownloadedFile();
+
+    }
+
+    validateExportModal() {
+
+        this.elements.exportModal()
+            .should("be.visible", { timeout: 10000 });
+
+        this.elements.exportDateRangeIcon()
+            .should("be.visible");
+
+        this.elements.exportRowsSelect()
+            .should("be.visible")
+            .and("have.value", "15");
+
+        this.elements.exportColumnButtons()
+            .should("have.length", 7);
+
+        this.elements.exportModalExportButton()
+            .should("be.disabled");
+
+    }
+
+    selectExportDateRange(period) {
+
+        this.elements.exportDateRangeIcon()
+            .should("be.visible")
+            .click();
+
+        switch (period) {
+
+            case "Monthly":
+
+                this.selectExportPreviousMonth();
+                break;
+
+            default:
+
+                cy.contains("button", period, { timeout: 10000 })
+                    .should("be.visible")
+                    .click();
+
+                // Close the calendar so it no longer overlays the Export button.
+                cy.contains("button", "OK", { timeout: 10000 })
+                    .should("be.visible")
+                    .click();
+
+        }
+
+        this.elements.dateRangeInput()
+            .should(($input) => {
+                expect($input.val()).to.not.equal("");
+            });
+
+    }
+
+    selectExportPreviousMonth() {
+
+        const today = new Date();
+
+        const start = new Date(today);
+
+        start.setMonth(today.getMonth() - 1);
+
+        cy.get('[data-testid="calendar-start"]', { timeout: 10000 })
+            .find('[aria-label="Previous month"]')
+            .click();
+
+        cy.get('[data-testid="calendar-end"]', { timeout: 10000 })
+            .find('[aria-label="Previous month"]')
+            .click();
+
+        cy.get(
+            `.rs-calendar-table-cell[title^="${this.formatDate(start)}"]`
+        )
+            .first()
+            .click();
+
+        cy.get(
+            `.rs-calendar-table-cell[title^="${this.formatDate(today)}"]`
+        )
+            .last()
+            .click();
+
+        // Close the calendar so it no longer overlays the Export button.
+        cy.contains("button", "OK", { timeout: 10000 })
+            .should("be.visible")
+            .click();
+
+    }
+
+    formatDate(date) {
+
+        const day = String(date.getDate()).padStart(2, "0");
+
+        const month = date.toLocaleString("en-US", {
+            month: "short"
+        });
+
+        return `${day} ${month} ${date.getFullYear()}`;
+
+    }
+
+    validateExportButtonEnabled() {
+
+        this.elements.exportModalExportButton()
+            .should("not.be.disabled");
+
+    }
+
+    validateDownloadedFile() {
+
+        const expectedHeader = [
+            "DATE",
+            "CREDITS",
+            "DEBITS",
+            "AVAILABLE BALANCE",
+            "POCKET ID",
+            "SOURCE NAME",
+            "PAYMENT REFERENCE",
+            "STATUS"
+        ];
+
+        cy.task("getLatestDownloadedFile", ".xlsx").then((filePath) => {
+
+            if (!filePath) {
+                throw new Error("No .xlsx file was downloaded after exporting transactions");
+            }
+
+            const fileName = String(filePath).split(/[\\/]/).pop();
+
+            cy.log(`Downloaded export file: ${fileName}`);
+
+            expect(fileName.toLowerCase(), "exported file name").to.contain("transaction");
+
+            cy.task("parseXlsx", filePath).then((rows) => {
+
+                expect(rows.length, "xlsx should include a header row plus data rows")
+                    .to.be.greaterThan(1);
+
+                const header = rows[0].map((cell) => cell.trim());
+
+                expect(header, "export header row").to.deep.equal(expectedHeader);
+
+                const dataRows = rows.slice(1);
+
+                cy.log(`Exported ${dataRows.length} transaction row(s)`);
+
+                // Validate every data row: correct column count, no empty cells,
+                // and well-formed values in each column.
+                dataRows.forEach((row, index) => {
+                    const rowNumber = index + 2;
+
+                    expect(
+                        row.length,
+                        `row ${rowNumber} should have ${header.length} columns`
+                    ).to.equal(header.length);
+
+                    row.forEach((cell, columnIndex) => {
+                        expect(
+                            cell.trim(),
+                            `row ${rowNumber} column "${header[columnIndex]}" should not be empty`
+                        ).to.not.be.empty;
+                    });
+
+                    const date = row[0].trim();
+                    const credits = row[1].trim();
+                    const debits = row[2].trim();
+                    const availableBalance = row[3].trim();
+                    const pocketId = row[4].trim();
+                    const paymentReference = row[6].trim();
+                    const status = row[7].trim();
+
+                    expect(date, `row ${rowNumber} date format`).to.match(
+                        /^\d{2} [A-Za-z]{3}, \d{4} \d{2}:\d{2}:\d{2}$/
+                    );
+
+                    for (const [amount, label] of [
+                        [parseAmount(credits), `row ${rowNumber} CREDITS`],
+                        [parseAmount(debits), `row ${rowNumber} DEBITS`],
+                        [parseAmount(availableBalance), `row ${rowNumber} AVAILABLE BALANCE`],
+                    ]) {
+                        expect(isFinite(amount), `${label} should be a valid amount`).to.be.true;
+                    }
+
+                    expect(pocketId, `row ${rowNumber} pocket ID format`).to.match(
+                        /^SBP\d+$/
+                    );
+
+                    expect(paymentReference, `row ${rowNumber} payment reference`).to.not.be.empty;
+
+                    expect(
+                        ["Successful", "Failed", "Pending", "In Progress"],
+                        `row ${rowNumber} status value`
+                    ).to.include(status);
+                });
+
+                const allPocketIds = new Set(dataRows.map((row) => row[4].trim()));
+
+                expect(
+                    allPocketIds.size,
+                    "all exported rows should belong to a single pocket"
+                ).to.equal(1);
+            });
+        });
 
     }
 

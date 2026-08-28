@@ -126,8 +126,8 @@ Feature: Single Send Money
     @singleSendMoney8b
     Scenario: Same pocket transfer not allowed error on Sub pocket transfer
         When I click the Sub pocket button
-        And I select the primary pocket "SBP0018808"
-        And I enter pocket ID "SBP0018808"
+        And I select the primary pocket "SBP0017146"
+        And I enter pocket ID "SBP0017146"
         And I enter amount "1"
         And I enter narration "Same pocket transfer test"
         And I click the Continue button
