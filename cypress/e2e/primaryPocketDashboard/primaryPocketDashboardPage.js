@@ -406,8 +406,26 @@ class PrimaryPocketDashboardPage {
     //Validate currency conversion table
     validateCurrencyConversionTable() {
 
+        // Wait for the loading skeleton rows (animate-pulse / bg-gray-200) to
+        // be replaced by real data rows before iterating.  The skeleton has no
+        // <span> currency codes and re-renders mid-chain, which would detach
+        // a captured row and break cy.wrap(...).find(...).
+        this.elements.currencyConversionRows({ timeout: 20000 })
+            .should(($rows) => {
+
+                expect($rows.length).to.be.greaterThan(0);
+
+                // Every row must contain at least one <span> (a currency code),
+                // which only exists once the real data has rendered.
+                const loadedRows = [...$rows].filter((row) =>
+                    Cypress.$(row).find("span").length > 0
+                );
+
+                expect(loadedRows.length).to.equal($rows.length);
+
+            });
+
         this.elements.currencyConversionRows({ timeout: 15000 })
-            .should("have.length.greaterThan", 0)
             .each(($row, index) => {
 
                 cy.log(`Validating Currency Conversion Row ${index + 1}`);
