@@ -216,6 +216,7 @@ Feature: Single Send Money
         When I enter the OTP "123456"
         Then all OTP fields should be filled
         When I click the Continue button after OTP
+        Then I should see a successful transaction page
 
     # ============================
     # CANCEL BUTTON

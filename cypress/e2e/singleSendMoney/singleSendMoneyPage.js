@@ -120,6 +120,12 @@ class SingleSendMoneyPage {
             cy.contains("span", "Pocket ID").parent(),
         receiverDescription: () =>
             cy.contains("span", "Description").parent(),
+        receiverAccountName: () =>
+            cy.contains("span", "Account name").parent(),
+        receiverBank: () =>
+            cy.contains("span", "Bank").parent(),
+        receiverAccountNumber: () =>
+            cy.contains("span", "Account number").parent(),
         paymentReference: () =>
             cy.contains("span", "Payment reference").parent(),
         backButton: () =>
@@ -221,6 +227,8 @@ class SingleSendMoneyPage {
             .should("be.visible")
             .click();
 
+        cy.wrap("bank").as("transferType");
+
         this.elements.accountNumberInput({ timeout: 20000 })
             .should("be.visible");
     }
@@ -229,6 +237,8 @@ class SingleSendMoneyPage {
         this.elements.subPocketButton({ timeout: 15000 })
             .should("be.visible")
             .click();
+
+        cy.wrap("subpocket").as("transferType");
 
         this.elements.pocketIdInput({ timeout: 20000 })
             .should("be.visible");
@@ -1184,16 +1194,53 @@ class SingleSendMoneyPage {
             this.elements.receiverDetailsHeader()
                 .should("be.visible");
 
-            cy.contains("span", "Pocket ID", { timeout: 30000 })
-                .parent()
-                .should("be.visible")
-                .invoke("text")
-                .then((text) => {
-                    expect(text).to.match(/SBP\d+|Pocket ID\d+/);
-                });
+            cy.get("@transferType").then((transferType) => {
 
-            this.elements.receiverDescription()
-                .should("be.visible");
+                if (transferType === "bank") {
+
+                    // Bank transfer receiver details: Account name, Bank,
+                    // Account number, Description (no Pocket ID).
+                    this.elements.receiverAccountName()
+                        .should("be.visible")
+                        .invoke("text")
+                        .then((text) => {
+                            expect(text).to.match(/Account name\s*\S+/);
+                        });
+
+                    this.elements.receiverBank()
+                        .should("be.visible")
+                        .invoke("text")
+                        .then((text) => {
+                            expect(text).to.match(/Bank\s*\S+/);
+                        });
+
+                    this.elements.receiverAccountNumber()
+                        .should("be.visible")
+                        .invoke("text")
+                        .then((text) => {
+                            expect(text).to.match(/Account number\s*\d{10}/);
+                        });
+
+                    this.elements.receiverDescription()
+                        .should("be.visible");
+
+                } else {
+
+                    // Sub pocket receiver details: Pocket ID + Description.
+                    cy.contains("span", "Pocket ID", { timeout: 30000 })
+                        .parent()
+                        .should("be.visible")
+                        .invoke("text")
+                        .then((text) => {
+                            expect(text).to.match(/SBP\d+|Pocket ID\d+/);
+                        });
+
+                    this.elements.receiverDescription()
+                        .should("be.visible");
+
+                }
+
+            });
 
             this.elements.continueButton()
                 .should("be.visible")
