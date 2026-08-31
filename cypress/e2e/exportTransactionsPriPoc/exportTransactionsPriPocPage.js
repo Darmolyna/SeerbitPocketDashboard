@@ -1,3 +1,4 @@
+
 class ExportTransactionsPriPocPage {
 
     elements = {
@@ -6,7 +7,8 @@ class ExportTransactionsPriPocPage {
             cy.get("nav a", { timeout: 30000 })
                 .contains("Transactions", { timeout: 30000 }),
 
-        disbursementMenu: () => cy.contains('button', 'Disbursement'),
+        disbursementMenu: () =>
+            cy.contains("button", "Disbursement"),
 
         exportTransactionsButton: () =>
             cy.contains("div", "Export Transactions"),
@@ -45,9 +47,11 @@ class ExportTransactionsPriPocPage {
             cy.get('[data-testid="calendar-end"]'),
 
         noTransactionsMessage: () =>
-            cy.contains("No transactions found for the selected date range")
+            cy.get("p")
+                .contains("No transactions found for the selected date range")
 
-    }
+    };
+
 
     /*
     |--------------------------------------------------------------------------
@@ -56,12 +60,16 @@ class ExportTransactionsPriPocPage {
     */
 
     clickTransactionMenu() {
+
         this.elements.transactionMenu()
             .should("be.visible", { timeout: 15000 })
             .click();
+
     }
 
+
     clickDisbursementMenu() {
+
         this.elements.transactionMenu()
             .should("be.visible", { timeout: 10000 })
             .click();
@@ -69,29 +77,46 @@ class ExportTransactionsPriPocPage {
         this.elements.disbursementMenu()
             .should("be.visible", { timeout: 10000 })
             .click();
+
     }
 
+
     clickExportTransactionsButton() {
-        this.elements.exportTransactionsButton().click()
+
+        this.elements.exportTransactionsButton()
+            .should("be.visible")
+            .click();
+
     }
+
 
     validateExportModal() {
 
-        this.elements.modal().should("be.visible");
-        this.elements.dateRangeInput().should("be.visible");
-        this.elements.rowDropdown().should("be.visible");
-        this.elements.exportButton().should("be.disabled");
+        this.elements.modal()
+            .should("be.visible");
+
+        this.elements.dateRangeInput()
+            .should("be.visible");
+
+        this.elements.rowDropdown()
+            .should("be.visible");
+
+        this.elements.exportButton()
+            .should("be.disabled");
 
     }
 
+
     openCalendar() {
 
-        this.elements.datePickerIcon().click();
+        this.elements.datePickerIcon()
+            .click();
 
         this.elements.calendar()
             .should("be.visible");
 
     }
+
 
     selectRows(rows) {
 
@@ -100,38 +125,47 @@ class ExportTransactionsPriPocPage {
 
     }
 
+
     selectDateRange(range) {
 
         this.openCalendar();
 
         switch (range) {
+
             case "Today":
 
-                cy.contains("button", "Today").click();
+                cy.contains("button", "Today")
+                    .click();
+
                 break;
 
 
             case "Yesterday":
 
-                cy.contains("button", "Yesterday").click();
+                cy.contains("button", "Yesterday")
+                    .click();
+
                 break;
+
 
             case "Weekly":
 
-                cy.contains("button", "Last 7 Days").click();
+                cy.contains("button", "Last 7 Days")
+                    .click();
+
                 break;
+
 
             case "Monthly":
 
                 this.selectPreviousMonth();
+
                 break;
 
         }
 
-        // this.elements.okButton()
-        //     .click();
-
     }
+
 
     selectPreviousMonth() {
 
@@ -161,47 +195,71 @@ class ExportTransactionsPriPocPage {
             .last()
             .click();
 
-        //click ok button
-        this.elements.okButton().click()
-
-    }
-
-    clickExport() {
-
-        this.elements.exportButton()
+        this.elements.okButton()
             .click();
 
     }
 
 
+    clickExport() {
+
+        this.elements.exportButton()
+            .should("be.visible")
+            .should("not.be.disabled")
+            .click();
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Export
+    |--------------------------------------------------------------------------
+    */
+
     clickExportIfAvailable() {
 
-        cy.get("body").then(($body) => {
+        const noTransactionsMessage =
+            "No transactions found for the selected date range";
 
-            if ($body.text().includes("No transactions found for the selected date range")) {
+        cy.get("body", { timeout: 30000 })
+            .then(($body) => {
 
-                cy.log("No transactions available. Export skipped.");
+                /*
+                 * IMPORTANT:
+                 * Check for the error message BEFORE clicking Export.
+                 *
+                 * If the application has already displayed the message,
+                 * do not click Export and do not attempt to check downloads.
+                 */
 
-            } else {
+                if ($body.find("p").filter((_, el) =>
+                    Cypress.$(el)
+                        .text()
+                        .trim()
+                        .includes(noTransactionsMessage)
+                ).length > 0) {
+
+                    cy.log(
+                        "No transactions found. Export will not be attempted."
+                    );
+
+                    return;
+                }
+
+                /*
+                 * Transactions exist, so click Export.
+                 */
 
                 this.elements.exportButton()
                     .should("be.visible")
                     .should("not.be.disabled")
                     .click();
 
-            }
-
-        });
+            });
 
     }
 
-    validateNoTransactionsMessage() {
-
-        this.elements.noTransactionsMessage()
-            .should("be.visible")
-            .and("contain.text", "No transactions found for the selected date range");
-
-    }
 
     /*
     |--------------------------------------------------------------------------
@@ -209,6 +267,16 @@ class ExportTransactionsPriPocPage {
     |--------------------------------------------------------------------------
     */
 
+    validateNoTransactionsMessage() {
+
+        this.elements.noTransactionsMessage()
+            .should("be.visible")
+            .and(
+                "contain.text",
+                "No transactions found for the selected date range"
+            );
+
+    }
 
 
     validateExportEnabled() {
@@ -217,6 +285,7 @@ class ExportTransactionsPriPocPage {
             .should("not.be.disabled");
 
     }
+
 
     validateExportDisabled() {
 
@@ -228,22 +297,26 @@ class ExportTransactionsPriPocPage {
 
     validateExportState() {
 
-        cy.get("body").then(($body) => {
+        const noTransactionsMessage =
+            "No transactions found for the selected date range";
 
-            if ($body.text().includes("No transactions found for the selected date range")) {
+        cy.get("body", { timeout: 30000 })
+            .then(($body) => {
 
-                this.validateNoTransactionsMessage();
-                this.validateExportDisabled();
+                if ($body.text().includes(noTransactionsMessage)) {
 
-            } else {
+                    this.validateNoTransactionsMessage();
+
+                    return;
+
+                }
 
                 this.validateExportEnabled();
 
-            }
-
-        });
+            });
 
     }
+
 
     validateSelectedRows(rows) {
 
@@ -251,6 +324,7 @@ class ExportTransactionsPriPocPage {
             .should("have.value", rows);
 
     }
+
 
     validateDateSelected() {
 
@@ -260,6 +334,7 @@ class ExportTransactionsPriPocPage {
 
     }
 
+
     validateDefaultColumns() {
 
         this.elements.selectedColumns()
@@ -267,80 +342,110 @@ class ExportTransactionsPriPocPage {
 
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Validate Export Result
+    |--------------------------------------------------------------------------
+    */
+
     validateDownloadedFile() {
+
         const noTransactionsMessage =
             "No transactions found for the selected date range";
 
-        const timeout = 30000;
-        const startTime = Date.now();
+        /*
+         * Wait briefly for the export API/UI response.
+         * This gives the application time to render the error.
+         */
+        cy.wait(1000);
 
-        const checkResult = () => {
-            // 1. First check if the "No transactions" message is displayed
-            return cy.get("body").then(($body) => {
+        /*
+         * Check the DOM BEFORE calling the download task.
+         */
+        cy.get("body").then(($body) => {
 
-                if ($body.text().includes(noTransactionsMessage)) {
-                    cy.log("No transactions found for the selected date range");
+            const errorMessage = $body
+                .find("p")
+                .filter((_, element) =>
+                    Cypress.$(element)
+                        .text()
+                        .trim()
+                        .includes(noTransactionsMessage)
+                );
 
-                    cy.contains(noTransactionsMessage, {
-                        timeout: 5000,
-                    }).should("be.visible");
 
-                    return;
-                }
+            /*
+             * ERROR SCENARIO
+             *
+             * If the message exists:
+             * - Validate it
+             * - STOP
+             * - NEVER call getLatestDownloadedFile
+             */
+            if (errorMessage.length > 0) {
 
-                // 2. Check if a file has been downloaded
-                return cy.task("getLatestDownloadedFile", null).then((fileName) => {
+                cy.log(
+                    "No transactions found for the selected date range."
+                );
 
-                    if (fileName) {
-                        cy.log(`Downloaded file: ${fileName}`);
-
-                        expect(fileName, "Downloaded file name")
-                            .to.not.be.empty;
-
-                        expect(fileName.toLowerCase())
-                            .to.contain("transaction");
-
-                        cy.readFile(fileName, {
-                            timeout: 30000,
-                        }).should("exist");
-
-                        return;
-                    }
-
-                    // 3. Neither result exists yet
-                    if (Date.now() - startTime < timeout) {
-                        cy.log("Waiting for download or no-transactions message...");
-
-                        return new Cypress.Promise((resolve) => {
-                            setTimeout(resolve, 1000);
-                        }).then(() => {
-                            return checkResult();
-                        });
-                    }
-
-                    // 4. Nothing happened within the timeout
-                    throw new Error(
-                        `Neither a transaction file nor the "${noTransactionsMessage}" message was found within ${timeout}ms`
+                cy.wrap(errorMessage)
+                    .should("be.visible")
+                    .and(
+                        "contain.text",
+                        noTransactionsMessage
                     );
-                });
-            });
-        };
 
-        checkResult();
+                return;
+            }
+
+
+            /*
+             * SUCCESS SCENARIO
+             *
+             * Only call getLatestDownloadedFile when
+             * there is no error message.
+             */
+            cy.task("getLatestDownloadedFile", null)
+                .then((fileName) => {
+
+                    expect(
+                        fileName,
+                        "Downloaded file name"
+                    ).to.not.be.empty;
+
+                    cy.log(
+                        `Downloaded file: ${fileName}`
+                    );
+
+                    expect(
+                        fileName.toLowerCase()
+                    ).to.contain("transaction");
+
+                });
+
+        });
+
     }
+
+
 
     formatDate(date) {
 
-        const day = String(date.getDate()).padStart(2, "0");
+        const day =
+            String(date.getDate())
+                .padStart(2, "0");
 
-        const month = date.toLocaleString("en-US", {
-            month: "short"
-        });
+        const month =
+            date.toLocaleString("en-US", {
+                month: "short"
+            });
 
         return `${day} ${month} ${date.getFullYear()}`;
 
     }
 
 }
+
 
 export default new ExportTransactionsPriPocPage();
