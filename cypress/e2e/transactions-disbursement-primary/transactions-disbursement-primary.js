@@ -136,3 +136,20 @@ Then("the disbursement transactions export should start successfully", () => {
     PrimaryPocketDisbursementPage.validateExportStarted();
 
 });
+
+
+When("I export {string} disbursement transaction rows", (rows) => {
+
+    PrimaryPocketDisbursementPage.exportTransactionRows(rows);
+
+});
+
+
+Then(
+    "the disbursement export should contain exactly {string} rows",
+    (rows) => {
+
+        PrimaryPocketDisbursementPage.validateExportedRowCount(rows);
+
+    }
+);

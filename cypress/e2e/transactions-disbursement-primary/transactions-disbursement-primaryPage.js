@@ -530,6 +530,130 @@ class PrimaryPocketDisbursementPage {
 
     }
 
+    exportTransactionRows(rows) {
+
+        this.validateExportModal();
+
+        this.elements.exportRowsSelect()
+            .select(rows);
+
+        this.selectExportDateRange("Monthly");
+
+        this.elements.exportModalExportButton()
+            .should("not.be.disabled")
+            .click();
+
+        cy.task("getLatestDownloadedFile", ".xlsx").then((filePath) => {
+
+            if (!filePath) {
+                throw new Error("No .xlsx file was downloaded after exporting transactions");
+            }
+
+            cy.wrap(filePath).as("lastExportFile");
+
+        });
+
+    }
+
+    validateExportedRowCount(expectedRows) {
+
+        const expectedCount = Number(expectedRows);
+
+        const parsed = this.parseExportedFile();
+
+        cy.wrap(parsed).then(({ header, dataRows, fileName }) => {
+
+            cy.log(`Downloaded export file: ${fileName}`);
+
+            // All expected columns must be strictly present.
+            this.assertAllColumnsPresent(header);
+
+            expect(
+                dataRows.length,
+                `expected ${expectedCount} data rows in export`
+            ).to.equal(expectedCount);
+
+            // The DATE column must never be empty and must be well-formed.
+            dataRows.forEach((row, index) => {
+                const rowNumber = index + 2;
+
+                expect(
+                    row.length,
+                    `row ${rowNumber} should have ${header.length} columns`
+                ).to.equal(header.length);
+
+                const date = row[0].trim();
+
+                expect(date, `row ${rowNumber} DATE should not be empty`)
+                    .to.not.be.empty;
+
+                expect(date, `row ${rowNumber} date format`).to.match(
+                    /^\d{2} [A-Za-z]{3}, \d{4} \d{2}:\d{2}:\d{2}$/
+                );
+
+                // Essential columns must be populated. CREDITS is allowed
+                // to be empty because this is a disbursement export.
+                const requiredIndexes = [0, 2, 3, 4, 5, 6, 7];
+
+                requiredIndexes.forEach((columnIndex) => {
+                    expect(
+                        row[columnIndex].trim(),
+                        `row ${rowNumber} column "${header[columnIndex]}" should not be empty`
+                    ).to.not.be.empty;
+                });
+            });
+
+        });
+
+    }
+
+    parseExportedFile() {
+
+        return cy.task("getLatestDownloadedFile", ".xlsx").then((filePath) => {
+
+            if (!filePath) {
+                throw new Error("No .xlsx file was downloaded after exporting transactions");
+            }
+
+            const fileName = String(filePath).split(/[\\/]/).pop();
+
+            return cy.task("parseXlsx", filePath).then((rows) => {
+
+                expect(rows.length, "xlsx should include a header row plus data rows")
+                    .to.be.greaterThan(1);
+
+                return {
+                    fileName,
+                    header: rows[0].map((cell) => cell.trim()),
+                    dataRows: rows.slice(1).map((row) => row.map((cell) => String(cell).trim()))
+                };
+
+            });
+
+        });
+
+    }
+
+    assertAllColumnsPresent(header) {
+
+        const expectedHeader = [
+            "DATE",
+            "CREDITS",
+            "DEBITS",
+            "AVAILABLE BALANCE",
+            "POCKET ID",
+            "RECEIVER NAME",
+            "PAYMENT REFERENCE",
+            "STATUS"
+        ];
+
+        expectedHeader.forEach((col) => {
+            expect(header, `export header should contain "${col}"`)
+                .to.include(col);
+        });
+
+    }
+
     validateExportModal() {
 
         this.elements.exportModal()

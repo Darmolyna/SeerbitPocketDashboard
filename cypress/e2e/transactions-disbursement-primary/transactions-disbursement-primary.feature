@@ -59,3 +59,16 @@ Scenario: Validate payment reference copy
 Scenario: Export disbursement Transactions
     When I export disbursement transactions
     Then the disbursement transactions export should start successfully
+
+@transactionDisbursement7
+Scenario Outline: Export disbursement transactions rows
+    When I export "<rows>" disbursement transaction rows
+    Then the disbursement export should contain exactly "<rows>" rows
+
+Examples:
+    | rows  |
+    | 15    |
+    | 25    |
+    | 50    |
+    | 100   |
+    | 200   |
