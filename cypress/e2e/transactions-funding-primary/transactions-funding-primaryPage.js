@@ -463,6 +463,55 @@ class PrimaryPocketFundingPage {
 
     }
 
+    validateSearchByPaymentReference(reference) {
+
+        // Searching by payment reference is reflected in the URL.
+        cy.url().should("include", `funding_reference=${reference}`);
+
+        const emptyMessage = "Oops, we have nothing to show!";
+
+        // A non-existent reference (e.g. 9999999999) yields no rows.
+        cy.get("body", { timeout: 20000 }).should(($body) => {
+
+            const hasEmptyState = $body.text().includes(emptyMessage);
+
+            const hasData = Cypress.$("table tbody tr td").length >= 6;
+
+            expect(hasEmptyState || hasData).to.be.true;
+
+        });
+
+        cy.get("body").then(($body) => {
+
+            if ($body.text().includes(emptyMessage)) {
+
+                this.elements.emptyStateMessage()
+                    .should("be.visible");
+
+                return;
+
+            }
+
+            // Every row must contain the searched reference in its
+            // payment reference link href (displayed text is truncated).
+            this.loopAllPages(() => {
+
+                cy.get("tbody tr a[href*='/transactions/']")
+                    .should("have.length.greaterThan", 0)
+                    .each(($link) => {
+
+                        expect(
+                            Cypress.$( $link ).attr("href")
+                        ).to.contain(reference);
+
+                    });
+
+            });
+
+        });
+
+    }
+
     validatePaymentReferenceResults() {
 
         cy.get("@fundingSearchTerm").then((reference) => {

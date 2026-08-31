@@ -44,7 +44,7 @@ When("I search using a payment reference {string}", (reference) => {
 
 
 Then(
-    "I should see transactions matching payment reference {string}",
+    "I should see disbursement matching payment reference {string}",
     (reference) => {
 
         PrimaryPocketDisbursementPage.validatePaymentReferenceResults(reference);

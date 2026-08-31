@@ -22,15 +22,16 @@ Examples:
     | 9999999999   | no transactions           |
 
 @transactionDisbursement30
-Scenario Outline: Search transactions by payment reference
+Scenario Outline: Search disbursement by payment reference
     When I search using a payment reference "<reference>"
-    Then I should see transactions matching payment reference "<reference>"
+    Then I should see disbursement matching payment reference "<reference>"
 
 Examples:
-    | reference                             |
-    | Charge-F0006640830-qpc4jk             |
-    | F0006640830                           |
-    | JIN-S49745200465                      |
+    | reference                             | result                    |
+    | Charge-F0006640830-qpc4jk             | matching transactions     |
+    | F0006640830                           | matching transactions     |
+    | JIN-S49745200465                      | matching transactions     |
+    | 9999999999   | no transactions           |
 
 @transactionDisbursement3
 Scenario: Filter transactions by Payment Reference

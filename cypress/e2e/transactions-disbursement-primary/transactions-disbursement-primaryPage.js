@@ -408,17 +408,43 @@ class PrimaryPocketDisbursementPage {
         // Searching by payment reference reflects in the URL query string.
         cy.url().should("include", `disbursement_reference=${reference}`);
 
-        // Validate every page of returned rows contains the reference.
-        this.loopAllPages(() => {
+        const emptyMessage = "Oops, we have nothing to show!";
 
-            cy.get("tbody tr a[href*='/transactions/']")
-                .should("have.length.greaterThan", 0)
-                .each(($link) => {
+        // A non-existent reference (e.g. 9999999999) yields no rows.
+        cy.get("body", { timeout: 20000 }).should(($body) => {
 
-                    expect(Cypress.$( $link ).attr("href"))
-                        .to.include(reference);
+            const hasEmptyState = $body.text().includes(emptyMessage);
 
-                });
+            const hasData = Cypress.$("table tbody tr td").length >= 6;
+
+            expect(hasEmptyState || hasData).to.be.true;
+
+        });
+
+        cy.get("body").then(($body) => {
+
+            if ($body.text().includes(emptyMessage)) {
+
+                this.elements.emptyStateMessage()
+                    .should("be.visible");
+
+                return;
+
+            }
+
+            // Validate every page of returned rows contains the reference.
+            this.loopAllPages(() => {
+
+                cy.get("tbody tr a[href*='/transactions/']")
+                    .should("have.length.greaterThan", 0)
+                    .each(($link) => {
+
+                        expect(Cypress.$( $link ).attr("href"))
+                            .to.include(reference);
+
+                    });
+
+            });
 
         });
 

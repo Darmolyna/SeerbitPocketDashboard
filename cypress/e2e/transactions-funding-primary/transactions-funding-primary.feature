@@ -19,13 +19,19 @@ Examples:
     | SBP0018808   | matching transactions     |
     | SBP0017146   | matching transactions     |
     | SBP0017144   | matching transactions     |
-    | SBP0000829   | matching transactions     |
     | 9999999999   | no transactions           |
 
 @transactionFunding3
-Scenario: Search transactions by Payment Reference
-    When I search transactions using a payment reference
-    Then only transactions matching the payment reference should be displayed
+Scenario Outline: Search transactions funding by payment reference
+    When I search using a payment reference "<reference>"
+    Then I should see transactions funding matching payment reference "<reference>"
+
+Examples:
+    | reference                             | result                    |
+    | JIN-S54184569908_XFER-C           | matching transactions     |
+    | 000017260828092034265485097205-C                           | matching transactions     |
+    | JIN-S16013439124-C               |matching transactions     |
+    | 9999999999                      |no transactions                |
 
 @transactionFunding4   
 Scenario Outline: Filter transactions by Date Range

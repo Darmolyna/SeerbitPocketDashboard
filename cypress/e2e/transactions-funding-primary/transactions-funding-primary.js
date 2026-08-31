@@ -55,6 +55,23 @@ When("I search transactions using a payment reference", () => {
 });
 
 
+When("I search using a payment reference {string}", (reference) => {
+
+    PrimaryPocketFundingPage.searchPaymentReference(reference);
+
+});
+
+
+Then(
+    "I should see transactions funding matching payment reference {string}",
+    (reference) => {
+
+        PrimaryPocketFundingPage.validateSearchByPaymentReference(reference);
+
+    }
+);
+
+
 Then("only transactions matching the payment reference should be displayed", () => {
 
     PrimaryPocketFundingPage.validatePaymentReferenceResults();
