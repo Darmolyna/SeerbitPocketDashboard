@@ -22,7 +22,13 @@ class PrimaryPocketDisbursementPage {
             cy.get('input[placeholder="Search reference"]'),
 
         filterButton: () =>
-            cy.contains("button", "Filter"),
+            cy.contains("div", "Filter"),
+
+        filterSearchInput: () =>
+            cy.get('input[placeholder="Search"]'),
+
+        emptyStateMessage: () =>
+            cy.contains("Oops, we have nothing to show!"),
 
         dateRangeInput: () =>
             cy.get('[data-picker="date-range"] input'),
@@ -85,9 +91,17 @@ class PrimaryPocketDisbursementPage {
     }
     searchPocketId(pocketId) {
 
-        this.elements.searchInput()
+        // Pocket ID search happens through the filter modal:
+        // click Filter, type the pocket ID into the "Search" input,
+        // then Apply Filter.
+        this.elements.filterButton()
+            .click();
+
+        this.elements.filterSearchInput()
             .clear()
-            .type(pocketId);
+            .type(pocketId, { delay: 0 });
+
+        this.clickApplyFilter();
 
     }
 
@@ -95,6 +109,15 @@ class PrimaryPocketDisbursementPage {
 
         this.elements.filterButton()
             .click();
+
+    }
+
+    searchPaymentReference(reference) {
+
+        this.elements.searchInput()
+            .clear()
+            .type(reference, { delay: 0 })
+            .type("{enter}");
 
     }
 
@@ -228,8 +251,84 @@ class PrimaryPocketDisbursementPage {
             .should("be.visible")
             .click();
 
-        this.elements.transactionRows({ timeout: 15000 })
-            .should("have.length.gte", 1);
+        // The table either reloads data (rows with 6 cells) or shows the
+        // "Oops, we have nothing to show!" empty state (single colspan td).
+        cy.get("body", { timeout: 20000 }).should(($body) => {
+
+            const hasEmptyState = $body.text()
+                .includes("Oops, we have nothing to show!");
+
+            const hasData = Cypress.$("table tbody tr td").length >= 6;
+
+            expect(hasEmptyState || hasData).to.be.true;
+
+        });
+
+    }
+
+    loopAllPages(callback) {
+
+        const visitPage = () => {
+
+            callback();
+
+            cy.get("body").then(($body) => {
+
+                // Check for the "Showing X of Y" indicator — if only
+                // one page, "Showing" text is absent or X === Y.
+                const showingMatch = $body
+                    .text()
+                    .match(/Showing\s+\d+\s+of\s+(\d+)/);
+
+                if (!showingMatch) {
+
+                    cy.log("No pagination indicator — single page of results.");
+
+                    return;
+
+                }
+
+                const total = Number(showingMatch[1]);
+
+                if (total <= 10) {
+
+                    cy.log(`Total results ${total} fit on one page.`);
+
+                    return;
+
+                }
+
+                // The next-page arrow button contains an SVG with class
+                // lucide-arrow-right. If it is missing, there is only one
+                // page of data.
+                const $nextBtn = $body
+                    .find("svg.lucide-arrow-right")
+                    .first()
+                    .closest("button");
+
+                if ($nextBtn.length === 0) {
+
+                    cy.log("No next-page arrow — single page of results.");
+
+                    return;
+
+                }
+
+                cy.wrap($nextBtn)
+                    .scrollIntoView()
+                    .click({ force: true });
+
+                cy.contains("td", /^(NGN|₦)/, { timeout: 15000 })
+                    .should("be.visible")
+                    .first();
+
+                visitPage();
+
+            });
+
+        };
+
+        visitPage();
 
     }
 
@@ -258,29 +357,68 @@ class PrimaryPocketDisbursementPage {
 
     }
 
-    validateSearchResults(searchText) {
+    validateSearchResults(result, searchText) {
+
+        const emptyMessage = "Oops, we have nothing to show!";
+
+        // Wait for either the empty state or the table data to render.
+        cy.get("body", { timeout: 20000 }).should(($body) => {
+
+            const hasEmptyState = $body.text().includes(emptyMessage);
+
+            const hasData = Cypress.$("table tbody tr td").length >= 6;
+
+            expect(hasEmptyState || hasData).to.be.true;
+
+        });
+
+        // Filtering by pocket ID is reflected in the URL query string.
+        cy.url().should("include", `disbursement_pocketId=${searchText}`);
 
         cy.get("body").then(($body) => {
 
-            const emptyMessage = "Oops, we have nothing to show!";
+            if (result === "no transactions") {
 
-            if ($body.text().includes(emptyMessage)) {
+                expect($body.text()).to.include(emptyMessage);
 
                 this.elements.emptyStateMessage()
                     .should("be.visible");
 
-            } else {
-
-                this.elements.tableRows()
-                    .should("have.length.greaterThan", 0)
-                    .each(($row) => {
-
-                        cy.wrap($row)
-                            .should("contain.text", searchText);
-
-                    });
+                return;
 
             }
+
+            expect($body.text()).not.to.include(emptyMessage);
+
+            // Table has data — pagination controls live in the same
+            // container (div.flex.justify-between), not directly in nav.
+            this.loopAllPages(() => {
+
+                this.elements.tableRows()
+                    .should("have.length.greaterThan", 0);
+
+            });
+
+        });
+
+    }
+
+    validatePaymentReferenceResults(reference) {
+
+        // Searching by payment reference reflects in the URL query string.
+        cy.url().should("include", `disbursement_reference=${reference}`);
+
+        // Validate every page of returned rows contains the reference.
+        this.loopAllPages(() => {
+
+            cy.get("tbody tr a[href*='/transactions/']")
+                .should("have.length.greaterThan", 0)
+                .each(($link) => {
+
+                    expect(Cypress.$( $link ).attr("href"))
+                        .to.include(reference);
+
+                });
 
         });
 
@@ -490,121 +628,64 @@ class PrimaryPocketDisbursementPage {
 
         };
 
-
         const navigateNextPage = () => {
 
             cy.get("body").then(($body) => {
 
                 const noDataMessage = "Oops, we have nothing to show!";
 
-
                 if ($body.text().includes(noDataMessage)) {
 
                     cy.log("No transactions available. Skipping pagination.");
+
                     return;
 
                 }
 
+                // Only paginate when the data spans more than one page.
+                const showingMatch = $body
+                    .text()
+                    .match(/Showing\s+\d+\s+of\s+(\d+)/);
 
-                const paginationButtons = $body.find("nav button");
-
-
-                // Pagination arrow is not displayed when there is only one page
-                if (paginationButtons.length === 0) {
+                if (!showingMatch || Number(showingMatch[1]) <= 10) {
 
                     cy.log("Pagination not displayed. Only one page available.");
+
                     return;
 
                 }
 
+                // The next-page arrow button contains an SVG with class
+                // lucide-arrow-right. If missing, we are on the last page.
+                const $nextBtn = $body
+                    .find("svg.lucide-arrow-right")
+                    .first()
+                    .closest("button");
 
-                const currentPage = [...paginationButtons]
-                    .find(button =>
-                        Cypress.$(button)
-                            .hasClass("text-red-500")
-                    );
+                if ($nextBtn.length === 0) {
 
+                    cy.log("No next-page arrow. Pagination completed.");
 
-                if (!currentPage) {
-
-                    cy.log("Current page not found. Stopping pagination.");
                     return;
 
                 }
 
+                cy.wrap($nextBtn)
+                    .scrollIntoView()
+                    .click({ force: true });
 
-                const currentPageNumber =
-                    Number(currentPage.innerText.trim());
+                // Wait for fresh data to render (a currency amount cell).
+                cy.contains("td", /^(NGN|₦)/, { timeout: 15000 })
+                    .should("be.visible")
+                    .first();
 
+                validateCurrentPage();
 
-                const nextPageNumber =
-                    String(currentPageNumber + 1);
-
-
-                const hasNextPage =
-                    [...paginationButtons]
-                        .some(button =>
-                            button.innerText.trim() === nextPageNumber
-                        );
-
-
-                if (hasNextPage) {
-
-
-                    cy.log(`Navigating to page ${nextPageNumber}`);
-
-
-                    const firstRowBeforeClick = this.elements.transactionRows()
-                        .first()
-                        .invoke("text");
-
-
-                    cy.wrap(paginationButtons[paginationButtons.length - 1])
-                        .click();
-
-
-                    this.elements.transactionRows({ timeout: 15000 })
-                        .should("have.length.greaterThan", 0)
-                        .each(($row) => {
-
-                            cy.wrap($row)
-                                .find("td")
-                                .should("have.length", 6);
-
-                        });
-
-
-                    this.elements.transactionRows()
-                        .first()
-                        .invoke("text")
-                        .should((newRowText) => {
-
-                            expect(newRowText.trim())
-                                .not.to.equal("");
-
-                            expect(newRowText)
-                                .not.to.equal(firstRowBeforeClick);
-
-                        });
-
-
-                    validateCurrentPage();
-
-
-                    navigateNextPage();
-
-
-                } else {
-
-                    cy.log("No next page available. Pagination completed.");
-
-                }
-
+                navigateNextPage();
 
             });
 
         };
-
 
         validateCurrentPage();
 

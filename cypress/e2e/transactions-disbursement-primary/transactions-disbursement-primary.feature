@@ -16,11 +16,21 @@ Scenario Outline: Search transaction by Pocket ID
 
 Examples:
     | pocketId     | result                    |
-    | 0010012873   | matching transactions     |
-    | 2093599119   | matching transactions     |
-    | 0010010001   | matching transactions     |
-    | 0522376248   | matching transactions     |
+    | SBP0018808   | matching transactions     |
+    | SBP0017146   | matching transactions     |
+    | SBP0017144   | matching transactions     |
     | 9999999999   | no transactions           |
+
+@transactionDisbursement30
+Scenario Outline: Search transactions by payment reference
+    When I search using a payment reference "<reference>"
+    Then I should see transactions matching payment reference "<reference>"
+
+Examples:
+    | reference                             |
+    | Charge-F0006640830-qpc4jk             |
+    | F0006640830                           |
+    | JIN-S49745200465                      |
 
 @transactionDisbursement3
 Scenario: Filter transactions by Payment Reference

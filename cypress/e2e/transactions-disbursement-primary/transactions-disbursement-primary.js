@@ -36,11 +36,28 @@ When("I search using a Pocket ID {string}", (pocketId) => {
 });
 
 
+When("I search using a payment reference {string}", (reference) => {
+
+    PrimaryPocketDisbursementPage.searchPaymentReference(reference);
+
+});
+
+
+Then(
+    "I should see transactions matching payment reference {string}",
+    (reference) => {
+
+        PrimaryPocketDisbursementPage.validatePaymentReferenceResults(reference);
+
+    }
+);
+
+
 Then(
     "I should see {string} for Pocket ID {string}",
     (result, pocketId) => {
 
-        PrimaryPocketFundingPage.validateSearchResults(
+        PrimaryPocketDisbursementPage.validateSearchResults(
             result,
             pocketId
         );
