@@ -1,0 +1,106 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 1,
+    "pending": 0,
+    "failures": 0,
+    "start": "2026-08-31T13:43:07.079Z",
+    "end": "2026-08-31T13:43:18.667Z",
+    "duration": 11588,
+    "testsRegistered": 1,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "1cd29e19-22b8-4d84-a548-e32bb8df5627",
+      "title": "",
+      "fullFile": "cypress/e2e/singleSendMoneySubPocket/probe.cy.js",
+      "file": "cypress/e2e/singleSendMoneySubPocket/probe.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "049d451a-8c59-4bda-bae9-2d583524d2ab",
+          "title": "probe sub-pocket dashboard nav",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "inspect nav links after sub-pocket login",
+              "fullTitle": "probe sub-pocket dashboard nav inspect nav links after sub-pocket login",
+              "timedOut": null,
+              "duration": 9628,
+              "state": "passed",
+              "speed": "medium",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.viewport(1800, 1e3);\nconst url = Cypress.expose(\"baseUrl\");\ncy.visit(url);\ncy.wait(8e3);\ncy.get(\"body\").then(($body) => {\n  cy.log(\"=== NAV LINKS (nav a) ===\");\n  $body.find(\"nav a\").each((i, el) => {\n    cy.log(`[${i}] href=${Cypress.$(el).attr(\"href\")} text=${Cypress.$(el).text().trim()}`);\n  });\n  cy.log(\"=== NAV LINKS (a[href]) ===\");\n  $body.find(\"a[href]\").each((i, el) => {\n    const href = Cypress.$(el).attr(\"href\");\n    if (href && href.includes(\"send\")) {\n      cy.log(`send link: href=${href} text=${Cypress.$(el).text().trim()}`);\n    }\n  });\n  cy.log(\"=== BODY HEAD ===\");\n  cy.log($body.text().replace(/\\s+/g, \" \").slice(0, 500));\n});",
+              "err": {},
+              "uuid": "38590077-e66d-44eb-8df0-ac489b3f1cbc",
+              "parentUUID": "049d451a-8c59-4bda-bae9-2d583524d2ab",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "38590077-e66d-44eb-8df0-ac489b3f1cbc"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 9628,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "8.0.1"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "embeddedScreenshots": true
+      },
+      "version": "6.3.2"
+    }
+  }
+}

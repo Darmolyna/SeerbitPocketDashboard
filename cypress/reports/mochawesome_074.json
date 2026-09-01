@@ -1,0 +1,110 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 0,
+    "pending": 0,
+    "failures": 1,
+    "start": "2026-08-31T13:41:55.039Z",
+    "end": "2026-08-31T13:42:34.137Z",
+    "duration": 39098,
+    "testsRegistered": 1,
+    "passPercent": 0,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "4ed16c1e-b62b-4d5b-95a4-d2011914cfec",
+      "title": "",
+      "fullFile": "cypress/e2e/singleSendMoneySubPocket/probe.cy.js",
+      "file": "cypress/e2e/singleSendMoneySubPocket/probe.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "e6c326e5-4bda-4d10-846d-39ef75af2830",
+          "title": "probe sub-pocket send money",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "inspect send money page",
+              "fullTitle": "probe sub-pocket send money inspect send money page",
+              "timedOut": null,
+              "duration": 35201,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "cy.viewport(1800, 1e3);\nconst url = Cypress.expose(\"baseUrl\");\ncy.visit(url);\ncy.contains(\"nav a\", \"Send Money\", { timeout: 3e4 }).should(\"exist\").click();\ncy.url({ timeout: 3e4 }).should(\"include\", \"/send-money\");\ncy.wait(3e3);\ncy.get(\"body\").then(($body) => {\n  const text = $body.text();\n  cy.log(\"=== PAGE TEXT ===\");\n  cy.log(text.slice(0, 3e3));\n});\ncy.document().then((doc) => {\n  cy.log(\"=== send money form HTML ===\");\n  const form = doc.querySelector(\"form\");\n  if (form) {\n    cy.log(form.outerHTML.slice(0, 4e3));\n  } else {\n    cy.log(\"NO FORM FOUND\");\n  }\n});\ncy.get(\"body\").then(($body) => {\n  cy.log(\"=== has source pocket dropdown (flag img) ===\", $body.find(\"img[alt='flag']\").length);\n  cy.log(\"=== has Sub pocket button ===\", $body.find(\"button:contains('Sub pocket')\").length);\n  cy.log(\"=== has Bank transfer button ===\", $body.find(\"button:contains('Bank transfer')\").length);\n  cy.log(\"=== has Pocket ID input ===\", $body.find(\"input[placeholder='Pocket ID']\").length);\n});",
+              "err": {
+                "message": "AssertionError: Timed out retrying after 30000ms: Expected to find content: 'Send Money' within the selector: 'nav a' but never did.",
+                "estack": "AssertionError: Timed out retrying after 30000ms: Expected to find content: 'Send Money' within the selector: 'nav a' but never did.\n    at Context.eval (https://develop.d1vg8wvg97d1gx.amplifyapp.com/__cypress/tests?p=cypress/e2e/singleSendMoneySubPocket/probe.cy.js:19:64)",
+                "diff": null
+              },
+              "uuid": "e57be25f-20f7-4579-837d-8f2c689053c8",
+              "parentUUID": "e6c326e5-4bda-4d10-846d-39ef75af2830",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [],
+          "failures": [
+            "e57be25f-20f7-4579-837d-8f2c689053c8"
+          ],
+          "pending": [],
+          "skipped": [],
+          "duration": 35201,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "8.0.1"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports",
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "embeddedScreenshots": true
+      },
+      "version": "6.3.2"
+    }
+  }
+}
