@@ -18,6 +18,9 @@ on:
         required: false
         default: ""
 
+  repository_dispatch:
+    types: [amplify-deploy-complete]
+
 permissions:
   contents: write
 
@@ -952,6 +955,7 @@ jobs:
           COMMIT_MESSAGE="${{ steps.commit.outputs.message }}"
 
           TAG="${{ github.event.inputs.tags }}"
+          RUN_ID="${{ github.run_id }}"
 
           if [ -z "$TAG" ]; then
             TAG="All tests"
@@ -971,13 +975,15 @@ jobs:
             --arg author "$AUTHOR" \
             --arg commit "$COMMIT_MESSAGE" \
             --arg tag "$TAG" \
+            --arg run_id "$RUN_ID" \
             '{
               text: (
                 $icon + " *Cypress Test Result: " + $status + "*\n\n" +
 
                 "*Repository:* " + $repository + "\n" +
                 "*Branch:* " + $branch + "\n" +
-                "*Tag:* " + $tag + "\n\n" +
+                "*Tag:* " + $tag + "\n" +
+                "*Run ID:* " + $run_id + "\n\n" +
 
                 "🧪 *Test Summary*\n" +
                 "• Total Tests: " + $tests + "\n" +
