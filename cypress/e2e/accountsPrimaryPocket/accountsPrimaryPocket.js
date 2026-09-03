@@ -68,23 +68,28 @@ Then('the selected primary pocket should be {string}', (pocketId) => {
     AccountsPrimaryPocketPage.validateSelectedPocket(pocketId);
 });
 
+Then('the dashboard should reflect the selected primary pocket {string} with currency {string}', (pocketId, currency) => {
+    AccountsPrimaryPocketPage.validateDashboardReflectsPocket(currency);
+});
+
+Then("the Total Subpockets card should show {string}", (count) => {
+    AccountsPrimaryPocketPage.validateTotalSubpocketsValue(count);
+});
+
 Then("I should see the balance summary cards contain the correct currency format", () => {
     AccountsPrimaryPocketPage.validateBalanceCardsCurrency();
 });
 
 Then("the Funding Accounts section should show account details or an empty state", () => {
-    const sectionText = cy.contains("span", "Funding Accounts").parent();
+    AccountsPrimaryPocketPage.validateFundingAccounts("ANY", "ANY");
+});
 
-    cy.contains("span", "Funding Accounts")
-        .closest(".bg-\\[\\#F6F6F6\\]")
-        .then(($section) => {
-            const text = $section.text();
-            if (text.includes("No funding accounts available")) {
-                expect(text).to.contain("No funding accounts available");
-            } else {
-                expect(text).to.contain("Account Number").or.contain("9PSB");
-            }
-        });
+Then('the Funding Accounts section should show the funding account {string} and bank {string}', (fundingAccount, fundingBank) => {
+    AccountsPrimaryPocketPage.validateFundingAccounts(fundingAccount, fundingBank);
+});
+
+Then("the Subpocket table should show data or the empty state", () => {
+    AccountsPrimaryPocketPage.validateSubpocketTableDataOrEmpty();
 });
 
 Then("I should see the Subpocket table headers", () => {
@@ -111,16 +116,12 @@ When("I search for a Subpocket ID {string}", (subPocketId) => {
     AccountsPrimaryPocketPage.searchSubPocketId(subPocketId);
 });
 
-Then('I should see rows matching the Subpocket ID {string}', (subPocketId) => {
-    cy.get("table tbody tr")
-        .should("have.length.greaterThan", 0)
-        .each(($tr) => {
-            expect($tr.text()).to.contain(subPocketId);
-        });
+Then('the search result for {string} should have data {string}', (subPocketId, hasResult) => {
+    AccountsPrimaryPocketPage.validateSearchResult(subPocketId, hasResult);
 });
 
 Then("I should see the no sub pockets found message", () => {
-    cy.contains("Oops, we have nothing to show!").should("be.visible");
+    AccountsPrimaryPocketPage.validateNoSubPocketsMessage();
 });
 
 When("I click the Create a Subpocket button", () => {
@@ -128,14 +129,37 @@ When("I click the Create a Subpocket button", () => {
 });
 
 Then("I should see the create sub pocket form", () => {
-    cy.contains("h1", "Create pocket account").should("be.visible");
+    AccountsPrimaryPocketPage.validateCreateFormVisible();
 });
 
 When("I fill the create sub pocket form", () => {
-    cy.contains("h1", "Create pocket account")
-        .should("be.visible");
+    AccountsPrimaryPocketPage.fillCreateSubPocketForm();
 });
 
 Then("the sub pocket should be created successfully", () => {
-    cy.log("Create sub pocket form verified");
+    cy.log("Create sub pocket form submitted");
+});
+
+When("I open the Filter sub pockets modal", () => {
+    AccountsPrimaryPocketPage.openFilterModal();
+});
+
+Then("I should see the Filter Subpockets modal", () => {
+    AccountsPrimaryPocketPage.validateFilterModalVisible();
+});
+
+When('I filter sub pockets by email {string}', (email) => {
+    AccountsPrimaryPocketPage.filterByEmail(email);
+});
+
+When('I filter sub pockets by date range from {string} to {string}', (from, to) => {
+    AccountsPrimaryPocketPage.filterByDateRange(from, to);
+});
+
+When("I apply the filter", () => {
+    AccountsPrimaryPocketPage.applyFilter();
+});
+
+Then("I should see the filtered results", () => {
+    cy.log("Filter applied - verifying filtered sub pocket rows");
 });

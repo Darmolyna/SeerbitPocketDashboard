@@ -27,11 +27,23 @@ Feature: Primary Pocket Accounts Page
     Given I open the primary pocket switcher
     When I select the primary pocket "<pocketId>"
     Then the selected primary pocket should be "<pocketId>"
+    And the dashboard should reflect the selected primary pocket "<pocketId>" with currency "<currency>"
+    And the Funding Accounts section should show the funding account "<fundingAccount>" and bank "<fundingBank>"
+    And the Subpocket table should show data or the empty state
 
     Examples:
-      | pocketId    |
-      | SBP0000829  |
-      | SBP0016109  |
+      | pocketId   | currency | fundingAccount | fundingBank |
+      | SBP0000829 | NGN      | 4018404197     | 9PSB        |
+      | SBP0013153 | USD      | EMPTY          | EMPTY       |
+      | SBP0013794 | XOF      | EMPTY          | EMPTY       |
+      | SBP0014320 | XOF      | EMPTY          | EMPTY       |
+      | SBP0014681 | GHS      | EMPTY          | EMPTY       |
+      | SBP0016070 | XOF      | EMPTY          | EMPTY       |
+      | SBP0016109 | XAF      | EMPTY          | EMPTY       |
+      | SBP0016110 | XOF      | EMPTY          | EMPTY       |
+      | SBP0017144 | NGN      | 7750187620     | WEMA        |
+      | SBP0017146 | NGN      | 4565882902     | FIDELITY    |
+      | SBP0018808 | NGN      | EMPTY          | EMPTY       |
 
   @accountsPrimaryPocket4
   Scenario: Validate the balance and subpocket summary cards
@@ -50,18 +62,14 @@ Feature: Primary Pocket Accounts Page
   Scenario Outline: Search for a sub pocket by its ID
     Given I am on the Accounts page
     When I search for a Subpocket ID "<subpocketId>"
-    Then I should see rows matching the Subpocket ID "<subpocketId>"
+    Then the search result for "<subpocketId>" should have data "<hasResult>"
 
     Examples:
-      | subpocketId |
-      | SBP0020711  |
-      | SBP0020694  |
-
-  @accountsPrimaryPocket8
-  Scenario: Search for a non existent sub pocket ID
-    Given I am on the Accounts page
-    When I search for a Subpocket ID "SBP9999999"
-    Then I should see the no sub pockets found message
+      | subpocketId   | hasResult |
+      | SBP0020711    | true      |
+      | SBP0020694    | true      |
+      | 11223344565   | false     |
+      | SBP9999999    | false     |
 
   @accountsPrimaryPocket9
   Scenario: Create a sub pocket for the selected primary pocket
@@ -69,3 +77,13 @@ Feature: Primary Pocket Accounts Page
     Then I should see the create sub pocket form
     When I fill the create sub pocket form
     Then the sub pocket should be created successfully
+
+  @accountsPrimaryPocket10
+  Scenario: Filter sub pockets by email address and date range
+    Given I am on the Accounts page
+    When I open the Filter sub pockets modal
+    Then I should see the Filter Subpockets modal
+    When I filter sub pockets by email "ayomide.afolabi@seerbit.com"
+    And I filter sub pockets by date range from "2025-01-01" to "2026-12-31"
+    And I apply the filter
+    Then I should see the filtered results

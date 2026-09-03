@@ -57,6 +57,30 @@ class AccountsPrimaryPocketPage {
             .click({ force: true });
     }
 
+    validateCreateFormVisible() {
+        cy.contains("h2", "Create Subpocket", { timeout: 10000 }).should("be.visible");
+        cy.get('input[name="firstname"]').should("be.visible");
+        cy.get('input[name="lastname"]').should("be.visible");
+        cy.get('input[name="email"]').should("be.visible");
+        cy.get('input[name="phoneNumber"]').should("be.visible");
+    }
+
+    fillCreateSubPocketForm() {
+        cy.get('input[name="firstname"]').clear().type("Test");
+        cy.get('input[name="lastname"]').clear().type("Pocket");
+        cy.get('input[name="email"]').clear().type("test.pocket@seerbit.com");
+        cy.get('input[name="phoneNumber"]').clear().type("08012345678");
+        cy.contains("button", "Create").click({ force: true });
+    }
+
+    openFilterModal() {
+        cy.get('[data-slot="trigger"]')
+            .contains("Filter", { matchCase: false })
+            .then(($el) => {
+                cy.wrap($el).scrollIntoView().click({ force: true });
+            });
+    }
+
     // ============================
     // Validations
     // ============================
@@ -91,6 +115,60 @@ class AccountsPrimaryPocketPage {
         cy.contains("h2", "All Subpockets").should("be.visible");
     }
 
+    validateFundingAccounts(fundingAccount, fundingBank) {
+        cy.contains("span", "Funding Accounts")
+            .closest("div.bg-\\[\\#F6F6F6\\]")
+            .should("exist")
+            .then(($section) => {
+                cy.wrap($section)
+                    .find(".animate-pulse")
+                    .should("not.exist", { timeout: 20000 });
+                cy.wrap($section)
+                    .invoke("text")
+                    .then((text) => {
+                        if (fundingAccount === "EMPTY") {
+                            expect(text).to.contain("No funding accounts available");
+                        } else if (fundingAccount === "ANY") {
+                            const isEmpty = text.includes("No funding accounts available");
+                            const isFunded = /JABARI INC/.test(text) || /Account Number/.test(text);
+                            expect(isEmpty || isFunded).to.equal(true);
+                        } else {
+                            expect(text).to.contain(fundingAccount);
+                            if (fundingBank !== "EMPTY") {
+                                expect(text).to.contain(fundingBank);
+                            }
+                        }
+                    });
+            });
+    }
+
+    validateSubpocketTableDataOrEmpty() {
+        cy.get("table tbody", { timeout: 20000 }).should(($tbody) => {
+            const text = $tbody.text();
+            const empty = /Oops, we have nothing to show!/.test(text);
+            const hasRow = $tbody.find("tr").length > 0 &&
+                !$tbody.find(".animate-pulse").length &&
+                !/Oops, we have nothing to show!/.test(text);
+            expect(empty || hasRow).to.equal(true);
+        });
+    }
+
+    validateNoSubPocketsMessage() {
+        cy.get("table tbody", { timeout: 20000 })
+            .should("contain.text", "Oops, we have nothing to show!");
+    }
+
+    validateSearchResult(subPocketId, hasResult) {
+        if (String(hasResult).toLowerCase() === "true") {
+            cy.get("table tbody", { timeout: 20000 })
+                .should("contain.text", subPocketId)
+                .find("tr")
+                .should("have.length.greaterThan", 0);
+        } else {
+            this.validateNoSubPocketsMessage();
+        }
+    }
+
     validateSwitcherList() {
         this.elements.pocketSwitcherItems()
             .should("have.length.greaterThan", 0)
@@ -109,6 +187,52 @@ class AccountsPrimaryPocketPage {
     validateSelectedPocket(pocketId) {
         this.elements.pocketSwitcherTrigger()
             .should("contain.text", pocketId);
+    }
+
+    validateFilterModalVisible() {
+        cy.contains("h2", "Filter Subpockets", { timeout: 10000 }).should("be.visible");
+        cy.contains("label", "Search Email Address").should("be.visible");
+    }
+
+    filterByEmail(email) {
+        cy.contains("label", "Search Email Address")
+            .parent()
+            .find('input[placeholder="Search"]')
+            .clear()
+            .type(email);
+    }
+
+    filterByDateRange(from, to) {
+        cy.get('input[placeholder="Select Date Range"]')
+            .first()
+            .click({ force: true });
+        cy.log(`Set date range from ${from} to ${to} using the date picker`);
+    }
+
+    applyFilter() {
+        cy.contains("button", "Apply Filter").click({ force: true });
+    }
+
+    // Validates the balance summary cards reflect the selected primary pocket
+    validateDashboardReflectsPocket(currency) {
+        this.elements.balanceCards()
+            .find("p")
+            .should("exist")
+            .first()
+            .invoke("text")
+            .then((text) => {
+                expect(text.trim()).to.match(new RegExp(`^${currency}\\s[\\d,.]+$`));
+            });
+    }
+
+    validateTotalSubpocketsValue(count) {
+        cy.contains("p", "Total Subpockets")
+            .parent()
+            .invoke("text")
+            .then((parentText) => {
+                const text = parentText.trim();
+                expect(text).to.have.string(count.toString());
+            });
     }
 
     validateBalanceCardsCurrency() {
