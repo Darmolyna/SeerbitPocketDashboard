@@ -974,7 +974,7 @@ jobs:
       - name: Send Cypress result to Slack
         if: always()
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
         run: |
 
           REPORT_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/runs/${{ github.run_id }}/"
@@ -998,7 +998,7 @@ jobs:
             TAG="All tests"
           fi
 
-          PAYLOAD=$(jq -n \
+          TEXT=$(jq -nr \
             --arg icon "$ICON" \
             --arg status "$STATUS" \
             --arg repository "$GITHUB_REPOSITORY" \
@@ -1013,36 +1013,39 @@ jobs:
             --arg commit "$COMMIT_MESSAGE" \
             --arg tag "$TAG" \
             --arg run_id "$RUN_ID" \
-            --arg channel "CQTT5SY86" \
-            '{
-              channel: $channel,
-              text: (
-                $icon + " *Cypress Test Result: " + $status + "*\n\n" +
+            '(
+              $icon + " *Cypress Test Result: " + $status + "*\n\n" +
 
-                "*Repository:* " + $repository + "\n" +
-                "*Branch:* " + $branch + "\n" +
-                "*Tag:* " + $tag + "\n" +
-                "*Run ID:* " + $run_id + "\n\n" +
+              "*Repository:* " + $repository + "\n" +
+              "*Branch:* " + $branch + "\n" +
+              "*Tag:* " + $tag + "\n" +
+              "*Run ID:* " + $run_id + "\n\n" +
 
-                "🧪 *Test Summary*\n" +
-                "• Total Tests: " + $tests + "\n" +
-                "• Passed: " + $passed + "\n" +
-                "• Failed: " + $failed + "\n" +
-                "• Pending/Skipped: " + $pending + "\n" +
-                "• Duration: " + $duration + "\n\n" +
+              "🧪 *Test Summary*\n" +
+              "• Total Tests: " + $tests + "\n" +
+              "• Passed: " + $passed + "\n" +
+              "• Failed: " + $failed + "\n" +
+              "• Pending/Skipped: " + $pending + "\n" +
+              "• Duration: " + $duration + "\n\n" +
 
-                "👤 *Commit Author:* " + $author + "\n" +
-                "📝 *Commit Message:* " + $commit + "\n\n" +
+              "👤 *Commit Author:* " + $author + "\n" +
+              "📝 *Commit Message:* " + $commit + "\n\n" +
 
-                "📊 *Interactive Cypress Report:*\n" +
-                $report
-              )
-            }')
+              "📊 *Interactive Cypress Report:*\n" +
+              $report
+            )')
 
-          curl -X POST \
-            -H 'Content-type: application/json' \
-            --data "$PAYLOAD" \
-            "$SLACK_WEBHOOK_URL"
+          RESPONSE=$(curl -sS -X POST "https://slack.com/api/chat.postMessage" \
+            -H "Authorization: Bearer $SLACK_TOKEN" \
+            -H 'Content-type: application/x-www-form-urlencoded' \
+            --data-urlencode "channel=CQTT5SY86" \
+            --data-urlencode "text=$TEXT")
+
+          echo "$RESPONSE"
+          if ! echo "$RESPONSE" | jq -e '.ok == true' > /dev/null; then
+            echo "::error::Slack message failed: $RESPONSE"
+            exit 1
+          fi
 
       # ---------------------------------------------------------
       # FAIL WORKFLOW IF CYPRESS FAILED
