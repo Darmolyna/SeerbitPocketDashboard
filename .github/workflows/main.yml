@@ -1,5 +1,7 @@
 name: Pocket Dashboard Tests
 
+run-name: "${{ github.event.client_payload.author }} - ${{ github.event.client_payload.message }}"
+
 on:
   push:
     branches:
@@ -1011,7 +1013,9 @@ jobs:
             --arg commit "$COMMIT_MESSAGE" \
             --arg tag "$TAG" \
             --arg run_id "$RUN_ID" \
+            --arg channel "CQTT5SY86" \
             '{
+              channel: $channel,
               text: (
                 $icon + " *Cypress Test Result: " + $status + "*\n\n" +
 
