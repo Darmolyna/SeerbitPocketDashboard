@@ -91,6 +91,41 @@ jobs:
             npx mochawesome-merge "cypress/reports/*.json" \
               -o cypress/reports/merged.json
 
+            node -e '
+              const fs = require("fs");
+              const path = "cypress/reports/merged.json";
+              const report = JSON.parse(fs.readFileSync(path, "utf8"));
+
+              const strip = (title = "") =>
+                title.replace(/\s*\(example #\d+\)\s*$/, "");
+
+              const processTests = (tests = []) => {
+                tests.forEach((test) => {
+                  test.title = strip(test.title);
+                  test.fullTitle = strip(test.fullTitle);
+                });
+              };
+
+              const walkSuites = (suites = []) => {
+                suites.forEach((suite) => {
+                  processTests(suite.tests);
+                  walkSuites(suite.suites);
+                });
+              };
+
+              for (const result of report.results || []) {
+                processTests(result.tests);
+                for (const suite of result.suites || []) {
+                  processTests(suite.tests);
+                  walkSuites(suite.suites);
+                }
+              }
+
+              fs.writeFileSync(path, JSON.stringify(report));
+
+              console.log("Stripped (example #N) suffix from scenario outline test names.");
+            '
+
             mkdir -p cypress/reports/mochawesome
 
             npx marge cypress/reports/merged.json \
