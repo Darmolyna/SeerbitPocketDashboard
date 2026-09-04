@@ -974,10 +974,13 @@ jobs:
       - name: Send Cypress result to Slack
         if: always()
         env:
-          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
 
           REPORT_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/runs/${{ github.run_id }}/"
+
+          # Cypress Cloud run URL produced by the recorded run (record: true + CYPRESS_RECORD_KEY)
+          CLOUD_URL="${{ steps.cypress.outputs.reportUrl }}"
 
           STATUS="${{ steps.result.outputs.status }}"
           ICON="${{ steps.result.outputs.slack_icon }}"
@@ -998,6 +1001,10 @@ jobs:
             TAG="All tests"
           fi
 
+          if [ -z "$CLOUD_URL" ]; then
+            CLOUD_URL="$REPORT_URL"
+          fi
+
           TEXT=$(jq -nr \
             --arg icon "$ICON" \
             --arg status "$STATUS" \
@@ -1008,7 +1015,7 @@ jobs:
             --arg failed "$FAILED" \
             --arg pending "$PENDING" \
             --arg duration "$DURATION" \
-            --arg report "$REPORT_URL" \
+            --arg report "$CLOUD_URL" \
             --arg author "$AUTHOR" \
             --arg commit "$COMMIT_MESSAGE" \
             --arg tag "$TAG" \
@@ -1035,15 +1042,16 @@ jobs:
               $report
             )')
 
-          RESPONSE=$(curl -sS -X POST "https://slack.com/api/chat.postMessage" \
-            -H "Authorization: Bearer $SLACK_TOKEN" \
-            -H 'Content-type: application/x-www-form-urlencoded' \
-            --data-urlencode "channel=CQTT5SY86" \
-            --data-urlencode "text=$TEXT")
+          PAYLOAD=$(jq -n --arg text "$TEXT" '{ text: $text }')
+
+          RESPONSE=$(curl -sS -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-type: application/json' \
+            --data "$PAYLOAD")
 
           echo "$RESPONSE"
-          if ! echo "$RESPONSE" | jq -e '.ok == true' > /dev/null; then
-            echo "::error::Slack message failed: $RESPONSE"
+          if ! echo "$RESPONSE" | jq -e 'has("ok") and .ok == true' > /dev/null 2>&1 \
+             && ! echo "$RESPONSE" | jq -r '.text // "x"' > /dev/null 2>&1; then
+            echo "::error::Slack message may have failed: $RESPONSE"
             exit 1
           fi
 
