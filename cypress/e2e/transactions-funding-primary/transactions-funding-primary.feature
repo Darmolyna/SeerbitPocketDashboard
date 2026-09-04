@@ -10,7 +10,7 @@ Scenario: Validate Funding Transactions page
     Then I should see the Funding Transactions page
 
 @transactionFunding2
-Scenario Outline: Search transaction by Pocket ID
+Scenario Outline: Search transaction by Pocket ID "<pocketId>"
     When I search using a Pocket ID "<pocketId>"
     Then I should see "<result>" for Pocket ID "<pocketId>"
 
@@ -22,7 +22,7 @@ Examples:
     | 9999999999   | no transactions           |
 
 @transactionFunding3
-Scenario Outline: Search transactions funding by payment reference
+Scenario Outline: Search transactions funding by payment reference "<reference>"
     When I search using a payment reference "<reference>"
     Then I should see transactions funding matching payment reference "<reference>"
 
@@ -34,7 +34,7 @@ Examples:
     | 9999999999                      |no transactions                |
 
 @transactionFunding4   
-Scenario Outline: Filter transactions by Date Range
+Scenario Outline: Filter transactions by Date Range "<dateRange>"
     When I filter transactions using "<dateRange>" date range
     Then only transactions within the selected "<dateRange>" range should be displayed
 

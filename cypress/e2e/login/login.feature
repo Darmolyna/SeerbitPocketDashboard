@@ -8,7 +8,7 @@ Feature: Login Functionality for flow dashboard
     Given I navigate to the login page
     
     @login1
-  Scenario: Login validation with different credential combinations
+  Scenario Outline: Login as "<email>" 
     When I enter my email "<email>"
     And I enter my password "<password>"
     And I click the Sign In button

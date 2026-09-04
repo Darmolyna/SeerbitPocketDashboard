@@ -23,7 +23,7 @@ Feature: Primary Pocket Accounts Page
     And each primary pocket should have a valid SBP ID and currency code
 
   @accountsPrimaryPocket3
-  Scenario Outline: Switch primary pocket and validate the dashboard updates
+  Scenario Outline: Switch primary pocket "<pocketId>" and validate the dashboard updates
     Given I open the primary pocket switcher
     When I select the primary pocket "<pocketId>"
     Then the selected primary pocket should be "<pocketId>"
@@ -59,7 +59,7 @@ Feature: Primary Pocket Accounts Page
     And the Subpocket table should display the correct headers
 
   @accountsPrimaryPocket7
-  Scenario Outline: Search for a sub pocket by its ID
+  Scenario Outline: Search for sub pocket ID "<subpocketId>" (has data: "<hasResult>")
     Given I am on the Accounts page
     When I search for a Subpocket ID "<subpocketId>"
     Then the search result for "<subpocketId>" should have data "<hasResult>"

@@ -10,7 +10,7 @@ Scenario: Validate Disbursement Transactions page
     Then I should see the Disbursement Transactions page
 
 @transactionDisbursement2
-Scenario Outline: Search transaction by Pocket ID
+Scenario Outline: Search transaction by Pocket ID "<pocketId>"
     When I search using a Pocket ID "<pocketId>"
     Then I should see "<result>" for Pocket ID "<pocketId>"
 
@@ -22,7 +22,7 @@ Examples:
     | 9999999999   | no transactions           |
 
 @transactionDisbursement30
-Scenario Outline: Search disbursement by payment reference
+Scenario Outline: Search disbursement by payment reference "<reference>"
     When I search using a payment reference "<reference>"
     Then I should see disbursement matching payment reference "<reference>"
 
@@ -39,7 +39,7 @@ Scenario: Filter transactions by Payment Reference
     Then only Disbursement transactions matching the payment reference should be displayed
 
 @transactionDisbursement4
-Scenario Outline: Filter transactions by Date Range
+Scenario Outline: Filter transactions by Date Range "<dateRange>"
     When I filter disbursement transactions using "<dateRange>" date range
     Then only Disbursement transactions within the selected "<dateRange>" range should be displayed
 
@@ -61,7 +61,7 @@ Scenario: Export disbursement Transactions
     Then the disbursement transactions export should start successfully
 
 @transactionDisbursement7
-Scenario Outline: Export disbursement transactions rows
+Scenario Outline: Export disbursement transactions "<rows>" rows
     When I export "<rows>" disbursement transaction rows
     Then the disbursement export should contain exactly "<rows>" rows
 

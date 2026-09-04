@@ -24,7 +24,7 @@ Scenario: Search transactions with a non-existent reference
     Then no funding transactions should be displayed
 
 @subPocketFunding5
-Scenario Outline: Filter transactions by Date Range
+Scenario Outline: Filter transactions by Date Range "<dateRange>"
     When I filter funding transactions using "<dateRange>" date range
     Then only funding transactions within the selected "<dateRange>" range should be displayed
 

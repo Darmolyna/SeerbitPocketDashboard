@@ -5,7 +5,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
         Given I am logged into the Primary Pocket Dashboard
 
     @exportTransactions @exportTransactions1
-    Scenario Outline: Export Today transactions 
+    Scenario Outline: Export Today transactions "<Rows>" rows
         And I navigate to the Funding Transactions page
         And I clcik the Export Transactions button
         And I select the Today date range
@@ -25,7 +25,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
         | 1000 |
 
     @exportTransactions @exportTransactions2
-    Scenario Outline: Export Yesterday transactions
+    Scenario Outline: Export Yesterday transactions "<Rows>" rows
         And I navigate to the Funding Transactions page
         And I clcik the Export Transactions button
         And I select the Yesterday date range
@@ -45,7 +45,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
         | 1000 |
 
     @exportTransactions @exportTransactions3
-    Scenario Outline: Export weekly transactions
+    Scenario Outline: Export weekly transactions "<Rows>" rows
         And I navigate to the Funding Transactions page
         And I clcik the Export Transactions button
         And I select the Weekly date range
@@ -65,7 +65,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
         | 1000 |
 
     @exportTransactions @exportTransactions4
-    Scenario Outline: Export monthly transactions
+    Scenario Outline: Export monthly transactions "<Rows>" rows
         And I navigate to the Funding Transactions page
         And I clcik the Export Transactions button
         And I select the Monthly date range
@@ -93,7 +93,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
 
 
     @exportDisbursement @exportDisbursement1
-    Scenario Outline: Export Today Disbursement
+    Scenario Outline: Export Today Disbursement "<Rows>" rows
         And I navigate to the Disbursement Transactions page
         And I clcik the Export Transactions button
         And I select the Today date range
@@ -113,7 +113,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
         | 1000 |
 
     @exportDisbursement @exportDisbursement2
-    Scenario Outline: Export Yesterday Disbursement
+    Scenario Outline: Export Yesterday Disbursement "<Rows>" rows
         And I navigate to the Disbursement Transactions page
         And I clcik the Export Transactions button
         And I select the Yesterday date range
@@ -133,7 +133,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
         | 1000 |
 
     @exportDisbursement @exportDisbursement3
-    Scenario Outline: Export weekly Disbursement
+    Scenario Outline: Export weekly Disbursement "<Rows>" rows
         And I navigate to the Disbursement Transactions page
         And I clcik the Export Transactions button
         And I select the Weekly date range
@@ -153,7 +153,7 @@ Feature: Export Transactions and Disbursement Primary Pocket
         | 1000 |
 
     @exportDisbursement @exportDisbursement4
-    Scenario Outline: Export monthly Disbursement
+    Scenario Outline: Export monthly Disbursement "<Rows>" rows
         And I navigate to the Disbursement Transactions page
         And I clcik the Export Transactions button
         And I select the Monthly date range

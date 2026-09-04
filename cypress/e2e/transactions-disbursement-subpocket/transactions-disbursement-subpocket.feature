@@ -14,7 +14,7 @@ Scenario: Validate disbursement transactions table structure
     Then the disbursement transactions table should display the correct columns and rows
 
 @subPocketDisbursement3
-Scenario Outline: Search disbursement by payment reference
+Scenario Outline: Search disbursement by payment reference "<reference>"
     When I search using a payment reference "<reference>"
     Then I should see disbursement matching payment reference "<reference>"
 
@@ -29,7 +29,7 @@ Scenario: Search disbursement transactions with a non-existent reference
     Then no disbursement transactions should be displayed
 
 @subPocketDisbursement5
-Scenario Outline: Filter transactions by Date Range
+Scenario Outline: Filter transactions by Date Range "<dateRange>"
     When I filter disbursement transactions using "<dateRange>" date range
     Then only disbursement transactions within the selected "<dateRange>" range should be displayed
 
