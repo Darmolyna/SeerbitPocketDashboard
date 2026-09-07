@@ -192,14 +192,6 @@ class PrimaryPocketDisbursementPage {
                 startDate = new Date(today);
                 startDate.setMonth(today.getMonth() - 1);
 
-                cy.get('[data-testid="calendar-start"]')
-                    .find('[aria-label="Previous month"]')
-                    .click();
-
-                cy.get('[data-testid="calendar-end"]')
-                    .find('[aria-label="Previous month"]')
-                    .click();
-
                 break;
 
             case "Future Date":
@@ -217,6 +209,16 @@ class PrimaryPocketDisbursementPage {
                 throw new Error(`Unsupported date range: ${dateRange}`);
 
         }
+
+        // The start pane opens on the current month and the end pane opens
+        // on the next month. If the computed start or end date falls in an
+        // earlier month, navigate that pane back so its cell is visible.
+        this.navigateRsuiteCalendar("calendar-start", this.monthSpan(today, startDate));
+
+        this.navigateRsuiteCalendar(
+            "calendar-end",
+            this.monthSpan(this.nextMonth(today), endDate || today)
+        );
 
         const formattedStartDate = this.formatDate(startDate);
         const formattedEndDate = this.formatDate(endDate || today);
@@ -242,6 +244,48 @@ class PrimaryPocketDisbursementPage {
             .should(($input) => {
                 expect($input.val()).to.not.equal("");
             });
+
+    }
+
+    monthSpan(origin, date) {
+
+        const originIndex = origin.getFullYear() * 12 + origin.getMonth();
+
+        const dateIndex = date.getFullYear() * 12 + date.getMonth();
+
+        const diff = originIndex - dateIndex;
+
+        return diff > 0 ? diff : 0;
+
+    }
+
+    nextMonth(date) {
+
+        const next = new Date(date);
+
+        next.setMonth(date.getMonth() + 1);
+
+        return next;
+
+    }
+
+    navigateRsuiteCalendar(pane, times) {
+
+        if (times <= 0) {
+            return;
+        }
+
+        const paneSelector = pane === "calendar-end"
+            ? '[data-testid="calendar-end"]'
+            : '[data-testid="calendar-start"]';
+
+        for (let i = 0; i < times; i++) {
+
+            cy.get(paneSelector, { timeout: 10000 })
+                .find('[aria-label="Previous month"]')
+                .click();
+
+        }
 
     }
 
@@ -527,130 +571,6 @@ class PrimaryPocketDisbursementPage {
             .click();
 
         this.validateDownloadedFile();
-
-    }
-
-    exportTransactionRows(rows) {
-
-        this.validateExportModal();
-
-        this.elements.exportRowsSelect()
-            .select(rows);
-
-        this.selectExportDateRange("Monthly");
-
-        this.elements.exportModalExportButton()
-            .should("not.be.disabled")
-            .click();
-
-        cy.task("getLatestDownloadedFile", ".xlsx").then((filePath) => {
-
-            if (!filePath) {
-                throw new Error("No .xlsx file was downloaded after exporting transactions");
-            }
-
-            cy.wrap(filePath).as("lastExportFile");
-
-        });
-
-    }
-
-    validateExportedRowCount(expectedRows) {
-
-        const expectedCount = Number(expectedRows);
-
-        const parsed = this.parseExportedFile();
-
-        cy.wrap(parsed).then(({ header, dataRows, fileName }) => {
-
-            cy.log(`Downloaded export file: ${fileName}`);
-
-            // All expected columns must be strictly present.
-            this.assertAllColumnsPresent(header);
-
-            expect(
-                dataRows.length,
-                `expected ${expectedCount} data rows in export`
-            ).to.equal(expectedCount);
-
-            // The DATE column must never be empty and must be well-formed.
-            dataRows.forEach((row, index) => {
-                const rowNumber = index + 2;
-
-                expect(
-                    row.length,
-                    `row ${rowNumber} should have ${header.length} columns`
-                ).to.equal(header.length);
-
-                const date = row[0].trim();
-
-                expect(date, `row ${rowNumber} DATE should not be empty`)
-                    .to.not.be.empty;
-
-                expect(date, `row ${rowNumber} date format`).to.match(
-                    /^\d{2} [A-Za-z]{3}, \d{4} \d{2}:\d{2}:\d{2}$/
-                );
-
-                // Essential columns must be populated. CREDITS is allowed
-                // to be empty because this is a disbursement export.
-                const requiredIndexes = [0, 2, 3, 4, 5, 6, 7];
-
-                requiredIndexes.forEach((columnIndex) => {
-                    expect(
-                        row[columnIndex].trim(),
-                        `row ${rowNumber} column "${header[columnIndex]}" should not be empty`
-                    ).to.not.be.empty;
-                });
-            });
-
-        });
-
-    }
-
-    parseExportedFile() {
-
-        return cy.task("getLatestDownloadedFile", ".xlsx").then((filePath) => {
-
-            if (!filePath) {
-                throw new Error("No .xlsx file was downloaded after exporting transactions");
-            }
-
-            const fileName = String(filePath).split(/[\\/]/).pop();
-
-            return cy.task("parseXlsx", filePath).then((rows) => {
-
-                expect(rows.length, "xlsx should include a header row plus data rows")
-                    .to.be.greaterThan(1);
-
-                return {
-                    fileName,
-                    header: rows[0].map((cell) => cell.trim()),
-                    dataRows: rows.slice(1).map((row) => row.map((cell) => String(cell).trim()))
-                };
-
-            });
-
-        });
-
-    }
-
-    assertAllColumnsPresent(header) {
-
-        const expectedHeader = [
-            "DATE",
-            "CREDITS",
-            "DEBITS",
-            "AVAILABLE BALANCE",
-            "POCKET ID",
-            "RECEIVER NAME",
-            "PAYMENT REFERENCE",
-            "STATUS"
-        ];
-
-        expectedHeader.forEach((col) => {
-            expect(header, `export header should contain "${col}"`)
-                .to.include(col);
-        });
 
     }
 

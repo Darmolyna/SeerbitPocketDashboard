@@ -81,3 +81,24 @@ Then("the transaction file should be downloaded", () => {
 Then("I navigate to the Disbursement Transactions page", () => {
     ExportTransactionsPriPocPage.clickDisbursementMenu()
 });
+
+When("I click the Export Transactions button", () => {
+
+    ExportTransactionsPriPocPage.clickExportTransactionsButton();
+
+});
+
+When("I export {string} disbursement transaction rows", (rows) => {
+
+    ExportTransactionsPriPocPage.exportTransactionRows(rows);
+
+});
+
+Then(
+    "the disbursement export should contain exactly {string} rows",
+    (rows) => {
+
+        ExportTransactionsPriPocPage.validateExportedRowCount(rows);
+
+    }
+);

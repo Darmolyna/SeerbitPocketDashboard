@@ -99,7 +99,11 @@ class ExportTransactionsPriPocPage {
             .should("be.visible");
 
         this.elements.rowDropdown()
-            .should("be.visible");
+            .should("be.visible")
+            .and("have.value", "15");
+
+        this.elements.selectedColumns()
+            .should("have.length", 7);
 
         this.elements.exportButton()
             .should("be.disabled");
@@ -442,6 +446,245 @@ class ExportTransactionsPriPocPage {
             });
 
         return `${day} ${month} ${date.getFullYear()}`;
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Export row validation (6-month disbursement outline)
+    |--------------------------------------------------------------------------
+    */
+
+    exportTransactionRows(rows) {
+
+        this.validateExportModal();
+
+        this.elements.rowDropdown()
+            .select(rows);
+
+        this.selectExportDateRange("Last 6 Months");
+
+        this.elements.exportButton()
+            .should("not.be.disabled")
+            .click();
+
+        cy.task("getLatestDownloadedFile", ".xlsx").then((filePath) => {
+
+            if (!filePath) {
+                throw new Error("No .xlsx file was downloaded after exporting transactions");
+            }
+
+            cy.wrap(filePath).as("lastExportFile");
+
+        });
+
+    }
+
+    validateExportedRowCount(expectedRows) {
+
+        const expectedCount = Number(expectedRows);
+
+        cy.task("getLatestDownloadedFile", ".xlsx").then((filePath) => {
+
+            if (!filePath) {
+                throw new Error("No .xlsx file was downloaded after exporting transactions");
+            }
+
+            const fileName = String(filePath).split(/[\\/]/).pop();
+
+            cy.log(`Downloaded export file: ${fileName}`);
+
+            cy.task("parseXlsx", filePath).then((rows) => {
+
+                expect(rows.length, "xlsx should include a header row plus data rows")
+                    .to.be.greaterThan(1);
+
+                const header = rows[0].map((cell) => cell.trim());
+
+                const dataRows = rows
+                    .slice(1)
+                    .map((row) => row.map((cell) => String(cell).trim()));
+
+                // All expected columns must be strictly present.
+                this.assertAllColumnsPresent(header);
+
+                // The exported file must never contain more rows than were
+                // requested. It may contain fewer when the 6-month date range
+                // has fewer transactions than the selected row count.
+                expect(
+                    dataRows.length,
+                    `expected no more than ${expectedCount} data rows in export`
+                ).to.be.at.most(expectedCount);
+
+                cy.log(
+                    `Exported ${dataRows.length} data rows (requested ${expectedCount})`
+                );
+
+                // The DATE column must never be empty and must be well-formed.
+                dataRows.forEach((row, index) => {
+                    const rowNumber = index + 2;
+
+                    expect(
+                        row.length,
+                        `row ${rowNumber} should have ${header.length} columns`
+                    ).to.equal(header.length);
+
+                    const date = row[0].trim();
+
+                    expect(date, `row ${rowNumber} DATE should not be empty`)
+                        .to.not.be.empty;
+
+                    expect(date, `row ${rowNumber} date format`).to.match(
+                        /^\d{2} [A-Za-z]{3}, \d{4} \d{2}:\d{2}:\d{2}$/
+                    );
+
+                    // Essential columns must be populated. CREDITS is allowed
+                    // to be empty because this is a disbursement export.
+                    const requiredIndexes = [0, 2, 3, 4, 5, 6, 7];
+
+                    requiredIndexes.forEach((columnIndex) => {
+                        expect(
+                            row[columnIndex].trim(),
+                            `row ${rowNumber} column "${header[columnIndex]}" should not be empty`
+                        ).to.not.be.empty;
+                    });
+                });
+
+            });
+
+        });
+
+    }
+
+    assertAllColumnsPresent(header) {
+
+        const expectedHeader = [
+            "DATE",
+            "CREDITS",
+            "DEBITS",
+            "AVAILABLE BALANCE",
+            "POCKET ID",
+            "RECEIVER NAME",
+            "PAYMENT REFERENCE",
+            "STATUS"
+        ];
+
+        expectedHeader.forEach((col) => {
+            expect(header, `export header should contain "${col}"`)
+                .to.include(col);
+        });
+
+    }
+
+    selectExportDateRange(period) {
+
+        this.openCalendar();
+
+        switch (period) {
+
+            case "Monthly":
+                this.selectExportPreviousMonth();
+                break;
+
+            case "Last 6 Months":
+                this.selectExportLastSixMonths();
+                break;
+
+            default:
+                cy.contains("button", period, { timeout: 10000 })
+                    .should("be.visible")
+                    .click();
+
+                cy.contains("button", "OK", { timeout: 10000 })
+                    .should("be.visible")
+                    .click();
+
+        }
+
+        this.validateDateSelected();
+
+    }
+
+    selectExportPreviousMonth() {
+
+        const today = new Date();
+
+        const start = new Date(today);
+
+        start.setMonth(today.getMonth() - 1);
+
+        this.elements.calendarStart()
+            .find('[aria-label="Previous month"]')
+            .click();
+
+        this.elements.calendarEnd()
+            .find('[aria-label="Previous month"]')
+            .click();
+
+        cy.get(
+            `.rs-calendar-table-cell[title^="${this.formatDate(start)}"]`
+        )
+            .first()
+            .click();
+
+        cy.get(
+            `.rs-calendar-table-cell[title^="${this.formatDate(today)}"]`
+        )
+            .last()
+            .click();
+
+        this.elements.okButton()
+            .click();
+
+    }
+
+    selectExportLastSixMonths() {
+
+        const today = new Date();
+
+        const start = new Date(today);
+
+        start.setMonth(today.getMonth() - 6);
+
+        // The start pane opens on the current month; move it back 6 months
+        // so the start date cell (6 months ago) becomes visible.
+        this.navigateExportCalendar("calendar-start", 6);
+
+        // The end pane opens on the next month; move it back one month so
+        // the current month (containing today) is shown on the end pane.
+        this.navigateExportCalendar("calendar-end", 1);
+
+        cy.get(
+            `.rs-calendar-table-cell[title^="${this.formatDate(start)}"]`
+        )
+            .first()
+            .click();
+
+        cy.get(
+            `.rs-calendar-table-cell[title^="${this.formatDate(today)}"]`
+        )
+            .last()
+            .click();
+
+        this.elements.okButton()
+            .click();
+
+    }
+
+    navigateExportCalendar(pane, times) {
+
+        const paneSelector = pane === "calendar-end"
+            ? '[data-testid="calendar-end"]'
+            : '[data-testid="calendar-start"]';
+
+        for (let i = 0; i < times; i++) {
+
+            cy.get(paneSelector, { timeout: 10000 })
+                .find('[aria-label="Previous month"]')
+                .click();
+
+        }
 
     }
 

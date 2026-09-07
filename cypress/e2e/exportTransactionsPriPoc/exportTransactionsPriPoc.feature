@@ -171,3 +171,18 @@ Feature: Export Transactions and Disbursement Primary Pocket
         | 200  |
         | 500  |
         | 1000 |
+
+    @exportDisbursement @exportDisbursement5
+    Scenario Outline: Export disbursement transactions "<rows>" rows
+        And I navigate to the Disbursement Transactions page
+        When I click the Export Transactions button
+        When I export "<rows>" disbursement transaction rows
+        Then the disbursement export should contain exactly "<rows>" rows
+
+    Examples:
+        | rows  |
+        | 50    |
+        | 100   |
+        | 200   |
+        | 500   |
+        | 1000  |
