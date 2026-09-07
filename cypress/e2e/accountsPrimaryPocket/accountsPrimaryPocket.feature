@@ -72,11 +72,22 @@ Feature: Primary Pocket Accounts Page
       | SBP9999999    | false     |
 
   @accountsPrimaryPocket9
-  Scenario: Create a sub pocket for the selected primary pocket
+  Scenario Outline: Create a sub pocket for primary pocket "<pocketId>"
+    Given I open the primary pocket switcher
+    When I select the primary pocket "<pocketId>"
+    Then the selected primary pocket should be "<pocketId>"
     When I click the Create a Subpocket button
     Then I should see the create sub pocket form
-    When I fill the create sub pocket form
+    When I fill the create sub pocket form with random data
     Then the sub pocket should be created successfully
+    And I filter sub pockets by the created email to validate the sub pocket exists
+
+    Examples:
+      | pocketId   |
+      | SBP0017144 |
+      | SBP0000829 |
+      | SBP0018808 |
+      | SBP0017146 |
 
   @accountsPrimaryPocket10
   Scenario: Filter sub pockets by email address and date range

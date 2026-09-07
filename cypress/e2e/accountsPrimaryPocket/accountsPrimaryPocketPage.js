@@ -65,20 +65,216 @@ class AccountsPrimaryPocketPage {
         cy.get('input[name="phoneNumber"]').should("be.visible");
     }
 
-    fillCreateSubPocketForm() {
-        cy.get('input[name="firstname"]').clear().type("Test");
-        cy.get('input[name="lastname"]').clear().type("Pocket");
-        cy.get('input[name="email"]').clear().type("test.pocket@seerbit.com");
-        cy.get('input[name="phoneNumber"]').clear().type("08012345678");
-        cy.contains("button", "Create").click({ force: true });
+    fillCreateSubPocketFormWithRandomData() {
+
+        const firstname = this._randomFirstName();
+
+        const lastname = this._randomLastName();
+
+        const email = this._randomEmail(firstname, lastname);
+
+        const phoneNumber = this._randomPhoneNumber();
+
+        // Keep the data so later steps can verify the row on the table.
+        this.createdSubPocket = {
+            firstname,
+            lastname,
+            email,
+            phoneNumber
+        };
+
+        cy.log(
+            `Creating sub pocket: ${firstname} ${lastname} (${email})`
+        );
+
+        // Capture the create request so later steps can assert its status.
+        cy.intercept("POST", "**/sub-pocket").as("createSubPocket");
+
+        this._setField('input[name="firstname"]', firstname);
+        this._setField('input[name="lastname"]', lastname);
+        this._setField('input[name="email"]', email);
+        this._setField('input[name="phoneNumber"]', phoneNumber);
+
+        // Re-assert all values immediately before submitting, in case a
+        // re-render reset the controlled inputs.
+        cy.get('input[name="firstname"]').should("have.value", firstname);
+        cy.get('input[name="lastname"]').should("have.value", lastname);
+        cy.get('input[name="email"]').should("have.value", email);
+        cy.get('input[name="phoneNumber"]').should("have.value", phoneNumber);
+
+        // Scope to the modal so this does not match the page-level
+        // "Create a Subpocket" button.
+        cy.contains("h2", "Create Subpocket")
+            .closest(".max-w-2xl")
+            .find("button")
+            .filter((_index, $button) =>
+                Cypress.$($button).text().trim() === "Create"
+            )
+            .click({ force: true });
+
+    }
+
+    _setField(selector, value) {
+
+        cy.get(selector)
+            .clear()
+            .type(value)
+            .should("have.value", value);
+
+    }
+
+    _randomFirstName() {
+
+        const firstNames = [
+            "Ada",
+            "Chidi",
+            "Amina",
+            "Kofi",
+            "Ngozi",
+            "Tunde",
+            "Yemi",
+            "Kwame",
+            "Zainab",
+            "Emeka"
+        ];
+
+        return firstNames[Math.floor(Math.random() * firstNames.length)];
+
+    }
+
+    _randomLastName() {
+
+        const lastNames = [
+            "Okafor",
+            "Mensah",
+            "Balogun",
+            "Asante",
+            "Eze",
+            "Adeyemi",
+            "Sowande",
+            "Osei",
+            "Okoye",
+            "Diallo"
+        ];
+
+        return lastNames[Math.floor(Math.random() * lastNames.length)];
+
+    }
+
+    _randomEmail(firstname, lastname) {
+
+        const suffix = Date.now().toString().slice(-7);
+
+        return `${firstname}${lastname}${suffix}@yopmail.com`
+            .toLowerCase();
+
+    }
+
+    _randomPhoneNumber() {
+
+        const digits = String(
+            Math.floor(10000000 + Math.random() * 90000000)
+        );
+
+        return `080${digits}`;
+
+    }
+
+    validateCreateSubPocketSubmitted() {
+
+        // The create request must succeed (2xx) for the modal to close.
+        cy.wait("@createSubPocket", { timeout: 20000 })
+            .then((interception) => {
+
+                const status = interception.response.statusCode;
+
+                cy.log(`Create sub pocket response: ${status}`);
+
+                expect(
+                    status,
+                    "create sub pocket request status"
+                ).to.be.oneOf([200, 201]);
+
+            });
+
+        cy.contains("h2", "Create Subpocket", { timeout: 15000 })
+            .should("not.exist");
+
+        // Give React a moment to fully unmount the modal/backdrop before
+        // interacting with the page again.
+        cy.wait(500);
+
+    }
+
+    filterAndValidateCreatedSubPocketByEmail() {
+
+        const created = this.createdSubPocket;
+
+        expect(created, "random sub pocket data").to.exist;
+
+        cy.log(
+            `Filtering sub pockets by created email: ${created.email}`
+        );
+
+        // Click the Filter button and open the Filter Subpockets modal.
+        this.openFilterModal();
+
+        this.validateFilterModalVisible();
+
+        // Search by the created email address.
+        this.filterByEmail(created.email);
+
+        this.applyFilter();
+
+        // The filtered table should display exactly the created sub pocket.
+        cy.get("table tbody", { timeout: 30000 })
+            .should(($tbody) => {
+
+                const matchingRows = Cypress.$($tbody)
+                    .find("tr")
+                    .filter((_index, row) =>
+                        Cypress.$(row).text().includes(created.email)
+                    );
+
+                expect(
+                    matchingRows.length,
+                    `created sub pocket (${created.email}) in filtered results`
+                ).to.equal(1);
+
+            })
+
+            .and(($tbody) => {
+
+                const nameCell = Cypress.$($tbody)
+                    .find("tr")
+                    .filter((_index, row) =>
+                        Cypress.$(row).text().includes(created.email)
+                    )
+                    .first()
+                    .find("td")
+                    .first()
+                    .text();
+
+                expect(
+                    nameCell,
+                    "created sub pocket name cell"
+                ).to.match(new RegExp(
+                    `${created.firstname}.*${created.lastname}`,
+                    "i"
+                ));
+
+            });
+
     }
 
     openFilterModal() {
-        cy.get('[data-slot="trigger"]')
-            .contains("Filter", { matchCase: false })
-            .then(($el) => {
-                cy.wrap($el).scrollIntoView().click({ force: true });
-            });
+
+        // Dismiss any lingering dialog/backdrop before opening the filter.
+        cy.get("body").type("{esc}", { force: true });
+
+        // Click the Filter pill directly (inner div with the "Filter" text).
+        cy.contains("div", "Filter").scrollIntoView().click({ force: true });
+
     }
 
     // ============================

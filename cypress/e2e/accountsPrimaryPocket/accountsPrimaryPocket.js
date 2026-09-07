@@ -132,12 +132,16 @@ Then("I should see the create sub pocket form", () => {
     AccountsPrimaryPocketPage.validateCreateFormVisible();
 });
 
-When("I fill the create sub pocket form", () => {
-    AccountsPrimaryPocketPage.fillCreateSubPocketForm();
+When("I fill the create sub pocket form with random data", () => {
+    AccountsPrimaryPocketPage.fillCreateSubPocketFormWithRandomData();
 });
 
 Then("the sub pocket should be created successfully", () => {
-    cy.log("Create sub pocket form submitted");
+    AccountsPrimaryPocketPage.validateCreateSubPocketSubmitted();
+});
+
+Then("I filter sub pockets by the created email to validate the sub pocket exists", () => {
+    AccountsPrimaryPocketPage.filterAndValidateCreatedSubPocketByEmail();
 });
 
 When("I open the Filter sub pockets modal", () => {
