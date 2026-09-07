@@ -28,6 +28,10 @@ Then("I should see the Accounts sidebar menu is active", () => {
     AccountsPrimaryPocketPage.validateAccountsMenuActive();
 });
 
+Then("the business header should show JABARI INC. and PRIMARY POCKET", () => {
+    AccountsPrimaryPocketPage.validateBusinessHeader();
+});
+
 Then("I should see the Pocket balance card", () => {
     AccountsPrimaryPocketPage.validatePocketBalanceCard();
 });

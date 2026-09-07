@@ -76,6 +76,7 @@ Feature: Primary Pocket Accounts Page
     Given I open the primary pocket switcher
     When I select the primary pocket "<pocketId>"
     Then the selected primary pocket should be "<pocketId>"
+    And the business header should show JABARI INC. and PRIMARY POCKET
     When I click the Create a Subpocket button
     Then I should see the create sub pocket form
     When I fill the create sub pocket form with random data

@@ -216,6 +216,11 @@ class AccountsPrimaryPocketPage {
             `Filtering sub pockets by created email: ${created.email}`
         );
 
+        // Clear any leftover search text from an earlier scenario so the
+        // table list is unfiltered before we open the filter modal.
+        cy.get('input[placeholder="Search Subpocket ID"]')
+            .clear();
+
         // Click the Filter button and open the Filter Subpockets modal.
         this.openFilterModal();
 
@@ -269,11 +274,38 @@ class AccountsPrimaryPocketPage {
 
     openFilterModal() {
 
-        // Dismiss any lingering dialog/backdrop before opening the filter.
-        cy.get("body").type("{esc}", { force: true });
+        // The Filter trigger is a TOGGLE: clicking an already-open modal will
+        // close it. In a long-lived spec session a prior scenario may have
+        // left the Filter Subpockets modal open, so check first and only
+        // click when it is closed. Keep checking until it is open.
+        const ensureOpen = (attempt) => {
 
-        // Click the Filter pill directly (inner div with the "Filter" text).
-        cy.contains("div", "Filter").scrollIntoView().click({ force: true });
+            cy.document().then((doc) => {
+
+                const alreadyOpen =
+                    Cypress.$('h2:contains("Filter Subpockets")', doc).length > 0;
+
+                cy.log(`Filter modal open check (attempt ${attempt}): ${alreadyOpen}`);
+
+                if (alreadyOpen) {
+                    return;
+                }
+
+                cy.contains("div", "Filter")
+                    .scrollIntoView()
+                    .click({ force: true });
+
+                if (attempt >= 4) {
+                    return;
+                }
+
+                cy.wait(1000).then(() => ensureOpen(attempt + 1));
+
+            });
+
+        };
+
+        ensureOpen(1);
 
     }
 
@@ -289,6 +321,11 @@ class AccountsPrimaryPocketPage {
         this.elements.accountsMenu()
             .should("exist")
             .and("have.class", "!bg-[#FF3C38]");
+    }
+
+    validateBusinessHeader() {
+        cy.contains("h2", "JABARI INC.").should("be.visible");
+        cy.contains("p", "PRIMARY POCKET").should("be.visible");
     }
 
     validatePocketBalanceCard() {
