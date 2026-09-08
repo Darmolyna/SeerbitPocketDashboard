@@ -211,7 +211,7 @@ class SingleSendMoneyPage {
     ensureOnSendMoneyPage() {
         cy.url().then((url) => {
             if (!url.includes("/send-money")) {
-                const baseUrl = Cypress.env("baseUrl") || Cypress.expose("baseUrl");
+                const baseUrl = Cypress.expose("baseUrl");
                 cy.visit("/send-money");
                 this.elements.transferTypeSection({ timeout: 15000 })
                     .should("be.visible");
@@ -610,7 +610,7 @@ class SingleSendMoneyPage {
     clickTransactionPaymentReferenceLink() {
         cy.get("@paymentReference").then((ref) => {
             cy.log(`Navigating to transaction details for ref: ${ref}`);
-            const baseUrl = Cypress.env("baseUrl") || Cypress.expose("baseUrl");
+            const baseUrl = Cypress.expose("baseUrl");
             cy.visit(`${baseUrl}/transactions/${ref}?tab=disbursement`);
         });
     }

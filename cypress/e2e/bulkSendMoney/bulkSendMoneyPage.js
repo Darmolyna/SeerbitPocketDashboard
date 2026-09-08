@@ -366,7 +366,7 @@ class BulkSendMoneyPage {
     clickTransactionPaymentReferenceLink() {
         cy.get("@paymentReference").then((ref) => {
             cy.log(`Navigating to transaction details for ref: ${ref}`);
-            const baseUrl = Cypress.env("baseUrl") || Cypress.expose("baseUrl");
+            const baseUrl = Cypress.expose("baseUrl");
             cy.visit(`${baseUrl}/transactions/${ref}?tab=disbursement`);
         });
     }
@@ -743,7 +743,7 @@ class BulkSendMoneyPage {
                     .first()
                     .invoke("attr", "href")
                     .then((href) => {
-                        const baseUrl = Cypress.env("baseUrl") || Cypress.expose("baseUrl");
+const baseUrl = Cypress.expose("baseUrl");
                         cy.visit(`${baseUrl}${href}`);
                     });
             });

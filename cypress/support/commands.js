@@ -27,7 +27,7 @@
 
 Cypress.Commands.add("loginToPrimaryPocket", () => {
     cy.viewport(1800, 1000);
-    cy.visit(Cypress.env("baseUrl"));
+    cy.visit(Cypress.expose("baseUrl"));
 
     LoginPage.enterPrimaryPocketEmail();
     LoginPage.enterPrimaryPocketPassword();
