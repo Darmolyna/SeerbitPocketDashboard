@@ -14,8 +14,13 @@ class LoginPage {
 
         forgotPasswordLink: () => cy.contains('Forgot Password?'),
 
-        // passwordToggle: () =>
-        //     cy.get('button[type="button"]'),
+        // Eye icon: sibling of the password input inside its field wrapper.
+        // The wrapping button collapses (absolute-positioned SVG), so target
+        // the SVG itself, which is the part the user clicks.
+        passwordToggle: () =>
+            this.elements.passwordInput()
+                .parent()
+                .find('button[type="button"] svg'),
 
         loginHeading: () => cy.contains('Sign to your account'),
 
@@ -78,7 +83,7 @@ class LoginPage {
     }
 
     clickPasswordToggle() {
-        this.elements.passwordToggle().click()
+        this.elements.passwordToggle().click({ force: true })
     }
 
 
@@ -99,15 +104,15 @@ class LoginPage {
         this.elements.forgotPasswordLink().should('be.visible')
     }
 
-    // verifyPasswordVisible() {
-    //     this.elements.passwordInput()
-    //         .should('have.attr', 'type', 'text')
-    // }
+    verifyPasswordVisible() {
+        this.elements.passwordInput()
+            .should('have.attr', 'type', 'text')
+    }
 
-    // verifyPasswordHidden() {
-    //     this.elements.passwordInput()
-    //         .should('have.attr', 'type', 'password')
-    // }
+    verifyPasswordHidden() {
+        this.elements.passwordInput()
+            .should('have.attr', 'type', 'password')
+    }
 
 }
 

@@ -32,3 +32,5 @@ Feature: Login Functionality for flow dashboard
     When I enter my password "Password123"
     And I click the password visibility icon
     Then the password should become visible
+    And I click the password visibility icon again
+    Then the password should become hidden again

@@ -46,9 +46,17 @@ Then("I should be redirected to the Forgot Password page", () => {
 
 /* PASSWORD VISIBILITY TOOGLE */
 When("I click the password visibility icon", () => {
-    // LoginPage.clickPasswordToggle();
+    LoginPage.clickPasswordToggle();
+});
+
+When("I click the password visibility icon again", () => {
+    LoginPage.clickPasswordToggle();
 });
 
 Then("the password should become visible", () => {
-    // LoginPage.verifyPasswordVisible();
+    LoginPage.verifyPasswordVisible();
+});
+
+Then("the password should become hidden again", () => {
+    LoginPage.verifyPasswordHidden();
 });
