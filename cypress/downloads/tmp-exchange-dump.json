@@ -1,0 +1,41 @@
+{
+  "totalRows": 11,
+  "dump": [
+    {
+      "index": 0,
+      "className": "grid grid-cols-4 gap-2 md:gap-4 py-4 border-b border-[#F3F4F6]",
+      "spanCount": 0,
+      "imgCount": 0,
+      "pCount": 0,
+      "text": "CURRENCY\nRATE",
+      "html": "<div class=\"grid grid-cols-4 gap-2 md:gap-4 py-4 border-b border-[#F3F4F6]\"><div class=\"col-span-3 text-xs font-medium text-[#9CA3AF] tracking-wider uppercase ml-1 md:ml-12\">CURRENCY</div><div class=\"text-xs font-medium text-[#9CA3AF] tracking-wider uppercase ml-2 md:ml-16\">RATE</div></div>"
+    },
+    {
+      "index": 1,
+      "className": "grid grid-cols-4 gap-2 md:gap-4 py-4 border-b border-[#F3F4F6] last:border-b-0 items-center",
+      "spanCount": 3,
+      "imgCount": 1,
+      "pCount": 0,
+      "text": "ZAR\n—\nEUR\nEUR\n0.0004",
+      "html": "<div class=\"grid grid-cols-4 gap-2 md:gap-4 py-4 border-b border-[#F3F4F6] last:border-b-0 items-center\"><div class=\"flex items-center gap-2 min-w-0\"><div class=\"scale-[0.7] md:scale-100 origin-left shrink-0\"><img alt=\"South Africa\" loading=\"lazy\" width=\"47\" height=\"45\" decoding=\"async\" data-nimg=\"1\" class=\"w-[47px] h-[45px] rounded-[100%]\" srcset=\"/_next/image?url=%2Fflags%2Fsouth_africa.gif&amp;w=48&amp;q=75 1x, /_next/image?url=%2Fflags%2Fsouth_africa.gif&amp;w=96&amp;q=75 2x\" src=\"https://develop.d1vg8wvg97d1gx.amplifyapp.com/_next/image?url=%2Fflags%2Fsouth_africa.gif&amp;w=96&amp;q=75\" style=\"color: transparent;\"></div><span class=\"font-medium text-[#111827] text-xs md:text-sm truncate\">ZAR</span></div><div><span class=\"text-[#090909] text-base font-light\">—</span></div><div class=\"flex items-center gap-2 min-w-0\"><div class=\"scale-[0.7] md:scale-100 origin-left shrink-0\"><div class=\"w-[47px] h-[45px] rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold\">EUR</div></div><span class=\"font-medium text-[#111827] text-xs md:text-sm truncate\">EUR</span></div><div class=\"text-xs md:text-sm text-[#111827] font-medium ml-2 md:ml-16 truncate\">0.0004</div></div>"
+    },
+    {
+      "index": 2,
+      "className": "grid grid-cols-4 gap-2 md:gap-4 py-4 border-b border-[#F3F4F6] last:border-b-0 items-center",
+      "spanCount": 3,
+      "imgCount": 2,
+      "pCount": 0,
+      "text": "XAF\n—\nNGN\n2.36",
+      "html": "<div class=\"grid grid-cols-4 gap-2 md:gap-4 py-4 border-b border-[#F3F4F6] last:border-b-0 items-center\"><div class=\"flex items-center gap-2 min-w-0\"><div class=\"scale-[0.7] md:scale-100 origin-left shrink-0\"><img alt=\"Cameroon\" loading=\"lazy\" width=\"47\" height=\"45\" decoding=\"async\" data-nimg=\"1\" class=\"w-[47px] h-[45px] rounded-[100%]\" srcset=\"/_next/image?url=%2Fflags%2Fcameroon.gif&amp;w=48&amp;q=75 1x, /_next/image?url=%2Fflags%2Fcameroon.gif&amp;w=96&amp;q=75 2x\" src=\"https://develop.d1vg8wvg97d1gx.amplifyapp.com/_next/image?url=%2Fflags%2Fcameroon.gif&amp;w=96&amp;q=75\" style=\"color: transparent;\"></div><span class=\"font-medium text-[#111827] text-xs md:text-sm truncate\">XAF</span></div><div><span class=\"text-[#090909] text-base font-light\">—</span></div><div class=\"flex items-center gap-2 min-w-0\"><div class=\"scale-[0.7] md:scale-100 origin-left shrink-0\"><img alt=\"Nigeria\" loading=\"lazy\" width=\"47\" height=\"45\" decoding=\"async\" data-nimg=\"1\" class=\"w-[47px] h-[45px] rounded-[100%]\" srcset=\"/_next/image?url=%2Fflags%2Fnigeria.gif&amp;w=48&amp;q=75 1x, /_next/image?url=%2Fflags%2Fnigeria.gif&amp;w=96&amp;q=75 2x\" src=\"https://develop.d1vg8wvg97d1gx.amplifyapp.com/_next/image?url=%2Fflags%2Fnigeria.gif&amp;w=96&amp;q=75\" style=\"color: transparent;\"></div><span class=\"font-medium text-[#111827] text-xs md:text-sm truncate\">NGN</span></div><div class=\"text-xs md:text-sm text-[#111827] font-medium ml-2 md:ml-16 truncate\">2.36</div></div>"
+    },
+    {
+      "index": 3,
+      "className": "grid grid-cols-4 gap-2 md:gap-4 py-4 border-b border-[#F3F4F6] last:border-b-0 items-center",
+      "spanCount": 3,
+      "imgCount": 1,
+      "pCount": 0,
+      "text": "GHS\n—\nGBP\nGBP\n0.0006",
+      "html": "<div class=\"grid grid-cols-4 gap-2 md:gap-4 py-4 border-b border-[#F3F4F6] last:border-b-0 items-center\"><div class=\"flex items-center gap-2 min-w-0\"><div class=\"scale-[0.7] md:scale-100 origin-left shrink-0\"><img alt=\"Ghana\" loading=\"lazy\" width=\"47\" height=\"45\" decoding=\"async\" data-nimg=\"1\" class=\"w-[47px] h-[45px] rounded-[100%]\" srcset=\"/_next/image?url=%2Fflags%2Fghana.gif&amp;w=48&amp;q=75 1x, /_next/image?url=%2Fflags%2Fghana.gif&amp;w=96&amp;q=75 2x\" src=\"https://develop.d1vg8wvg97d1gx.amplifyapp.com/_next/image?url=%2Fflags%2Fghana.gif&amp;w=96&amp;q=75\" style=\"color: transparent;\"></div><span class=\"font-medium text-[#111827] text-xs md:text-sm truncate\">GHS</span></div><div><span class=\"text-[#090909] text-base font-light\">—</span></div><div class=\"flex items-center gap-2 min-w-0\"><div class=\"scale-[0.7] md:scale-100 origin-left shrink-0\"><div class=\"w-[47px] h-[45px] rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold\">GBP</div></div><span class=\"font-medium text-[#111827] text-xs md:text-sm truncate\">GBP</span></div><div class=\"text-xs md:text-sm text-[#111827] font-medium ml-2 md:ml-16 truncate\">0.0006</div></div>"
+    }
+  ]
+}

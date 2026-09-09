@@ -467,8 +467,8 @@ class PrimaryPocketDashboardPage {
 
     // RECENT TRANSACTIONS
     validateRecentTransactionsSection() {
-        this.scrollToRecentTransactions();
         this.elements.recentTransactionsSection()
+            .scrollIntoView()
             .should("be.visible");
 
         this.elements.seeAllTransactionsButton()
@@ -483,57 +483,79 @@ class PrimaryPocketDashboardPage {
             .scrollIntoView()
             .should("be.visible");
 
-
+        // Wait until every row has rendered its real data (icon + texts +
+        // amount). Header row excluded by the getter. Rows carry the
+        // .animate-pulse class even while filled, so require content instead
+        // of waiting for that class to disappear. This also gives the last
+        // row time to finish its skeleton->data replacement so it is stable
+        // before we validate it.
         this.elements.transactionRows()
-            .should("have.length.greaterThan", 0)
-            .each(($row, index) => {
+            .should(($rows) => {
 
-                cy.log(`Validating Transaction ${index + 1}`);
+                expect($rows.length).to.be.greaterThan(0);
 
-                cy.wrap($row).within(() => {
+                [...$rows].forEach((row) => {
 
+                    const $row = Cypress.$(row);
 
-                    // Transaction icon
-                    cy.get("svg")
-                        .should("exist")
-                        .and("be.visible");
+                    expect($row.find("svg").length, "row icon")
+                        .to.be.greaterThan(0);
 
+                    expect($row.find("p").length, "row texts")
+                        .to.be.at.least(3);
 
-                    // Transaction name
-                    cy.get("p")
-                        .first()
-                        .invoke("text")
-                        .then((text) => {
-
-                            expect(text.trim())
-                                .to.not.equal("");
-
-                        });
-
-
-                    // Transaction date
-                    cy.get("p")
-                        .eq(1)
-                        .invoke("text")
-                        .then((date) => {
-
-                            expect(date.trim())
-                                .to.match(/ago|day|days/);
-
-                        });
-
-
-                    // Transaction amount
-                    cy.get("> p")
-                        .invoke("text")
-                        .then((amount) => {
-
-                            expect(amount.trim())
-                                .to.match(/^[A-Z]{3}\s[\d,.]+$/);
-
-                        });
+                    expect($row.find("> p").text().trim(), "row amount")
+                        .to.match(/^[A-Z]{3}\s[\d,.]+$/);
 
                 });
+
+            }, { timeout: 20000 });
+
+        // Re-query each row right before validating it instead of reusing a
+        // captured reference, so rows re-rendered by the list refetch do not
+        // detach mid-validation.
+        this.elements.transactionRows()
+            .then(($rows) => {
+
+                for (let index = 0; index < $rows.length; index++) {
+
+                    this.elements.transactionRows()
+                        .eq(index)
+                        .within(() => {
+
+                            cy.log(`Validating Transaction ${index + 1}`);
+
+                            // Transaction icon
+                            cy.get("svg")
+                                .should("exist")
+                                .and("be.visible");
+
+                            // Transaction name
+                            cy.get("p")
+                                .first()
+                                .invoke("text")
+                                .then((text) => {
+                                    expect(text.trim()).to.not.equal("");
+                                });
+
+                            // Transaction date
+                            cy.get("p")
+                                .eq(1)
+                                .invoke("text")
+                                .then((date) => {
+                                    expect(date.trim()).to.match(/ago|day|days/);
+                                });
+
+                            // Transaction amount
+                            cy.get("> p")
+                                .invoke("text")
+                                .then((amount) => {
+                                    expect(amount.trim()).to.match(/^[A-Z]{3}\s[\d,.]+$/);
+                                });
+
+                        });
+
+                }
 
             });
 
