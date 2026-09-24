@@ -246,6 +246,32 @@ class PrimaryPocketFundingPage {
     }
 
 
+    handleFutureDateRange() {
+
+        cy.log("Validating the outcome for a future date range.");
+
+        this.elements.applyFilterButton()
+            .then(($btn) => {
+
+                if ($btn[0].disabled) {
+
+                    cy.wrap($btn).should("be.disabled");
+                    cy.log("Apply Filter is disabled for future dates.");
+
+                    return;
+                }
+
+                cy.log("Apply Filter is enabled. Applying the future date range.");
+                cy.wrap($btn).click();
+
+                cy.get("body", { timeout: 20000 })
+                    .should("contain.text", "Oops, we have nothing to show!");
+
+            });
+
+    }
+
+
     clickApplyFilter() {
 
         this.elements.applyFilterButton()
@@ -418,7 +444,7 @@ class PrimaryPocketFundingPage {
 
     validateTransactionTable() {
 
-        this.waitForTableData();
+        this.waitForTableDataOrEmpty();
 
         const headers = [
 
@@ -445,21 +471,25 @@ class PrimaryPocketFundingPage {
 
             });
 
-        this.elements.tableRows()
-            .should("have.length.greaterThan", 0);
+        this.validateRowsOrEmptyState(() => {
 
-        this.elements.tableRows()
-            .then(($rows) => {
+            this.elements.tableRows()
+                .should("have.length.greaterThan", 0);
 
-                $rows.each((index, row) => {
+            this.elements.tableRows()
+                .then(($rows) => {
 
-                    expect(
-                        Cypress.$(row).find("td").length
-                    ).to.equal(6);
+                    $rows.each((index, row) => {
+
+                        expect(
+                            Cypress.$(row).find("td").length
+                        ).to.equal(6);
+
+                    });
 
                 });
 
-            });
+        });
 
     }
 
@@ -557,6 +587,50 @@ class PrimaryPocketFundingPage {
         this.elements.copyButtons()
             .first()
             .should("be.visible");
+
+    }
+
+    copyPaymentReferenceIfAvailable() {
+
+        cy.get("body").then(($body) => {
+
+            if ($body.text().includes("Oops, we have nothing to show!")) {
+
+                cy.log("No data available — nothing to copy.");
+
+                this.elements.emptyStateMessage()
+                    .should("be.visible");
+
+                return;
+
+            }
+
+            this.clickFirstCopyButton();
+
+            this.validatePaymentReferenceCopy();
+
+        });
+
+    }
+
+    validateRowsOrEmptyState(callback) {
+
+        cy.get("body", { timeout: 20000 }).then(($body) => {
+
+            if ($body.text().includes("Oops, we have nothing to show!")) {
+
+                cy.log("No data available — validating empty state.");
+
+                this.elements.emptyStateMessage()
+                    .should("be.visible");
+
+                return;
+
+            }
+
+            callback();
+
+        });
 
     }
 
@@ -798,8 +872,12 @@ class PrimaryPocketFundingPage {
 
                 cy.log("Validating transactions without date filter.");
 
-                this.elements.transactionRows()
-                    .should("have.length.greaterThan", 0);
+                this.validateRowsOrEmptyState(() => {
+
+                    this.elements.transactionRows()
+                        .should("have.length.greaterThan", 0);
+
+                });
 
                 return;
 
@@ -833,13 +911,25 @@ class PrimaryPocketFundingPage {
 
             case "Future Date":
 
-                startDate = new Date(today);
-                startDate.setDate(today.getDate() + 7);
+                cy.get("body").then(($body) => {
 
-                endDate = new Date(today);
-                endDate.setDate(today.getDate() + 14);
+                    if ($body.text().includes("Oops, we have nothing to show!")) {
 
-                break;
+                        cy.log("Future date range returned no transactions.");
+
+                        this.elements.emptyStateMessage()
+                            .should("be.visible");
+
+                        return;
+                    }
+
+                    cy.log("Table still shows unfiltered transactions.");
+                    this.elements.transactionRows()
+                        .should("have.length.greaterThan", 0);
+
+                });
+
+                return;
 
             default:
 

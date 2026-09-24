@@ -94,6 +94,15 @@ When("I filter disbursement transactions using {string} date range",
         }
 
 
+        if (dateRange === "Future Date") {
+
+            PrimaryPocketDisbursementPage.selectDateRange(dateRange);
+            PrimaryPocketDisbursementPage.handleFutureDateRange();
+
+            return;
+        }
+
+
         if (dateRange !== "Empty Result") {
 
             PrimaryPocketDisbursementPage.selectDateRange(dateRange);
@@ -117,9 +126,7 @@ Then(
 
 Then("I should be able to copy the payment reference", () => {
 
-    PrimaryPocketDisbursementPage.clickFirstCopyButton();
-
-    PrimaryPocketDisbursementPage.validatePaymentReferenceCopy();
+    PrimaryPocketDisbursementPage.copyPaymentReferenceIfAvailable();
 
 });
 

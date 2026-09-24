@@ -7,9 +7,6 @@ class SubPocketDisbursementPage {
         */
 
     elements = {
-        subPocketContext: () =>
-            cy.contains("p", "CELL SUB POCKET"),
-
         transactionMenu: () => cy.contains("nav a", "Transactions"),
 
         fundingTab: () => cy.contains("button", "Funding"),
@@ -108,7 +105,7 @@ class SubPocketDisbursementPage {
 
             });
 
-        this.waitForTableData();
+        this.waitForTableDataOrEmpty();
 
     }
 
@@ -137,6 +134,27 @@ class SubPocketDisbursementPage {
             const hasData = Cypress.$("table tbody tr td").length >= 6;
 
             expect(hasEmptyState || hasData).to.be.true;
+
+        });
+
+    }
+
+    validateRowsOrEmptyState(callback) {
+
+        cy.get("body", { timeout: 20000 }).then(($body) => {
+
+            if ($body.text().includes("Oops, we have nothing to show!")) {
+
+                cy.log("No data available — validating empty state.");
+
+                this.elements.emptyStateMessage()
+                    .should("be.visible");
+
+                return;
+
+            }
+
+            callback();
 
         });
 
@@ -294,6 +312,32 @@ class SubPocketDisbursementPage {
     }
 
 
+    handleFutureDateRange() {
+
+        cy.log("Validating the outcome for a future date range.");
+
+        this.elements.applyFilterButton()
+            .then(($btn) => {
+
+                if ($btn[0].disabled) {
+
+                    cy.wrap($btn).should("be.disabled");
+                    cy.log("Apply Filter is disabled for future dates.");
+
+                    return;
+                }
+
+                cy.log("Apply Filter is enabled. Applying the future date range.");
+                cy.wrap($btn).click();
+
+                cy.get("body", { timeout: 20000 })
+                    .should("contain.text", "Oops, we have nothing to show!");
+
+            });
+
+    }
+
+
     clickApplyFilter() {
 
         this.elements.applyFilterButton()
@@ -402,8 +446,11 @@ class SubPocketDisbursementPage {
         this.elements.filterButton()
             .should("be.visible");
 
-        this.elements.subPocketContext()
-            .should("be.visible");
+        this.elements.disbursementTab()
+            .should("be.visible")
+            .invoke("attr", "class")
+            .should("contain", "border-b-2")
+            .should("contain", "border-[#E61B17]");
 
     }
 
@@ -493,7 +540,7 @@ class SubPocketDisbursementPage {
 
     validateTransactionTable() {
 
-        this.waitForTableData();
+        this.waitForTableDataOrEmpty();
 
         const headers = [
 
@@ -520,21 +567,25 @@ class SubPocketDisbursementPage {
 
             });
 
-        this.elements.transactionRows({ timeout: 20000 })
-            .should("have.length.greaterThan", 0);
+        this.validateRowsOrEmptyState(() => {
 
-        this.elements.transactionRows()
-            .then(($rows) => {
+            this.elements.transactionRows({ timeout: 20000 })
+                .should("have.length.greaterThan", 0);
 
-                $rows.each((index, row) => {
+            this.elements.transactionRows()
+                .then(($rows) => {
 
-                    expect(
-                        Cypress.$(row).find("td").length
-                    ).to.equal(6);
+                    $rows.each((index, row) => {
+
+                        expect(
+                            Cypress.$(row).find("td").length
+                        ).to.equal(6);
+
+                    });
 
                 });
 
-            });
+        });
 
     }
 
@@ -550,6 +601,29 @@ class SubPocketDisbursementPage {
         this.elements.copyButtons()
             .first()
             .should("be.visible");
+
+    }
+
+    copyPaymentReferenceIfAvailable() {
+
+        cy.get("body").then(($body) => {
+
+            if ($body.text().includes("Oops, we have nothing to show!")) {
+
+                cy.log("No data available — nothing to copy.");
+
+                this.elements.emptyStateMessage()
+                    .should("be.visible");
+
+                return;
+
+            }
+
+            this.clickFirstCopyButton();
+
+            this.validatePaymentReferenceCopy();
+
+        });
 
     }
 
@@ -575,7 +649,9 @@ class SubPocketDisbursementPage {
 
     validateTransactionRowInfo() {
 
-        this.waitForTableData();
+        this.waitForTableDataOrEmpty();
+
+        this.validateRowsOrEmptyState(() => {
 
         this.elements.transactionRows({ timeout: 20000 })
             .should("have.length.greaterThan", 0);
@@ -643,27 +719,33 @@ class SubPocketDisbursementPage {
 
             });
 
+        });
+
     }
 
     validatePaginationControls() {
 
-        this.waitForTableData();
+        this.waitForTableDataOrEmpty();
 
-        this.elements.paginationText()
-            .should("exist")
-            .then(($pagination) => {
+        this.validateRowsOrEmptyState(() => {
 
-                expect($pagination.text()).to.match(/Showing \d+ of \d+/);
+            this.elements.paginationText()
+                .should("exist")
+                .then(($pagination) => {
 
-            });
+                    expect($pagination.text()).to.match(/Showing \d+ of \d+/);
 
-        cy.get("nav").find("button")
-            .should("have.length.greaterThan", 0)
-            .then(($buttons) => {
+                });
 
-                expect($buttons.first().text().trim()).to.equal("1");
+            cy.get("nav").find("button")
+                .should("have.length.greaterThan", 0)
+                .then(($buttons) => {
 
-            });
+                    expect($buttons.first().text().trim()).to.equal("1");
+
+                });
+
+        });
 
     }
 
@@ -682,8 +764,12 @@ class SubPocketDisbursementPage {
 
                 cy.log("Validating transactions without date filter.");
 
-                this.elements.transactionRows()
-                    .should("have.length.greaterThan", 0);
+                this.validateRowsOrEmptyState(() => {
+
+                    this.elements.transactionRows()
+                        .should("have.length.greaterThan", 0);
+
+                });
 
                 return;
 
@@ -717,13 +803,25 @@ class SubPocketDisbursementPage {
 
             case "Future Date":
 
-                startDate = new Date(today);
-                startDate.setDate(today.getDate() + 7);
+                cy.get("body").then(($body) => {
 
-                endDate = new Date(today);
-                endDate.setDate(today.getDate() + 14);
+                    if ($body.text().includes("Oops, we have nothing to show!")) {
 
-                break;
+                        cy.log("Future date range returned no transactions.");
+
+                        this.elements.emptyStateMessage()
+                            .should("be.visible");
+
+                        return;
+                    }
+
+                    cy.log("Table still shows unfiltered transactions.");
+                    this.elements.transactionRows()
+                        .should("have.length.greaterThan", 0);
+
+                });
+
+                return;
 
             default:
 

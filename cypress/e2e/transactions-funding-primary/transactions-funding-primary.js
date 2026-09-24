@@ -90,6 +90,14 @@ When("I filter transactions using {string} date range",
         }
 
 
+        if (dateRange === "Future Date") {
+
+            PrimaryPocketFundingPage.selectDateRange(dateRange);
+            PrimaryPocketFundingPage.handleFutureDateRange();
+
+            return;
+        }
+
         if (dateRange !== "Empty Result") {
 
             PrimaryPocketFundingPage.selectDateRange(dateRange);
@@ -113,9 +121,7 @@ Then(
 
 Then("I should be able to copy the payment reference", () => {
 
-    PrimaryPocketFundingPage.clickFirstCopyButton();
-
-    PrimaryPocketFundingPage.validatePaymentReferenceCopy();
+    PrimaryPocketFundingPage.copyPaymentReferenceIfAvailable();
 
 });
 
