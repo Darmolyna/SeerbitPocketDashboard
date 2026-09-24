@@ -268,9 +268,9 @@ module.exports = defineConfig({
   screenshotOnRunFailure: true,
 
   expose: {
-    baseUrrl:
-      "https://develop.d1vg8wvg97d1gx.amplifyapp.com/",
     baseUrl:
+      "https://develop.d1vg8wvg97d1gx.amplifyapp.com/",
+    bhhhaseUrl:
       "https://flow-v2.seerbitapi.com/",
   },
 
