@@ -1,5 +1,12 @@
 const { defineConfig } = require("cypress");
 const createBundler = require("@bahmutov/cypress-esbuild-preprocessor");
+const fs = require("fs");
+const path = require("path");
+
+// Load the gitignored .env from the config directory explicitly, so the
+// plugin child process picks up the MAIL_* variables no matter what its
+// working directory is.
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const {
   addCucumberPreprocessorPlugin,
@@ -9,8 +16,7 @@ const {
   createEsbuildPlugin,
 } = require("@badeball/cypress-cucumber-preprocessor/esbuild");
 
-const fs = require("fs");
-const path = require("path");
+const { fetchLatestOtp } = require("./cypress/e2e/mailbox/fetchLatestOtp");
 
 function xmlDecode(value) {
   return String(value)
@@ -92,6 +98,21 @@ function parseWorksheetXml(xml, sharedStrings) {
 async function setupNodeEvents(on, config) {
   await addCucumberPreprocessorPlugin(on, config);
 
+  if (!process.env.MAIL_USERNAME || !process.env.MAIL_PASSWORD) {
+    console.warn(
+      "[fetchLatestOtp] MAIL_USERNAME / MAIL_PASSWORD not found. " +
+      `cwd=${process.cwd()}, .env exists=${fs.existsSync(path.join(__dirname, ".env"))}. ` +
+      "If .env was created/edited while Cypress was already running, fully quit and " +
+      "restart Cypress so the config (and dotenv) reloads."
+    );
+  }
+  if (!process.env.MAIL_CLIENT_ID) {
+    console.warn(
+      "[fetchLatestOtp] MAIL_CLIENT_ID not found. It is required to authenticate to " +
+      "Microsoft Graph. See .env.example for the setup steps."
+    );
+  }
+
   on(
     "file:preprocessor",
     createBundler({
@@ -101,6 +122,8 @@ async function setupNodeEvents(on, config) {
 
   // Get latest downloaded file
   on("task", {
+    fetchLatestOtp: (payload) => fetchLatestOtp(payload),
+
     parsePdf(filePath) {
       const { PDFParse } = require("pdf-parse");
       const fs = require("fs");
@@ -245,8 +268,10 @@ module.exports = defineConfig({
   screenshotOnRunFailure: true,
 
   expose: {
-    baseUrl:
+    baseUrrl:
       "https://develop.d1vg8wvg97d1gx.amplifyapp.com/",
+    baseUrl:
+      "https://flow-v2.seerbitapi.com/",
   },
 
   retries: {
@@ -255,13 +280,12 @@ module.exports = defineConfig({
   },
 
   defaultCommandTimeout: 10000,
-  pageLoadTimeout: 120000,
+  pageLoadTimeout: 180000,
   requestTimeout: 30000,
   responseTimeout: 30000,
-  execTimeout: 10000,
 
-  // Increase because file download may take time
-  taskTimeout: 30000,
+  // Increase because file download / OTP email polling may take time
+  taskTimeout: 180000,
 
   e2e: {
     specPattern: "**/*.feature",

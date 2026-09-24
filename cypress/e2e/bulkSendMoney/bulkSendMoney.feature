@@ -71,7 +71,7 @@ Feature: Bulk Send Money
         And the transaction summary should be displayed
         When I click Continue on bulk confirmation page
         Then I should see the OTP verification page
-        When I enter the OTP "123456"
+        When I fetch the OTP from my email
         Then all OTP fields should be filled
         When I click Continue after OTP
         Then I should see a successful transaction page
@@ -102,7 +102,7 @@ Feature: Bulk Send Money
         And the transaction summary should be displayed
         When I click Continue on bulk confirmation page
         Then I should see the OTP verification page
-        When I enter the OTP "123456"
+        When I fetch the OTP from my email
         Then all OTP fields should be filled
         When I click Continue after OTP
         Then I should see a successful transaction page

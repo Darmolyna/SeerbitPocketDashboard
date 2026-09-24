@@ -6,6 +6,10 @@ cypress/videos/
 # JavaScript / Node
 node_modules/
 
+# Secrets - never commit real mailbox credentials
+.env
+.env.example
+
 # Build output
 public/
 

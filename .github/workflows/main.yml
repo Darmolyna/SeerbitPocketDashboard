@@ -74,6 +74,11 @@ jobs:
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_CLIENT_ID: ${{ secrets.MAIL_CLIENT_ID }}
+          MAIL_TENANT_ID: ${{ secrets.MAIL_TENANT_ID }}
+          MAIL_CLIENT_SECRET: ${{ secrets.MAIL_CLIENT_SECRET }}
 
       # ---------------------------------------------------------
       # GENERATE MOCHAWESOME REPORT

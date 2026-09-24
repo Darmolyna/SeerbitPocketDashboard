@@ -1,0 +1,8 @@
+{
+  "stepDefinitions": [
+    "cypress/[filepath]/**/*.{js,mjs,ts,tsx}",
+    "cypress/[filepath].{js,mjs,ts,tsx}",
+    "cypress/e2e/mailbox/**/*.{js,mjs,ts,tsx}",
+    "cypress/support/step_definitions/**/*.{js,mjs,ts,tsx}"
+  ]
+}
