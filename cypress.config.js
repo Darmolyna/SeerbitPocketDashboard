@@ -290,6 +290,8 @@ module.exports = defineConfig({
   e2e: {
     specPattern: "**/*.feature",
 
+    excludeSpecPattern: ["cypress/screenshots/**"],
+
     downloadsFolder: "cypress/downloads",
 
     setupNodeEvents,
