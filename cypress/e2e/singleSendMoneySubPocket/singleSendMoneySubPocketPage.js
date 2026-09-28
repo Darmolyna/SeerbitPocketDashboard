@@ -14,27 +14,27 @@ class SubPocketSendMoneyPage {
 
         // Source Pocket (fixed to the sub-pocket itself)
         sourcePocketDropdown: () =>
-            cy.get("img[alt='flag']")
+            cy.get("img[alt*='flag']")
                 .first()
                 .closest("div.flex")
                 .parent()
                 .closest("button"),
 
         sourcePocketId: () =>
-            cy.get("img[alt='flag']")
+            cy.get("img[alt*='flag']")
                 .first()
-                .parent()
-                .parent()
-                .children("span")
+                .closest("button")
+                .find("span")
+                .filter((index, span) =>
+                    /^SBP\d+$/.test(Cypress.$(span).text().trim())
+                )
                 .first(),
 
         sourcePocketBalance: () =>
-            cy.get("img[alt='flag']")
+            cy.get("img[alt*='flag']")
                 .first()
-                .parent()
-                .parent()
-                .children("span")
-                .last(),
+                .closest("button")
+                .find("span.whitespace-nowrap"),
 
         // Form Title
         formTitle: () => cy.contains("h2", "Send money from"),
@@ -368,21 +368,21 @@ class SubPocketSendMoneyPage {
                 .should("be.visible")
                 .invoke("text")
                 .then((text) => {
-                    expect(text).to.match(/₦\s*[\d,.]+/);
+                    expect(text).to.match(/(₦|NGN)\s*[\d,.]+/);
                 });
 
             this.elements.transactionChargeRow()
                 .should("be.visible")
                 .invoke("text")
                 .then((text) => {
-                    expect(text).to.match(/₦[\d,.]+/);
+                    expect(text).to.match(/(₦|NGN)\s*[\d,.]+/);
                 });
 
             this.elements.totalAmountRow()
                 .should("be.visible")
                 .invoke("text")
                 .then((text) => {
-                    expect(text).to.match(/₦[\d,.]+/);
+                    expect(text).to.match(/(₦|NGN)\s*[\d,.]+/);
                 });
 
             this.elements.receiverDetailsHeader()

@@ -15,32 +15,32 @@ class SingleSendMoneyPage {
 
         // Source Pocket Dropdown
         sourcePocketDropdown: () =>
-            cy.get("img[alt='flag']")
+            cy.get("img[alt*='flag']")
                 .first()
                 .closest("div.flex")
                 .parent()
                 .closest("button"),
 
         sourcePocketCurrencyCode: () =>
-            cy.get("img[alt='flag']")
+            cy.get("img[alt*='flag']")
                 .first()
                 .next("span"),
 
         sourcePocketId: () =>
-            cy.get("img[alt='flag']")
+            cy.get("img[alt*='flag']")
                 .first()
-                .parent()
-                .parent()
-                .children("span")
+                .closest("button")
+                .find("span")
+                .filter((index, span) =>
+                    /^SBP\d+$/.test(Cypress.$(span).text().trim())
+                )
                 .first(),
 
         sourcePocketBalance: () =>
-            cy.get("img[alt='flag']")
+            cy.get("img[alt*='flag']")
                 .first()
-                .parent()
-                .parent()
-                .children("span")
-                .last(),
+                .closest("button")
+                .find("span.whitespace-nowrap"),
 
         pocketDropdownOptions: () =>
             cy.get(".absolute.z-20 button"),
@@ -347,7 +347,7 @@ class SingleSendMoneyPage {
             .should("be.visible")
             .invoke("text")
             .then((text) => {
-                const match = text.match(/₦([\d,.]+)/);
+                const match = text.match(/(?:₦|NGN)\s*([\d,.]+)/);
                 if (match) {
                     const charge = parseFloat(match[1].replace(/,/g, ""));
                     cy.wrap(charge).as("transactionCharge");
@@ -359,7 +359,7 @@ class SingleSendMoneyPage {
             .should("be.visible")
             .invoke("text")
             .then((text) => {
-                const match = text.match(/₦([\d,.]+)/);
+                const match = text.match(/(?:₦|NGN)\s*([\d,.]+)/);
                 if (match) {
                     const amount = parseFloat(match[1].replace(/,/g, ""));
                     cy.wrap(amount).as("transactionAmount");
@@ -371,7 +371,7 @@ class SingleSendMoneyPage {
             .should("be.visible")
             .invoke("text")
             .then((text) => {
-                const match = text.match(/₦([\d,.]+)/);
+                const match = text.match(/(?:₦|NGN)\s*([\d,.]+)/);
                 if (match) {
                     const total = parseFloat(match[1].replace(/,/g, ""));
                     cy.wrap(total).as("totalAmount");
@@ -390,7 +390,7 @@ class SingleSendMoneyPage {
                     .should("be.visible")
                     .invoke("text")
                     .then((text) => {
-                        const match = text.match(/₦([\d,.]+)/);
+                        const match = text.match(/(?:₦|NGN)\s*([\d,.]+)/);
                         if (match) {
                             const transferredAmount = parseFloat(match[1].replace(/,/g, ""));
                             cy.log(`Amount transferred on success page: ${transferredAmount}`);
@@ -1174,21 +1174,21 @@ class SingleSendMoneyPage {
                 .should("be.visible")
                 .invoke("text")
                 .then((text) => {
-                    expect(text).to.match(/₦\s*[\d,.]+/);
+                    expect(text).to.match(/(₦|NGN)\s*[\d,.]+/);
                 });
 
             this.elements.transactionChargeRow()
                 .should("be.visible")
                 .invoke("text")
                 .then((text) => {
-                    expect(text).to.match(/₦[\d,.]+/);
+                    expect(text).to.match(/(₦|NGN)\s*[\d,.]+/);
                 });
 
             this.elements.totalAmountRow()
                 .should("be.visible")
                 .invoke("text")
                 .then((text) => {
-                    expect(text).to.match(/₦[\d,.]+/);
+                    expect(text).to.match(/(₦|NGN)\s*[\d,.]+/);
                 });
 
             this.elements.receiverDetailsHeader()
@@ -1325,7 +1325,7 @@ class SingleSendMoneyPage {
             .should("be.visible")
             .invoke("text")
             .then((text) => {
-                expect(text).to.match(/₦[\d,.]+/);
+                expect(text).to.match(/(₦|NGN)\s*[\d,.]+/);
             });
 
         this.elements.transactionDetails()

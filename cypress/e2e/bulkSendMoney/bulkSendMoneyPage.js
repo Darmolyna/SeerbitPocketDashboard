@@ -5,7 +5,7 @@ class BulkSendMoneyPage {
         singleTab: () => cy.contains("a", "Single"),
 
         sourcePocketDropdown: () =>
-            cy.get("img[alt='flag']")
+            cy.get("img[alt*='flag']")
                 .first()
                 .closest("div.flex")
                 .parent()
@@ -119,7 +119,7 @@ class BulkSendMoneyPage {
             .should("be.visible")
             .invoke("text")
             .then((text) => {
-                const match = text.match(/₦([\d,.]+)/);
+                const match = text.match(/(?:₦|NGN)\s*([\d,.]+)/);
                 if (match) {
                     const charge = parseFloat(match[1].replace(/,/g, ""));
                     cy.wrap(charge).as("transactionCharge");
@@ -131,7 +131,7 @@ class BulkSendMoneyPage {
             .should("be.visible")
             .invoke("text")
             .then((text) => {
-                const match = text.match(/₦([\d,.]+)/);
+                const match = text.match(/(?:₦|NGN)\s*([\d,.]+)/);
                 if (match) {
                     const amount = parseFloat(match[1].replace(/,/g, ""));
                     cy.wrap(amount).as("transactionAmount");
@@ -143,7 +143,7 @@ class BulkSendMoneyPage {
             .should("be.visible")
             .invoke("text")
             .then((text) => {
-                const match = text.match(/₦([\d,.]+)/);
+                const match = text.match(/(?:₦|NGN)\s*([\d,.]+)/);
                 if (match) {
                     const total = parseFloat(match[1].replace(/,/g, ""));
                     cy.wrap(total).as("totalAmount");
@@ -215,10 +215,10 @@ class BulkSendMoneyPage {
                 cy.contains("p", "Amount Transferred", { timeout: 30000 })
                     .should("be.visible")
                     .parent()
-                    .contains("p", /₦/)
+                    .contains("p", /₦|NGN/)
                     .invoke("text")
                     .then((text) => {
-                        const match = text.match(/₦([\d,.]+)/);
+                        const match = text.match(/(?:₦|NGN)\s*([\d,.]+)/);
                         if (match) {
                             const transferredAmount = parseFloat(match[1].replace(/,/g, ""));
                             cy.log(`Amount transferred on success page: ${transferredAmount}`);
