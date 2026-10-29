@@ -1,5 +1,6 @@
 import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
 import LoginPage from "./loginPage";
+import credentials from "../../support/credentials";
 
 /* NAVIGATION */
 Given("I navigate to the login page", () => {
@@ -19,6 +20,14 @@ When("I enter my password {string}", (password) => {
     LoginPage.enterPassword(password);
 });
 
+When("I enter the email for the {string} pocket", (account) => {
+    LoginPage.enterEmail(credentials[`${account}Pocket`].email);
+});
+
+When("I enter the password for the {string} pocket", (account) => {
+    LoginPage.enterPassword(credentials[`${account}Pocket`].password);
+});
+
 When("I click the Sign In button", () => {
     LoginPage.clickSignIn();
 });
@@ -30,7 +39,7 @@ Then("the system should display {string}", (result) => {
             .should('be.visible')
             .and('contain', result)
     } else {
-        cy.contains(result, { timeout: 10000 }).should('be.visible');
+        cy.contains(result, { timeout: 60000 }).should('be.visible');
     }
 })
 

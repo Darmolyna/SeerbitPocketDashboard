@@ -2,6 +2,7 @@ import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
 
 import PrimaryPocketFundingPage from "./transactions-funding-primaryPage";
 import LoginPage from "../login/loginPage";
+import credentials from "../../support/credentials";
 
 
 Given("I am logged into the Primary Pocket Dashboard", () => {
@@ -10,8 +11,8 @@ Given("I am logged into the Primary Pocket Dashboard", () => {
 
     cy.visit(url);
 
-    LoginPage.enterPrimaryPocketEmail();
-    LoginPage.enterPrimaryPocketPassword();
+    LoginPage.enterEmail(credentials.primaryPocket.email);
+    LoginPage.enterPassword(credentials.primaryPocket.password);
     LoginPage.clickSignIn();
     //cy.wait(5000)
 }

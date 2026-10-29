@@ -8,18 +8,28 @@ Feature: Login Functionality for flow dashboard
     Given I navigate to the login page
     
     @login1
-  Scenario Outline: Login as "<email>" 
-    When I enter my email "<email>"
-    And I enter my password "<password>"
+  Scenario Outline: Login as the "<account>" pocket
+    When I enter the email for the "<account>" pocket
+    And I enter the password for the "<account>" pocket
     And I click the Sign In button
     Then the system should display "<result>"
 
     Examples:
-  | email                           | password           | result                      | tag       |
-  | test@seerbit.com               | Test@12345            | JABARI INC.                | positive Primary Pocket |
-  | ayomide.afolabi@seerbit.com    | Password@@1           | JABARI INC.                | positive Sub Pocket |
-  | invalid@example.com             | ValidPassword123   | Invalid Login Credentials     | negative  |
-  | test@seerbit.com                | WrongPassword      | Invalid Login Credentials     | negative  |
+  | account | result     |
+  | primary | JABARI INC. |
+  | sub     | JABARI INC. |
+
+  @login1
+  Scenario Outline: Login with invalid credentials "<email>"
+    When I enter my email "<email>"
+    And I enter my password "<password>"
+    And I click the Sign In button
+    Then the system should display "Invalid Login Credentials"
+
+    Examples:
+  | email               | password        |
+  | invalid@example.com | ValidPassword123 |
+  | test@seerbit.com    | WrongPassword    |
 
 
     @login2

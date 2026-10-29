@@ -2,6 +2,7 @@ import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
 import SubPocketDashboardPage from "./subPocketDashboardPage";
 import PrimaryPocketDashboardPage from "../primaryPocketDashboard/primaryPocketDashboardPage";
 import LoginPage from "../login/loginPage";
+import credentials from "../../support/credentials";
 
 
 /* NAVIGATION */
@@ -11,8 +12,8 @@ Given("I am logged into the Sub Pocket Dashboard", () => {
 
     cy.visit(url);
 
-    LoginPage.enterSubPocketEmail();
-    LoginPage.enterSubPocketPassword();
+    LoginPage.enterEmail(credentials.subPocket.email);
+    LoginPage.enterPassword(credentials.subPocket.password);
     LoginPage.clickSignIn();
     //cy.wait(5000)
 }

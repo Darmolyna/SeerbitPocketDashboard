@@ -2,6 +2,7 @@ import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
 
 import SubPocketFundingPage from "./transactions-funding-subpocketPage";
 import LoginPage from "../login/loginPage";
+import credentials from "../../support/credentials";
 
 
 Given("I am logged into the Sub Pocket Dashboard", () => {
@@ -10,8 +11,8 @@ Given("I am logged into the Sub Pocket Dashboard", () => {
 
     cy.visit(url);
 
-    LoginPage.enterSubPocketEmail();
-    LoginPage.enterSubPocketPassword();
+    LoginPage.enterEmail(credentials.subPocket.email);
+    LoginPage.enterPassword(credentials.subPocket.password);
     LoginPage.clickSignIn();
 }
 );

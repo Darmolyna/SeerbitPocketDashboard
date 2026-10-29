@@ -2,13 +2,14 @@ import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
 
 import AccountsPrimaryPocketPage from "./accountsPrimaryPocketPage";
 import LoginPage from "../login/loginPage";
+import credentials from "../../support/credentials";
 
 Given("I am logged into the Primary Pocket Dashboard", () => {
     cy.viewport(1800, 1000);
     const url = Cypress.expose('baseUrl');
     cy.visit(url);
-    LoginPage.enterPrimaryPocketEmail();
-    LoginPage.enterPrimaryPocketPassword();
+    LoginPage.enterEmail(credentials.primaryPocket.email);
+    LoginPage.enterPassword(credentials.primaryPocket.password);
     LoginPage.clickSignIn();
 });
 

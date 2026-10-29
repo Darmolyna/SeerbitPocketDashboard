@@ -25,11 +25,14 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
 
+import LoginPage from "../e2e/login/loginPage";
+import credentials from "./credentials";
+
 Cypress.Commands.add("loginToPrimaryPocket", () => {
     cy.viewport(1800, 1000);
     cy.visit(Cypress.expose("baseUrl"));
 
-    LoginPage.enterPrimaryPocketEmail();
-    LoginPage.enterPrimaryPocketPassword();
+    LoginPage.enterEmail(credentials.primaryPocket.email);
+    LoginPage.enterPassword(credentials.primaryPocket.password);
     LoginPage.clickSignIn();
 });

@@ -2,6 +2,7 @@ import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
 
 import SubPocketDisbursementPage from "./transactions-disbursement-subpocketPage";
 import LoginPage from "../login/loginPage";
+import credentials from "../../support/credentials";
 
 
 Given("I am logged into the Sub Pocket Dashboard", () => {
@@ -10,9 +11,10 @@ Given("I am logged into the Sub Pocket Dashboard", () => {
 
     cy.visit(url);
 
-    LoginPage.enterSubPocketEmail();
-    LoginPage.enterSubPocketPassword();
+    LoginPage.enterEmail(credentials.subPocket.email);
+    LoginPage.enterPassword(credentials.subPocket.password);
     LoginPage.clickSignIn();
+    cy.contains("JABARI INC.", { timeout: 60000 }).should("be.visible");
 }
 );
 

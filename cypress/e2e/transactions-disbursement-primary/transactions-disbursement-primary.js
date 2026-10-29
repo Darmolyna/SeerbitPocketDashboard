@@ -3,6 +3,7 @@ import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor";
 import PrimaryPocketDisbursementPage from "./transactions-disbursement-primaryPage";
 import PrimaryPocketFundingPage from "../transactions-funding-primary/transactions-funding-primaryPage";
 import LoginPage from "../login/loginPage";
+import credentials from "../../support/credentials";
 
 
 Given("I am logged into the Primary Pocket Dashboard", () => {
@@ -11,10 +12,10 @@ Given("I am logged into the Primary Pocket Dashboard", () => {
 
     cy.visit(url);
 
-    LoginPage.enterPrimaryPocketEmail();
-    LoginPage.enterPrimaryPocketPassword();
+    LoginPage.enterEmail(credentials.primaryPocket.email);
+    LoginPage.enterPassword(credentials.primaryPocket.password);
     LoginPage.clickSignIn();
-    //cy.wait(5000)
+    cy.contains("JABARI INC.", { timeout: 60000 }).should("be.visible");
 }
 );
 Then("I navigate to the Disbursement Transactions page", () => {

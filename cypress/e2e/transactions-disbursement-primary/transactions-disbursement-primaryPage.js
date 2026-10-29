@@ -7,9 +7,9 @@ class PrimaryPocketDisbursementPage {
         */
 
     elements = {
-        transactionMenu: () => cy.contains("nav a", "Transactions"),
+        transactionMenu: () => cy.contains("nav a", "Transactions", { timeout: 60000 }),
 
-        disbursementMenu: () => cy.contains('button', 'Disbursement'),
+        disbursementMenu: () => cy.contains('button', 'Disbursement', { timeout: 60000 }),
 
         // Page
         pageTitle: () => cy.contains("h1", "Transactions"),
@@ -91,17 +91,17 @@ class PrimaryPocketDisbursementPage {
 
     clickDisbursementMenu() {
         this.elements.transactionMenu()
-            .should("be.visible", { timeout: 10000 })
+            .should("be.visible")
             .click();
 
         this.elements.disbursementMenu()
-            .should("be.visible", { timeout: 10000 })
+            .should("be.visible")
             .click();
     }
 
     clickTransactionMenu() {
         this.elements.transactionMenu()
-            .should("be.visible", { timeout: 10000 })
+            .should("be.visible")
             .click();
     }
     searchPocketId(pocketId) {
