@@ -226,14 +226,14 @@ function extractOtp(text, term) {
     return bareMatch ? bareMatch[0] : null;
 }
 
-async function fetchLatestOtp({ term = "Seerbit", timeout = 90000 } = {}) {
+async function fetchLatestOtp({ term = "Seerbit", timeout = 60000 } = {}) {
     const startTime = Date.now();
     const deadline = startTime + timeout;
     // Look back up to 24h so the recency filter below does the real work.
     const since = new Date(startTime - 24 * 60 * 60 * 1000).toISOString();
 
     // Authenticate up front: config/consent problems surface immediately
-    // instead of being masked by a 90s "no OTP email" timeout. The token is
+    // instead of being masked by a 60s "no OTP email" timeout. The token is
     // valid for ~1h, so it is reused across the polling loop below.
     let accessToken = await acquireAccessToken();
     console.log(`[fetchLatestOtp] Authenticated to Microsoft Graph for ${process.env.MAIL_USERNAME}`);

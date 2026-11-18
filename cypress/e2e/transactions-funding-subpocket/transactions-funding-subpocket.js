@@ -15,7 +15,7 @@ Given("I am logged into the Sub Pocket Dashboard", () => {
     LoginPage.enterPassword(credentials.subPocket.password);
     LoginPage.clickSignIn();
     LoginPage.completeOtpVerification();
-    cy.contains("JABARI INC.", { timeout: 120000 }).should("be.visible");
+    cy.contains("JABARI INC.", { timeout: 60000 }).should("be.visible");
 }
 );
 

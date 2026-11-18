@@ -136,10 +136,10 @@ class SingleSendMoneyPage {
             cy.contains("Insufficient pocket balance for payout"),
 
         // OTP Page
-        otpPageTitle: () =>
-            cy.contains("h2", "Enter One Time Passcode"),
-        otpMessage: () =>
-            cy.contains("Please enter the 6-digit OTP sent to"),
+        otpPageTitle: (options) =>
+            cy.contains("h2", "Authenticator Verification", options),
+        otpMessage: (options) =>
+            cy.contains("Open your authenticator app and enter the 6-digit code", options),
         otpInputs: () =>
             cy.get('input[inputmode="numeric"][maxlength="1"]'),
         resendOtp: () =>
@@ -1266,10 +1266,10 @@ class SingleSendMoneyPage {
     // OTP Page
 
     validateOtpPage() {
-        cy.contains("h2", "Enter One Time Passcode", { timeout: 30000 })
+        this.elements.otpPageTitle({ timeout: 30000 })
             .should("be.visible");
 
-        cy.contains("Please enter the 6-digit OTP sent to", { timeout: 30000 })
+        this.elements.otpMessage({ timeout: 30000 })
             .should("be.visible");
 
         cy.get('input[inputmode="numeric"][maxlength="1"]', { timeout: 30000 })

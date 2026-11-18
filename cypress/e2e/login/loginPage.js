@@ -10,6 +10,10 @@ class LoginPage {
     // matching account's TOTP secret when no account is passed explicitly.
     lastEmail = null;
 
+    // TOTP secret resolved for the account that logged in, reused by later
+    // Authenticator prompts (e.g. transaction authorisation).
+    currentTotpSecret = null;
+
     elements = {
 
         emailInput: () => cy.get('input[name="email"]'),
@@ -127,6 +131,9 @@ class LoginPage {
         this.elements.otpHeading().should('be.visible')
 
         const secret = this.resolveTotpSecret(account)
+        // Remember the secret so later steps (e.g. the transaction
+        // Authenticator prompt) can reuse it without re-resolving the account.
+        this.currentTotpSecret = secret
         cy.task('generateTotp', secret).then((otp) => {
             cy.log(`Using Google Authenticator code: ${otp}`)
             this.enterOtp(otp)

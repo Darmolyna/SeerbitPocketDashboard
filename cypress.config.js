@@ -302,12 +302,12 @@ module.exports = defineConfig({
   },
 
   defaultCommandTimeout: 10000,
-  pageLoadTimeout: 180000,
+  pageLoadTimeout: 60000,
   requestTimeout: 30000,
   responseTimeout: 30000,
 
   // Increase because file download / OTP email polling may take time
-  taskTimeout: 660000,
+  taskTimeout: 60000,
 
   e2e: {
     specPattern: "**/*.feature",

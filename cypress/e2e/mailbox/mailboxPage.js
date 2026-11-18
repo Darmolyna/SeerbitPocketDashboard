@@ -4,7 +4,7 @@
 // never in test code.
 class MailboxPage {
 
-    fetchLatestOtp(term, timeout = 90000) {
+    fetchLatestOtp(term, timeout = 60000) {
         return cy.task("fetchLatestOtp", { term, timeout });
     }
 

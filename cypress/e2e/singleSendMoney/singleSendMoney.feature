@@ -1,5 +1,5 @@
 @regression @fullSuite @smoke @singleSendMoney
-Feature: Single Send Money
+Feature: Single Send Money Primary Pocket
 
     Background:
         Given I am logged into the Primary Pocket Dashboard
@@ -85,7 +85,7 @@ Feature: Single Send Money
         And I should capture the transaction charge
         When I click the Continue button on confirmation page
         Then I should see the OTP verification page
-        When I fetch the OTP from my email
+        When I enter the authenticator code
         Then all OTP fields should be filled
         When I click the Continue button after OTP
         Then I should see a successful transaction page
@@ -135,7 +135,7 @@ Feature: Single Send Money
         And I should capture the transaction charge
         When I click the Continue button on confirmation page
         Then I should see the OTP verification page
-        When I fetch the OTP from my email
+        When I enter the authenticator code
         Then all OTP fields should be filled
         When I click the Continue button after OTP
         Then I should see the same pocket transfer not allowed error
@@ -213,7 +213,7 @@ Feature: Single Send Money
         Then I should see the transaction confirmation page
         When I click the Continue button on confirmation page
         Then I should see the OTP verification page
-        When I fetch the OTP from my email
+        When I enter the authenticator code
         Then all OTP fields should be filled
         When I click the Continue button after OTP
         Then I should see a successful transaction page
