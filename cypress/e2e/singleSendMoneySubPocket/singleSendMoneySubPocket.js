@@ -15,6 +15,8 @@ Given("I am logged into the Sub Pocket Dashboard", () => {
     LoginPage.enterEmail(credentials.subPocket.email);
     LoginPage.enterPassword(credentials.subPocket.password);
     LoginPage.clickSignIn();
+    LoginPage.completeOtpVerification();
+    cy.contains("JABARI INC.", { timeout: 120000 }).should("be.visible");
 });
 
 Given("I navigate to the Send Money page", () => {

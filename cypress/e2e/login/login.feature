@@ -12,6 +12,7 @@ Feature: Login Functionality for flow dashboard
     When I enter the email for the "<account>" pocket
     And I enter the password for the "<account>" pocket
     And I click the Sign In button
+    And I enter the login OTP for the "<account>" pocket
     Then the system should display "<result>"
 
     Examples:

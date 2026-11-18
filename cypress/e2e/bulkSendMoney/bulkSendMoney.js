@@ -11,7 +11,8 @@ Given("I am logged into the Primary Pocket Dashboard", () => {
     LoginPage.enterEmail(credentials.primaryPocket.email);
     LoginPage.enterPassword(credentials.primaryPocket.password);
     LoginPage.clickSignIn();
-    cy.url().should("not.include", "/login", { timeout: 30000 });
+    LoginPage.completeOtpVerification();
+    cy.contains("JABARI INC.", { timeout: 120000 }).should("be.visible");
 });
 
 When("I navigate to the Send Money page", () => {

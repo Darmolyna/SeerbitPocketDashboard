@@ -32,6 +32,10 @@ When("I click the Sign In button", () => {
     LoginPage.clickSignIn();
 });
 
+When("I enter the login OTP for the {string} pocket", (account) => {
+    LoginPage.completeOtpVerification(account);
+});
+
 /* LOGIN RESULT VALIDATION */
 Then("the system should display {string}", (result) => {
     if (result === "Blessing Staging") {

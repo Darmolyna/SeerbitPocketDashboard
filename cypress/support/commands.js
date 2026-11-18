@@ -35,4 +35,5 @@ Cypress.Commands.add("loginToPrimaryPocket", () => {
     LoginPage.enterEmail(credentials.primaryPocket.email);
     LoginPage.enterPassword(credentials.primaryPocket.password);
     LoginPage.clickSignIn();
+    LoginPage.completeOtpVerification();
 });

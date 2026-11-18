@@ -15,7 +15,8 @@ Given("I am logged into the Primary Pocket Dashboard", () => {
     LoginPage.enterEmail(credentials.primaryPocket.email);
     LoginPage.enterPassword(credentials.primaryPocket.password);
     LoginPage.clickSignIn();
-    cy.contains("JABARI INC.", { timeout: 60000 }).should("be.visible");
+    LoginPage.completeOtpVerification();
+    cy.contains("JABARI INC.", { timeout: 120000 }).should("be.visible");
 }
 );
 Then("I navigate to the Disbursement Transactions page", () => {

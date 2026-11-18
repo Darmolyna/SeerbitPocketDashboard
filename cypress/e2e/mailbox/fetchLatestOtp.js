@@ -64,9 +64,11 @@ function describeTokenFailure(statusCode, body) {
     return parts.join(" ");
 }
 
-// Exchange a username/password for a Graph access token using the OAuth2
-// Resource Owner Password Credentials flow. Node 18+ has a global fetch, so no
-// MSAL/axios dependency is needed.
+// Exchange mailbox credentials for a Graph access token. Supports two flows:
+//   - delegated ROPC when MAIL_USERNAME + MAIL_PASSWORD are set
+//   - application/client-credentials when MAIL_CLIENT_SECRET is set and no
+//     password is provided (requires the application Mail.Read permission)
+// Node 18+ has a global fetch, so no MSAL/axios dependency is needed.
 async function acquireAccessToken() {
     const username = process.env.MAIL_USERNAME;
     const password = process.env.MAIL_PASSWORD;
@@ -74,35 +76,47 @@ async function acquireAccessToken() {
     const tenantId = process.env.MAIL_TENANT_ID || "common";
     const clientSecret = process.env.MAIL_CLIENT_SECRET;
 
-    if (!username || !password) {
-        throw new Error(
-            "MAIL_USERNAME / MAIL_PASSWORD environment variables are required to fetch the OTP. " +
-            "Set them in a local .env file or as GitHub Actions secrets."
-        );
-    }
     if (!clientId) {
         throw new Error(
             "MAIL_CLIENT_ID environment variable is required to fetch the OTP via Microsoft Graph. " +
-            "Register an app in Entra/Azure AD (App registrations) with the delegated Mail.Read " +
-            "permission, then copy its Application (client) ID into .env (or as a GitHub secret)."
+            "Register an app in Entra/Azure AD (App registrations), then copy its Application " +
+            "(client) ID into .env (or as a GitHub secret)."
         );
     }
     if (!tenantId || tenantId === "common") {
         throw new Error(
-            "MAIL_TENANT_ID environment variable is required: the OAuth2 password (ROPC) flow is " +
-            "only supported against a specific tenant endpoint, not /common. Copy the Directory " +
-            "(tenant) ID from the same Azure AD app registration into .env (or as a GitHub secret)."
+            "MAIL_TENANT_ID environment variable is required: the token endpoint must be " +
+            "tenant-specific, not /common. Copy the Directory (tenant) ID from the same Azure AD " +
+            "app registration into .env (or as a GitHub secret)."
+        );
+    }
+    if (!username) {
+        throw new Error(
+            "MAIL_USERNAME environment variable is required: set it to the mailbox that receives " +
+            "the OTP (for example blessing.olaiya@seerbit.com)."
         );
     }
 
     const params = new URLSearchParams();
-    params.append("grant_type", "password");
     params.append("client_id", clientId);
-    params.append("username", username);
-    params.append("password", password);
-    params.append("scope", "https://graph.microsoft.com/Mail.Read offline_access");
-    if (clientSecret) {
+
+    if (password) {
+        params.append("grant_type", "password");
+        params.append("username", username);
+        params.append("password", password);
+        params.append("scope", "https://graph.microsoft.com/Mail.Read offline_access");
+        if (clientSecret) {
+            params.append("client_secret", clientSecret);
+        }
+    } else if (clientSecret) {
+        params.append("grant_type", "client_credentials");
         params.append("client_secret", clientSecret);
+        params.append("scope", "https://graph.microsoft.com/.default");
+    } else {
+        throw new Error(
+            "No mailbox credentials found. Set MAIL_USERNAME + MAIL_PASSWORD (delegated) or " +
+            "MAIL_USERNAME + MAIL_CLIENT_SECRET (application Mail.Read with admin consent) in .env."
+        );
     }
 
     let response;
@@ -134,11 +148,18 @@ async function acquireAccessToken() {
     return body.access_token;
 }
 
-// List the most recent messages for the authenticated user, newest first.
+// List the most recent messages for the mailbox, newest first. Delegated
+// (ROPC) auth reads the signed-in user's mailbox; application auth must target
+// the mailbox explicitly via /users/{address}/messages.
 async function listMessages(token, sinceISO) {
     const filter = `receivedDateTime ge ${sinceISO}`;
+    const username = process.env.MAIL_USERNAME;
+    const password = process.env.MAIL_PASSWORD;
+    const baseUrl = password
+        ? "https://graph.microsoft.com/v1.0/me/messages"
+        : `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(username)}/messages`;
     const url =
-        "https://graph.microsoft.com/v1.0/me/messages" +
+        baseUrl +
         "?$select=id,subject,from,receivedDateTime,body,hasAttachments" +
         `&$orderby=receivedDateTime desc&$top=25&$filter=${encodeURIComponent(filter)}`;
 
@@ -158,6 +179,25 @@ async function listMessages(token, sinceISO) {
             /* ignore */
         }
         const detail = body.error && body.error.message ? `: ${body.error.message}` : "";
+
+        // A 403 here almost always means the app registration is missing a
+        // consented Mail.Read permission for the flow in use, so spell that out
+        // instead of leaving the caller with Graph's generic "Access is denied".
+        if (response.status === 403) {
+            const usingPassword = Boolean(process.env.MAIL_PASSWORD);
+            const hint = usingPassword
+                ? "The delegated Mail.Read permission is probably not consented for the app. " +
+                  "In Entra/Azure AD -> App registrations -> your app -> API permissions, add " +
+                  "Microsoft Graph -> Delegated permissions -> Mail.Read and click 'Grant admin consent'."
+                : "The application Mail.Read permission is probably not granted/consented for the app. " +
+                  "In Entra/Azure AD -> App registrations -> your app -> API permissions, add " +
+                  "Microsoft Graph -> Application permissions -> Mail.Read and click 'Grant admin consent'. " +
+                  "(Alternatively set MAIL_PASSWORD to use the delegated ROPC flow.)";
+            throw new Error(
+                `Graph API returned HTTP 403${detail} - ${hint}`
+            );
+        }
+
         throw new Error(`Graph API returned HTTP ${response.status}${detail}`);
     }
 
@@ -174,14 +214,15 @@ function messageText(message) {
 
 function extractOtp(text, term) {
     const primaryMatch = text.match(
-        /(?:one\s*time\s*passcode|otp|passcode|verification\s*code)[^0-9]{0,40}?(\d{6})/i
+        /(?:one[\s-]*time\s*(?:passcode|password)|authentication\s*code|otp|passcode|verification\s*code)[^0-9]{0,40}?(?<!\d)(\d{6})(?!\d)/i
     );
     if (primaryMatch) {
         return primaryMatch[1];
     }
     // Fallback: any bare 6-digit token in a message that already matches the
-    // sender/subject term (e.g. "Seerbit").
-    const bareMatch = text.match(/\b\d{6}\b/);
+    // sender/subject term (e.g. "Seerbit"). The lookarounds prevent matching
+    // part of a longer identifier such as "SBP0017146".
+    const bareMatch = text.match(/(?<!\d)\d{6}(?!\d)/);
     return bareMatch ? bareMatch[0] : null;
 }
 
@@ -208,6 +249,11 @@ async function fetchLatestOtp({ term = "Seerbit", timeout = 90000 } = {}) {
                     // Expired/revoked token - refresh once and retry this cycle.
                     accessToken = await acquireAccessToken();
                     messages = await listMessages(accessToken, since);
+                } else if (/HTTP 403/.test(err.message)) {
+                    // Permission problem - retrying cannot help, so fail fast
+                    // with the actionable message from listMessages instead of
+                    // polling for the full timeout.
+                    throw err;
                 } else {
                     // Transient Graph failure (throttling, network) - retry next cycle.
                     console.warn(`[fetchLatestOtp] attempt failed: ${err.message}`);
@@ -241,6 +287,12 @@ async function fetchLatestOtp({ term = "Seerbit", timeout = 90000 } = {}) {
                 }
             }
         } catch (err) {
+            // A 403 is a permanent permission failure (already explained in
+            // detail by listMessages) - surface it immediately rather than
+            // retrying until the timeout elapses.
+            if (/HTTP 403/.test(err.message)) {
+                throw err;
+            }
             console.warn(`[fetchLatestOtp] attempt failed: ${err.message}`);
         }
 

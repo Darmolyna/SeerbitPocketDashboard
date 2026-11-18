@@ -18,6 +18,13 @@ const {
 
 const { fetchLatestOtp } = require("./cypress/e2e/mailbox/fetchLatestOtp");
 
+const { generateSync, createGuardrails } = require("otplib");
+
+// otplib v13 defaults to a 128-bit minimum secret, but Google Authenticator
+// commonly issues 80-bit (16-character base32) secrets, so relax the guardrail
+// to accept them.
+const totpGuardrails = createGuardrails({ MIN_SECRET_BYTES: 1 });
+
 function xmlDecode(value) {
   return String(value)
     .replace(/&lt;/g, "<")
@@ -98,9 +105,9 @@ function parseWorksheetXml(xml, sharedStrings) {
 async function setupNodeEvents(on, config) {
   await addCucumberPreprocessorPlugin(on, config);
 
-  if (!process.env.MAIL_USERNAME || !process.env.MAIL_PASSWORD) {
+  if (!process.env.MAIL_USERNAME || (!process.env.MAIL_PASSWORD && !process.env.MAIL_CLIENT_SECRET)) {
     console.warn(
-      "[fetchLatestOtp] MAIL_USERNAME / MAIL_PASSWORD not found. " +
+      "[fetchLatestOtp] MAIL_USERNAME and either MAIL_PASSWORD or MAIL_CLIENT_SECRET not found. " +
       `cwd=${process.cwd()}, .env exists=${fs.existsSync(path.join(__dirname, ".env"))}. ` +
       "If .env was created/edited while Cypress was already running, fully quit and " +
       "restart Cypress so the config (and dotenv) reloads."
@@ -122,6 +129,21 @@ async function setupNodeEvents(on, config) {
 
   // Get latest downloaded file
   on("task", {
+    // Generate the current Google Authenticator (TOTP) code for the Pocket
+    // login 2FA step. The secret comes from cypress/support/credentials.js.
+    generateTotp: (secret) => {
+      if (!secret) {
+        throw new Error(
+          "generateTotp requires a base32 TOTP secret. Add totpSecret to the " +
+          "matching entry in cypress/support/credentials.js."
+        );
+      }
+      return generateSync({
+        secret: String(secret).replace(/\s+/g, "").toUpperCase(),
+        guardrails: totpGuardrails,
+      });
+    },
+
     fetchLatestOtp: (payload) => fetchLatestOtp(payload),
 
     parsePdf(filePath) {
@@ -285,7 +307,7 @@ module.exports = defineConfig({
   responseTimeout: 30000,
 
   // Increase because file download / OTP email polling may take time
-  taskTimeout: 180000,
+  taskTimeout: 660000,
 
   e2e: {
     specPattern: "**/*.feature",
