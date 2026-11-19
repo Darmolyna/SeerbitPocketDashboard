@@ -33,7 +33,7 @@ Feature: Primary Pocket Accounts Page
 
     Examples:
       | pocketId   | currency | fundingAccount | fundingBank |
-      | SBP0000829 | NGN      | 4018404197     | 9PSB        |
+      | SBP0000829 | NGN      | 6207068634     | 9PSB        |
       | SBP0013153 | USD      | EMPTY          | EMPTY       |
       | SBP0013794 | XOF      | EMPTY          | EMPTY       |
       | SBP0014320 | XOF      | EMPTY          | EMPTY       |
