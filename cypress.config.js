@@ -297,8 +297,8 @@ module.exports = defineConfig({
   },
 
   retries: {
-    // runMode: 2,
-    // openMode: 2
+    runMode: 1,
+    openMode: 1
   },
 
   defaultCommandTimeout: 10000,

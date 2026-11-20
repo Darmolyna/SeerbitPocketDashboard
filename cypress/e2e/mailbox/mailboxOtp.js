@@ -16,7 +16,8 @@ When("I enter the authenticator code", () => {
     }
 
     cy.task("generateTotp", secret).then((code) => {
-        cy.log(`Using authenticator code: ${code}`);
+        // Do not log the actual OTP code.
+        cy.log("Using authenticator code (value hidden)");
         cy.wrap(code).as("otpFromAuthenticator");
 
         cy.get('input[inputmode="numeric"][maxlength="1"]', { timeout: 30000 })
@@ -34,7 +35,8 @@ When("I enter the authenticator code", () => {
 When("I fetch the OTP from my email", () => {
     return MailboxPage.fetchLatestOtp("Seerbit").then(
         (otp) => {
-            cy.log(`Using OTP from email: ${otp}`);
+            // Do not log the actual OTP code.
+            cy.log("Using OTP from email (value hidden)");
             cy.wrap(otp).as("otpFromMailbox");
 
             cy.get('input[inputmode="numeric"][maxlength="1"]', { timeout: 30000 })

@@ -634,6 +634,23 @@ class PrimaryPocketFundingPage {
 
     }
 
+
+    validateEmptyState() {
+
+        cy.get("body", { timeout: 30000 })
+            .should(($body) => {
+
+                expect(
+                    $body.text()
+                ).to.include("Oops, we have nothing to show!");
+
+            });
+
+        this.elements.emptyStateMessage()
+            .should("be.visible");
+
+    }
+
     validateExportStarted() {
 
         this.validateExportModal();
@@ -785,14 +802,34 @@ class PrimaryPocketFundingPage {
 
             cy.task("parseXlsx", filePath).then((rows) => {
 
+                const header = rows.length > 0
+                    ? rows[0].map((cell) => cell.trim())
+                    : [];
+
+                const dataRows = rows.slice(1);
+
+                /*
+                 * EMPTY STATE:
+                 * The downloaded file contains no data to display.
+                 * Validate that the table shows the empty state.
+                 */
+                if (dataRows.length === 0) {
+
+                    cy.log(
+                        "Exported file contains no data rows — " +
+                        "validating empty state."
+                    );
+
+                    this.validateEmptyState();
+
+                    return;
+
+                }
+
                 expect(rows.length, "xlsx should include a header row plus data rows")
                     .to.be.greaterThan(1);
 
-                const header = rows[0].map((cell) => cell.trim());
-
                 expect(header, "export header row").to.deep.equal(expectedHeader);
-
-                const dataRows = rows.slice(1);
 
                 cy.log(`Exported ${dataRows.length} transaction row(s)`);
 

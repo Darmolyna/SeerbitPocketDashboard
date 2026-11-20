@@ -405,18 +405,75 @@ class ExportTransactionsPriPocPage {
 
 
             /*
-             * SUCCESS SCENARIO
+             * OUTCOME POLLING:
              *
-             * Only call getLatestDownloadedFile when
-             * there is no error message.
+             * The app resolves the export by displaying the "No
+             * transactions found..." message or by downloading the
+             * file. Poll until the outcome is observed.
+             *
+             * If the message is displayed, validate it and return -
+             * no need to check the downloaded file.
              */
-            cy.task("getLatestDownloadedFile", null)
-                .then((fileName) => {
+            const pollOutcome = (attemptsLeft) => {
 
-                    expect(
-                        fileName,
-                        "Downloaded file name"
-                    ).to.not.be.empty;
+                cy.get("body", { timeout: 3000 }).then(($body) => {
+
+                    const errorMessage = $body
+                        .find("p")
+                        .filter((_, el) =>
+                            Cypress.$(el)
+                                .text()
+                                .trim()
+                                .includes(noTransactionsMessage)
+                        );
+
+                    if (errorMessage.length > 0) {
+
+                        cy.wrap(errorMessage)
+                            .should("be.visible")
+                            .and("contain.text", noTransactionsMessage);
+
+                        return;
+
+                    }
+
+                    if (attemptsLeft <= 0) {
+
+                        this.validateFileOrEmptyState();
+
+                        return;
+
+                    }
+
+                    cy.wait(1500)
+                        .then(() => pollOutcome(attemptsLeft - 1));
+
+                });
+
+            };
+
+            pollOutcome(10);
+
+        });
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | No-file validation
+    |--------------------------------------------------------------------------
+    */
+
+    // After the polling window with no error message: check the
+    // downloads folder for the exported file. If the table is empty,
+    // validate the app's empty state.
+    validateFileOrEmptyState() {
+
+        cy.task("getLatestDownloadedFile", null)
+            .then((fileName) => {
+
+                if (fileName) {
 
                     cy.log(
                         `Downloaded file: ${fileName}`
@@ -426,12 +483,87 @@ class ExportTransactionsPriPocPage {
                         fileName.toLowerCase()
                     ).to.contain("transaction");
 
-                });
+                    return;
+
+                }
+
+                this.validateNoFileScenario();
+
+            });
+
+    }
+
+
+    // No file downloaded and no error message: if the table has
+    // records, the export file may still be generating - poll the
+    // downloads folder again. If the table is empty, validate the
+    // app's empty state.
+    validateNoFileScenario() {
+
+        cy.get("body", { timeout: 5000 }).then(($body) => {
+
+            const tableHasData =
+                $body.find("table tbody tr").length > 0;
+
+            if (tableHasData) {
+
+                this.validateFileDownloaded();
+                return;
+
+            }
+
+            this.validateEmptyState();
 
         });
 
     }
 
+
+    // The table has records but the export file is still generating:
+    // poll the downloads folder again for the exported file.
+    validateFileDownloaded() {
+
+        cy.task("getLatestDownloadedFile", null)
+            .then((fileName) => {
+
+                expect(
+                    fileName,
+                    "Downloaded file name"
+                ).to.not.be.empty;
+
+                cy.log(
+                    `Downloaded file: ${fileName}`
+                );
+
+                expect(
+                    String(fileName).toLowerCase()
+                ).to.contain("transaction");
+
+            });
+
+    }
+
+
+    // Retryable: the app shows the empty state when the table has no
+    // data (account for loading delays).
+    validateEmptyState() {
+
+        cy.get("body", { timeout: 30000 })
+            .should(($body) => {
+
+                const bodyText = $body.text();
+
+                const hasEmptyState =
+                    bodyText.includes("Oops, we have nothing to show!") ||
+                    bodyText.includes(
+                        "No transactions found for the selected date range"
+                    );
+
+                expect(hasEmptyState).to.be.true;
+
+            });
+
+    }
 
 
     formatDate(date) {

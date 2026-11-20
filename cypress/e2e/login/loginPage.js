@@ -127,18 +127,122 @@ class LoginPage {
     // Pocket now uses Google Authenticator (TOTP) as the second factor, so the
     // 6-digit code is generated from the account's shared secret instead of
     // being read from the mailbox.
-    completeOtpVerification(account) {
-        this.elements.otpHeading().should('be.visible')
+    // Google Authenticator (TOTP) login. A code is generated immediately
+    // before every login attempt, a code is never submitted twice, and if
+    // the code is rejected as already used, Cypress waits for the next
+    // valid 30s window and retries with a fresh, unused code.
+    _TOTP_PERIOD_SECONDS = 30;
 
-        const secret = this.resolveTotpSecret(account)
+    // Maximum login attempts; every attempt uses a fresh, unused OTP.
+    _MAX_OTP_ATTEMPTS = 5;
+
+    completeOtpVerification(account) {
+        this.elements.otpHeading().should('be.visible');
+
+        const secret = this.resolveTotpSecret(account);
         // Remember the secret so later steps (e.g. the transaction
         // Authenticator prompt) can reuse it without re-resolving the account.
-        this.currentTotpSecret = secret
-        cy.task('generateTotp', secret).then((otp) => {
-            cy.log(`Using Google Authenticator code: ${otp}`)
-            this.enterOtp(otp)
-            this.clickVerify()
-        })
+        this.currentTotpSecret = secret;
+
+        // Every OTP we submit; a code must never be submitted twice.
+        const submittedOtps = new Set();
+        let attempts = 0;
+
+        // Observe the verify-mfa response so a replay ("already used")
+        // error can be detected; the app flow itself is left unchanged.
+        cy.intercept('POST', '**/authenticate/verify-mfa').as('verifyMfa');
+
+        const waitNextTotpWindow = () =>
+            cy.wait(this._msUntilNextTotpWindow());
+
+        // Generate a code and guarantee it differs from every OTP already
+        // submitted: if this window's code was already used, wait for the
+        // next valid window and generate a new one.
+        const generateUniqueOtp = () =>
+            cy.task('generateTotp', secret).then((otp) => {
+                if (submittedOtps.has(otp)) {
+                    cy.log(
+                        'Generated OTP is a duplicate of a previously submitted code; waiting for the next window'
+                    );
+                    return waitNextTotpWindow()
+                        .then(() => cy.task('generateTotp', secret))
+                        .then((nextOtp) =>
+                            submittedOtps.has(nextOtp)
+                                ? waitNextTotpWindow().then(() =>
+                                    cy.task('generateTotp', secret)
+                                )
+                                : nextOtp
+                        );
+                }
+                return otp;
+            });
+
+        const submitOtp = () =>
+            generateUniqueOtp().then((otp) => {
+                // Requirement: never submit the same OTP more than once.
+                submittedOtps.add(otp);
+                attempts += 1;
+
+                if (attempts > this._MAX_OTP_ATTEMPTS) {
+                    throw new Error(
+                        'MFA login failed: authentication code was already used repeatedly'
+                    );
+                }
+
+                // Requirement: do not log the actual OTP code.
+                cy.log(`Submitting Google Authenticator code (attempt ${attempts})`);
+
+                this.enterOtp(otp);
+                this.clickVerify();
+
+                cy.wait('@verifyMfa', { timeout: 20000 }).then((interception) => {
+                    const response = interception.response || {};
+                    const status = response.statusCode;
+                    const bodyText = JSON.stringify(response.body || '').toLowerCase();
+
+                    cy.get('body').then(($body) => {
+                        const domText = $body.text().toLowerCase();
+
+                        const isReplayFailure =
+                            domText.includes('authentication code already used') ||
+                            domText.includes('code already used') ||
+                            domText.includes('authentication code already been used') ||
+                            (typeof status === 'number' &&
+                                status >= 400 &&
+                                /already used|already been used|already submitted|code already|replay/i.test(bodyText));
+
+                        if (!isReplayFailure) {
+                            // Success or non-replay failure: proceed as before.
+                            return;
+                        }
+
+                        if (attempts >= this._MAX_OTP_ATTEMPTS) {
+                            throw new Error(
+                                'MFA login failed: authentication code was already used repeatedly'
+                            );
+                        }
+
+                        cy.log(
+                            'Authentication code already used (replay detected); generating a new code'
+                        );
+
+                        // Wait for the next valid window, then retry with a
+                        // fresh OTP that differs from the submitted ones.
+                        return waitNextTotpWindow().then(() => submitOtp());
+                    });
+                });
+            });
+
+        submitOtp();
+    }
+
+    // Returns the ms until the next TOTP window starts.
+    _msUntilNextTotpWindow() {
+        const periodMs = this._TOTP_PERIOD_SECONDS * 1000;
+        const nowMs = Date.now();
+        const msToNextWindow = Math.floor(nowMs / periodMs) * periodMs + periodMs - nowMs;
+        // Small buffer so the generated code is already valid when typed.
+        return msToNextWindow + 500;
     }
 
 
