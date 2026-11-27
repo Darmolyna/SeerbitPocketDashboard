@@ -110,6 +110,9 @@ class PrimaryPocketDashboardPage {
         seeAllTransactionsButton: () =>
             cy.contains("button", "See all transactions"),
 
+        exportTransactionsButton: () =>
+            cy.contains("Export Transactions"),
+
 
 
 
@@ -474,6 +477,14 @@ class PrimaryPocketDashboardPage {
         this.elements.seeAllTransactionsButton()
             .should("be.visible")
             .and("be.enabled");
+    }
+
+    validateExportTransactionsButton() {
+
+        this.elements.exportTransactionsButton()
+            .scrollIntoView()
+            .should("be.visible");
+
     }
 
 

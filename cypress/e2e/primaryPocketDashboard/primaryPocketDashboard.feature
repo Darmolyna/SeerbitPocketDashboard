@@ -42,9 +42,10 @@ Scenario: Validate Exchange rate section and see all our rate page
         Then I validate that every currency conversion row should contain valid data in Exchange rate page
 
 @primaryPocketDashboard5
-Scenario: Validate Recent Transactions section and  navigation to see all transactions page
+Scenario: Validate Recent Transactions section and navigation to the Transactions page
     Then I should see the Recent Transactions section
     And I should see a list of recent transactions
     And each transaction should display valid information
-    When I click the See all transactions button
+    When I click the Transactions menu
     Then I should be redirected to the Transactions page
+    And I should validate the Export Transactions button on the Transactions page

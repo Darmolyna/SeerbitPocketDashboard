@@ -163,8 +163,24 @@ When("I click the See all transactions button", () => {
 });
 
 
+When("I click the Transactions menu", () => {
+
+    PrimaryPocketDashboardPage.elements.transactionsMenu()
+        .should("be.visible", { timeout: 15000 })
+        .click();
+
+});
+
+
 Then("I should be redirected to the Transactions page", () => {
 
     PrimaryPocketDashboardPage.validateNavigationToTransactions()
+
+});
+
+
+Then("I should validate the Export Transactions button on the Transactions page", () => {
+
+    PrimaryPocketDashboardPage.validateExportTransactionsButton();
 
 });
